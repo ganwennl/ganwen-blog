@@ -1,18 +1,18 @@
 # 甘文博客 / Ganwen Blog
 
-这是我维护的博客程序。用 Go 编写，页面和后台随程序一起打包，支持文章、页面、媒体上传、多语言译文和访问统计。后台目前使用中文；SQLite 是默认数据库，也支持 MySQL。
+这是我自己在用的博客程序，用 Go 写的，下载解压就能运行。可以写文章、做独立页面、上传图片和视频，也有访问统计。页面和后台自带 11 种显示语言，默认使用 SQLite，也支持 MySQL。
 
-This is the blog software I maintain. It is written in Go and includes its public pages and admin interface in one program. It supports posts, pages, media uploads, translations and visitor statistics. The admin interface is currently in Chinese. SQLite is the default database; MySQL is also supported.
+This is the blog software I use myself. It is written in Go: download, extract and run it. It supports posts, standalone pages, images, videos and visitor statistics. The public pages and admin interface include 11 display languages. SQLite is the default database; MySQL is also supported.
 
-当前版本 / Current version: **v1.0.0** · [更新日志 / Changelog](CHANGELOG.md)
+当前版本 / Current version: **v1.0.1** · [更新日志 / Changelog](CHANGELOG.md)
 
 ## 下载运行
 
-到 [Releases](https://github.com/ganwennl/ganwen-blog/releases) 下载适合自己的程序包。Windows 包适用于 x64；Linux 包适用于 amd64。程序不需要另装 Go、Node.js 或数据库服务，默认使用本地 SQLite。Linux 包由源码交叉编译，启动验证在 Windows 上完成。
+到 [Releases](https://github.com/ganwennl/ganwen-blog/releases) 下载适合自己的程序包。Windows 包适用于 x64；Linux 包适用于 amd64。程序不需要另装 Go、Node.js 或数据库服务，默认使用本地 SQLite。
 
 ### Windows
 
-1. 解压 `ganwen-blog-v1.0.0-windows-amd64.zip` 到可写的本地目录。
+1. 解压 `ganwen-blog-v1.0.1-windows-amd64.zip` 到可写的本地目录。
 2. 双击 `Start.bat`，保持打开的窗口；关闭窗口就停止服务。
 3. 浏览器打开 `http://127.0.0.1:8097/`，后台是 `http://127.0.0.1:8097/admin/`。
 4. 第一次启动会生成账号 `ganwen` 和随机密码，密码在 `data/admin-access.txt`。请保管好此文件。
@@ -35,13 +35,19 @@ This is the blog software I maintain. It is written in Go and includes its publi
 ### Linux
 
 ```sh
-unzip ganwen-blog-v1.0.0-linux-amd64.zip
-cd ganwen-blog-v1.0.0-linux-amd64
+unzip ganwen-blog-v1.0.1-linux-amd64.zip
+cd ganwen-blog-v1.0.1-linux-amd64
 chmod +x ganwen start.sh
 ./start.sh
 ```
 
 地址、初始账号和数据文件与 Windows 相同。可用 `PORT=8098 DATA_DIR=/home/me/blog-data ./start.sh` 换端口和目录。
+
+## 显示语言
+
+前台和后台支持中文、荷兰语、英语、印地语、西班牙语、阿拉伯语、法语、孟加拉语、葡萄牙语、印尼语和乌尔都语。后台右上角可以切换“界面语言”，会记住这台浏览器的选择；当前语言排在语言列表第一位。阿拉伯语和乌尔都语使用从右到左的排版。
+
+显示语言自带在程序里，不需要翻译服务或 API Key。它只影响菜单、按钮和操作提示。文章及已有译文仍按原来的内容语言管理，切换界面不会翻译或修改文章。
 
 ## 设置和自己的站点地址
 
@@ -77,20 +83,26 @@ chmod +x ganwen start.sh
 ```sh
 go test ./cmd/... ./internal/...
 go build -o ganwen ./cmd/ganwen
-python scripts/build-release.py --output dist/releases/v1.0.0
+python scripts/build-release.py --output dist/releases/v1.0.1
 ```
 
 构建脚本只打包程序、启动脚本、说明和许可，不复制本地数据库、媒体或配置。
 
 ## Download and run
 
-Download a package from [Releases](https://github.com/ganwennl/ganwen-blog/releases). The Windows package targets x64 and the Linux package targets amd64. Go, Node.js and a database server are not required to run the default SQLite setup. Linux is cross-compiled from source; startup verification is performed on Windows.
+Download a package from [Releases](https://github.com/ganwennl/ganwen-blog/releases). The Windows package targets x64 and the Linux package targets amd64. Go, Node.js and a database server are not required to run the default SQLite setup.
 
 On Windows, extract the ZIP to a writable local folder and double-click `Start.bat`. Keep the console open while using the blog. Open `http://127.0.0.1:8097/`, then visit `/admin/` to sign in. The first run creates the `ganwen` account and a random password in `data/admin-access.txt`. Keep that file private.
 
 Use `.\Start.ps1 -Port 8098 -DataDirectory 'D:\MyBlogData'` to change the port or data directory. Keep SQLite data on a local disk. If Windows blocks a downloaded script, unblock it in file properties or use the manual `init-admin` and `serve` commands above. Initialization refuses to replace existing credentials. Run `ganwen.exe version` to check the version.
 
 On Linux, extract the ZIP, enter its folder, run `chmod +x ganwen start.sh`, then `./start.sh`. Use `PORT=8098 DATA_DIR=/home/me/blog-data ./start.sh` for another port or data location.
+
+## Display languages
+
+The public pages and admin interface support Chinese, Dutch, English, Hindi, Spanish, Arabic, French, Bengali, Portuguese, Indonesian and Urdu. Use the language selector in the top-right corner of the admin page. Your browser remembers the choice, and the selected language comes first in the list. Arabic and Urdu use a right-to-left layout.
+
+Interface translations are included in the program and need no translation service or API key. They cover menus, buttons and messages. Posts and their existing translations keep their own content languages; changing the interface language does not translate or edit articles.
 
 ## Settings, backup and development
 
