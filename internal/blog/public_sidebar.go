@@ -100,12 +100,17 @@ func (a *Analytics) publicSidebarCountsAt(ctx context.Context, now time.Time) pu
 func (a *App) populatePublicSidebar(ctx context.Context, view *publicView, settings SiteSettings, posts []Post) {
 	view.SidebarPopular = nil
 	view.SidebarStats = publicSidebarStats{}
+	view.ShowPublicStats = publicStatsEnabled(settings)
 	if a.Analytics == nil {
 		return
 	}
 	now := a.Analytics.now()
 	counts := a.Analytics.publicSidebarCountsAt(ctx, now)
-	view.SidebarStats = publicSidebarDisplayStats(counts.stats, now, publicSidebarStartDate(posts, now), publicDailyDisplayTarget(settings))
+	virtualViews := publicVirtualViewsEnabled(settings)
+	view.SidebarStats = counts.stats
+	if virtualViews {
+		view.SidebarStats = publicSidebarDisplayStats(counts.stats, now, publicSidebarStartDate(posts, now), publicDailyDisplayTarget(settings))
+	}
 	visible := make(map[int64]Post, len(posts))
 	for _, post := range posts {
 		if post.Type == "post" && post.Status == "publish" {
@@ -121,13 +126,17 @@ func (a *App) populatePublicSidebar(ctx context.Context, view *publicView, setti
 		if !ok {
 			continue
 		}
-		rank, ceiling := len(view.SidebarPopular), view.SidebarStats.YearViews
-		if rank > 0 {
-			ceiling = min(ceiling, view.SidebarPopular[rank-1].Views-1)
+		views := count.views
+		if virtualViews {
+			rank, ceiling := len(view.SidebarPopular), view.SidebarStats.YearViews
+			if rank > 0 {
+				ceiling = min(ceiling, view.SidebarPopular[rank-1].Views-1)
+			}
+			views = publicSidebarDisplayPopular(count.views, post.ID, rank, ceiling)
 		}
 		view.SidebarPopular = append(view.SidebarPopular, publicPopular{
 			Title: html.UnescapeString(localized.Title), URL: publicPostURL(post, settings, view.Lang),
-			Views: publicSidebarDisplayPopular(count.views, post.ID, rank, ceiling),
+			Views: views,
 		})
 		if len(view.SidebarPopular) == publicSidebarPopularLimit {
 			break

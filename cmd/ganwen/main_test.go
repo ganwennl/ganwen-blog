@@ -52,6 +52,34 @@ func TestDatabaseCLIExportImport(t *testing.T) {
 	}
 }
 
+func TestConfigureSiteFreshDefaultsAndLegacyPreservation(t *testing.T) {
+	store, err := blog.OpenStore(filepath.Join(t.TempDir(), "blog.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	ctx := context.Background()
+	settings, err := configureSite(ctx, store, "")
+	if err != nil || settings.BaseURL != "https://localhost" || settings.PublicVirtualViewsEnabled == nil || *settings.PublicVirtualViewsEnabled || settings.PublicStatsEnabled == nil || !*settings.PublicStatsEnabled {
+		t.Fatal("fresh install did not choose real counters", err)
+	}
+	legacy := blog.SiteSettings{Title: "Existing", BaseURL: "https://blog.example", PostsPerPage: 8}
+	if err := store.SaveSettings(ctx, legacy); err != nil {
+		t.Fatal(err)
+	}
+	settings, err = configureSite(ctx, store, "")
+	if err != nil || settings.PublicVirtualViewsEnabled != nil || settings.BaseURL != legacy.BaseURL {
+		t.Fatal("legacy configuration was changed")
+	}
+	if _, err := configureSite(ctx, store, "http://invalid.example"); err == nil {
+		t.Fatal("accepted non-HTTPS site URL")
+	}
+	settings, err = configureSite(ctx, store, "https://new.example")
+	if err != nil || settings.BaseURL != "https://new.example" || settings.PublicVirtualViewsEnabled != nil {
+		t.Fatal("site URL changed unrelated legacy defaults", err)
+	}
+}
+
 func TestIndependentPageCLIImportsCompleteEvidencePackage(t *testing.T) {
 	t.Setenv("GBLOG_DATABASE_DRIVER", "sqlite")
 	t.Setenv("GBLOG_DATABASE_PATH", "")

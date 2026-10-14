@@ -27,6 +27,10 @@ func main() {
 	}
 }
 func run() error {
+	if len(os.Args) == 2 && (os.Args[1] == "version" || os.Args[1] == "--version") {
+		fmt.Println("Ganwen Blog " + version)
+		return nil
+	}
 	command := "serve"
 	args := os.Args[1:]
 	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
@@ -39,6 +43,7 @@ func run() error {
 	listen := fs.String("listen", "127.0.0.1:8097", "listen address")
 	preview := fs.Bool("preview", true, "prevent indexing this preview")
 	worker := fs.Bool("worker", true, "run the automatic translation worker")
+	siteURL := fs.String("site-url", "", "HTTPS site origin (saved in site settings)")
 	defaultFile := "migration/wordpress.json"
 	if command == "database-export" || command == "database-import" {
 		defaultFile = "migration/blog-database.json"
@@ -130,6 +135,12 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	if command == "serve" {
+		settings, err = configureSite(ctx, store, *siteURL)
+		if err != nil {
+			return err
+		}
+	}
 	cfg := blog.Config{DataDir: dataDir, MediaDir: mediaDir, BaseURL: settings.BaseURL, ListenAddr: *listen, Preview: *preview, AdminUser: os.Getenv("GBLOG_ADMIN_USER"), AdminPasswordHash: os.Getenv("GBLOG_ADMIN_PASSWORD_HASH"), TranslationEndpoint: os.Getenv("GBLOG_TRANSLATION_ENDPOINT"), TranslationKey: os.Getenv("GBLOG_TRANSLATION_KEY"), TranslationModel: os.Getenv("GBLOG_TRANSLATION_MODEL"), AutoPublishTranslation: os.Getenv("GBLOG_TRANSLATION_AUTOPUBLISH") == "true"}
 	app, err := blog.NewApp(store, cfg)
 	if err != nil {
@@ -181,6 +192,33 @@ func run() error {
 	}
 	return err
 }
+
+var version = "1.0.0"
+
+func configureSite(ctx context.Context, store *blog.Store, siteURL string) (blog.SiteSettings, error) {
+	settings, err := store.Settings(ctx)
+	if err != nil {
+		return settings, err
+	}
+	_, err = store.GetValue(ctx, "site")
+	if errors.Is(err, blog.ErrNotFound) {
+		virtualViews, showStats := false, true
+		settings = blog.SiteSettings{Title: "Ganwen Blog", BaseURL: "https://localhost", PostsPerPage: 10,
+			PublicVirtualViewsEnabled: &virtualViews, PublicStatsEnabled: &showStats}
+	} else if err != nil {
+		return settings, err
+	}
+	if siteURL != "" {
+		settings.BaseURL = siteURL
+	}
+	if errors.Is(err, blog.ErrNotFound) || siteURL != "" {
+		if saveErr := store.SaveSettings(ctx, settings); saveErr != nil {
+			return settings, saveErr
+		}
+	}
+	return settings, nil
+}
+
 func loadEnv(path string) error {
 	f, err := os.Open(path)
 	if os.IsNotExist(err) {

@@ -138,6 +138,7 @@ type publicView struct {
 	IsJournal, IsBlogPost, IsPage, HomeCurrent, ArticlesCurrent, AboutCurrent                                     bool
 	IsIndependentPage                                                                                             bool
 	ShowSidebar                                                                                                   bool
+	ShowPublicStats                                                                                               bool
 	AboutURL, OGType, SocialImage, SocialImageAlt, SocialCard                                                     string
 	SchemaJSON                                                                                                    template.JS
 }

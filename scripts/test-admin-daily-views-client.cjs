@@ -21,6 +21,34 @@ function setDailyViews(c, value) {
 
 const session = {authenticated: true, configured: true, user: 'editor', csrf: 'daily-views-session'};
 
+test('virtual counts and component visibility load, disable and save independently', async () => {
+  const submitted = [];
+  const c = client(call => {
+    if (call.path === 'session') return {data: session};
+    const payload = JSON.parse(call.options.body);
+    submitted.push(payload);
+    return {data: payload};
+  });
+  applySettings(c, 2500);
+  assert.equal(c.get('publicVirtualViewsEnabled').checked, true, 'legacy settings keep display behavior');
+  assert.equal(c.get('publicStatsEnabled').checked, true);
+  c.get('publicVirtualViewsEnabled').checked = false;
+  c.get('publicVirtualViewsEnabled').onchange();
+  assert.equal(c.get('publicDailyViews').disabled, true);
+  assert.equal(c.state.settingsDirty, true);
+  c.get('publicStatsEnabled').checked = false;
+  c.get('settingsForm').oninput();
+  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  assert.equal(submitted.at(-1).public_virtual_views_enabled, false);
+  assert.equal(submitted.at(-1).public_stats_enabled, false);
+  assert.equal(submitted.at(-1).public_daily_views, 2500, 'disabling retains the daily target');
+  assert.equal(c.get('publicDailyViews').disabled, true);
+  assert.equal(c.state.settingsDirty, false);
+  c.run('applySiteSettings({title:"Fresh",posts_per_page:10,public_virtual_views_enabled:false,public_stats_enabled:true})');
+  assert.equal(c.get('publicVirtualViewsEnabled').checked, false);
+  assert.equal(c.get('publicStatsEnabled').checked, true);
+});
+
 test('daily views input exposes its whole-number range and UTC display explanation', () => {
   const field = html.match(/<input\b[^>]*\bid="publicDailyViews"[^>]*>/)?.[0];
   assert.ok(field, 'the settings control is missing');

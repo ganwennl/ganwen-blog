@@ -541,6 +541,10 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		dailyViews := publicDailyDisplayTarget(current)
 		current.PublicDailyViews = &dailyViews
+		virtualViews := publicVirtualViewsEnabled(current)
+		current.PublicVirtualViewsEnabled = &virtualViews
+		showStats := publicStatsEnabled(current)
+		current.PublicStatsEnabled = &showStats
 		if current.SidebarAds.IntervalSeconds == 0 {
 			current.SidebarAds.IntervalSeconds = 8
 		}
@@ -552,13 +556,15 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 	}
 	var input struct {
 		SiteSettings
-		AvatarURL             *string                       `json:"avatar_url"`
-		DefaultLayout         json.RawMessage               `json:"default_layout"`
-		ArticleSidebarEnabled json.RawMessage               `json:"article_sidebar_enabled"`
-		FooterText            json.RawMessage               `json:"footer_text"`
-		FooterTranslations    *map[string]FooterTranslation `json:"footer_translations"`
-		SidebarAds            json.RawMessage               `json:"sidebar_ads"`
-		PublicDailyViews      json.RawMessage               `json:"public_daily_views"`
+		AvatarURL                 *string                       `json:"avatar_url"`
+		DefaultLayout             json.RawMessage               `json:"default_layout"`
+		ArticleSidebarEnabled     json.RawMessage               `json:"article_sidebar_enabled"`
+		FooterText                json.RawMessage               `json:"footer_text"`
+		FooterTranslations        *map[string]FooterTranslation `json:"footer_translations"`
+		SidebarAds                json.RawMessage               `json:"sidebar_ads"`
+		PublicDailyViews          json.RawMessage               `json:"public_daily_views"`
+		PublicVirtualViewsEnabled json.RawMessage               `json:"public_virtual_views_enabled"`
+		PublicStatsEnabled        json.RawMessage               `json:"public_stats_enabled"`
 	}
 	if !readAdminJSON(w, r, &input) {
 		return
@@ -595,6 +601,22 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		current.ArticleSidebarEnabled = *enabled
+	}
+	if len(input.PublicVirtualViewsEnabled) > 0 {
+		enabled, err := parsedPublicVirtualViewsEnabled(input.PublicVirtualViewsEnabled)
+		if err != nil {
+			adminError(w, 400, err.Error())
+			return
+		}
+		current.PublicVirtualViewsEnabled = enabled
+	}
+	if len(input.PublicStatsEnabled) > 0 {
+		enabled, err := parsedPublicVirtualViewsEnabled(input.PublicStatsEnabled)
+		if err != nil {
+			adminError(w, 400, err.Error())
+			return
+		}
+		current.PublicStatsEnabled = enabled
 	}
 	if len(input.PublicDailyViews) > 0 {
 		dailyViews, err := parsedPublicDailyViews(input.PublicDailyViews)

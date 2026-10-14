@@ -109,21 +109,23 @@ type SidebarAdsConfig struct {
 }
 
 type SiteSettings struct {
-	Title                 string                       `json:"title"`
-	Description           string                       `json:"description"`
-	BaseURL               string                       `json:"base_url"`
-	PostsPerPage          int                          `json:"posts_per_page"`
-	DefaultLayout         string                       `json:"default_layout"`
-	ArticleSidebarEnabled bool                         `json:"article_sidebar_enabled"`
-	Categories            []Term                       `json:"categories"`
-	Tags                  []Term                       `json:"tags"`
-	HeaderImage           string                       `json:"header_image"`
-	AvatarURL             string                       `json:"avatar_url"`
-	ContactLinks          []ContactLink                `json:"contact_links"`
-	SidebarAds            SidebarAdsConfig             `json:"sidebar_ads,omitzero"`
-	PublicDailyViews      *int64                       `json:"public_daily_views,omitempty"`
-	FooterText            *string                      `json:"footer_text"`
-	FooterTranslations    map[string]FooterTranslation `json:"footer_translations,omitempty"`
+	Title                     string                       `json:"title"`
+	Description               string                       `json:"description"`
+	BaseURL                   string                       `json:"base_url"`
+	PostsPerPage              int                          `json:"posts_per_page"`
+	DefaultLayout             string                       `json:"default_layout"`
+	ArticleSidebarEnabled     bool                         `json:"article_sidebar_enabled"`
+	Categories                []Term                       `json:"categories"`
+	Tags                      []Term                       `json:"tags"`
+	HeaderImage               string                       `json:"header_image"`
+	AvatarURL                 string                       `json:"avatar_url"`
+	ContactLinks              []ContactLink                `json:"contact_links"`
+	SidebarAds                SidebarAdsConfig             `json:"sidebar_ads,omitzero"`
+	PublicDailyViews          *int64                       `json:"public_daily_views,omitempty"`
+	PublicVirtualViewsEnabled *bool                        `json:"public_virtual_views_enabled,omitempty"`
+	PublicStatsEnabled        *bool                        `json:"public_stats_enabled,omitempty"`
+	FooterText                *string                      `json:"footer_text"`
+	FooterTranslations        map[string]FooterTranslation `json:"footer_translations,omitempty"`
 }
 type Config struct {
 	DataDir                string
