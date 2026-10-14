@@ -3,8 +3,14 @@ package blog
 import (
 	_ "embed"
 	"encoding/json"
+	"net/http"
 	"strings"
 )
+
+func publicRequestLanguage(r *http.Request) string {
+	lang, _, _ := publicLanguagePath(r.URL.Path)
+	return lang
+}
 
 //go:embed public_messages.json
 var publicMessagesJSON []byte
@@ -34,4 +40,21 @@ func publicAuthorName(name, lang string) string {
 		return "Wen Gan"
 	}
 	return name
+}
+
+// Keep published-language filtering and canonical ordering intact; only the
+// current view's already available links move to the front.
+func selectedPublicLanguageFirst(links []publicLink, selected string) []publicLink {
+	ordered := make([]publicLink, 0, len(links))
+	for _, link := range links {
+		if link.Lang == selected {
+			ordered = append(ordered, link)
+		}
+	}
+	for _, link := range links {
+		if link.Lang != selected {
+			ordered = append(ordered, link)
+		}
+	}
+	return ordered
 }

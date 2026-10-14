@@ -55,7 +55,7 @@ test('daily views input exposes its whole-number range and UTC display explanati
   for (const attribute of ['type="number"', 'min="0"', 'max="1000000"', 'step="1"', 'required']) {
     assert.ok(field.includes(attribute), 'missing input constraint: ' + attribute);
   }
-  assert.match(html, /label for="publicDailyViews">每日保底浏览/);
+  assert.match(html, /label for="publicDailyViews"[^>]*>每日保底浏览/);
   assert.match(html, /保底按全天逐步增长，速度会自然波动，并叠加真实浏览；后台仍统计真实数据。统计日使用 UTC。/);
 });
 

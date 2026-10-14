@@ -89,6 +89,10 @@ func (a *Admin) serve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Robots-Tag", "noindex, nofollow")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Referrer-Policy", "no-referrer")
+	if r.URL.Path == "/admin/ui-i18n.js" {
+		serveAdminI18n(w, r)
+		return
+	}
 	if r.URL.Path == "/admin/api/editor-session" && r.Method == http.MethodGet {
 		w.Header().Set("Vary", "Cookie")
 		_, authenticated, err := a.auth.sessionState(r)

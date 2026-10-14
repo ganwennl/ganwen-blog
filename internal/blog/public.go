@@ -146,7 +146,8 @@ type publicView struct {
 func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		w.Header().Set("Allow", "GET, HEAD")
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		lang, _, _ := publicLanguagePath(r.URL.Path)
+		http.Error(w, publicText(lang, "请求方法不支持", "Method not allowed", "Methode niet toegestaan", "Método no permitido"), http.StatusMethodNotAllowed)
 		return
 	}
 	if asset, ok := publicAssets[r.URL.Path]; ok {
@@ -167,20 +168,20 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	var directPage *Post
 	if !ok {
 		if r.URL.RawPath != "" || strings.Contains(r.URL.EscapedPath(), "%") {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		p, err := a.Store.GetPublicPageByPath(r.Context(), route)
 		if err != nil {
 			if errors.Is(err, ErrNotFound) {
-				publicNotFound(w)
+				publicNotFound(w, publicRequestLanguage(r))
 			} else {
-				http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+				http.Error(w, publicText(lang, "服务暂时不可用", "Service unavailable", "Dienst tijdelijk niet beschikbaar", "Servicio no disponible"), http.StatusServiceUnavailable)
 			}
 			return
 		}
 		if _, visible := localizedPost(p, lang); !visible {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		directPage = &p
@@ -188,20 +189,20 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	if (route == "/" || route == "/index.php") && q.Has("feed") && !q.Has("robots") && !q.Has("sitemap") {
 		if feed := q.Get("feed"); feed != "rss2" && feed != "comments-rss2" {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("X-Robots-Tag", "noindex")
 		w.WriteHeader(http.StatusGone)
 		if r.Method != http.MethodHead {
-			_, _ = io.WriteString(w, "RSS feeds are no longer available.\n")
+			_, _ = io.WriteString(w, publicText(lang, "RSS 已停用", "RSS feeds are no longer available.", "RSS-feeds zijn niet meer beschikbaar.", "Las fuentes RSS ya no están disponibles.")+"\n")
 		}
 		return
 	}
 	settings, err := a.Store.Settings(r.Context())
 	if err != nil {
-		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		http.Error(w, publicText(lang, "服务暂时不可用", "Service unavailable", "Dienst tijdelijk niet beschikbaar", "Servicio no disponible"), http.StatusServiceUnavailable)
 		return
 	}
 	settings = localizedPublicSettings(publicSettings(settings, a.Config), lang)
@@ -223,7 +224,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	}
 	posts, err := a.Store.ListPosts(r.Context(), false)
 	if err != nil {
-		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		http.Error(w, publicText(lang, "服务暂时不可用", "Service unavailable", "Dienst tijdelijk niet beschikbaar", "Servicio no disponible"), http.StatusServiceUnavailable)
 		return
 	}
 	if route == "/sitemap.xml" || route == "/wp-sitemap.xml" || (directPage == nil && q.Has("sitemap")) {
@@ -231,11 +232,11 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if directPage == nil && route != "/" && route != "/index.php" {
-		publicNotFound(w)
+		publicNotFound(w, publicRequestLanguage(r))
 		return
 	}
 	if q.Get("preview") != "" || q.Has("preview_id") {
-		publicNotFound(w)
+		publicNotFound(w, publicRequestLanguage(r))
 		return
 	}
 	view := newPublicView(settings, lang)
@@ -250,7 +251,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	for _, key := range []string{"p", "page_id", "attachment_id"} {
 		if q.Has(key) {
 			if idName != "" {
-				publicNotFound(w)
+				publicNotFound(w, publicRequestLanguage(r))
 				return
 			}
 			idName = key
@@ -258,21 +259,21 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	}
 	if idName != "" {
 		if directPage != nil {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		id, err := strconv.ParseInt(q.Get(idName), 10, 64)
 		if err != nil || id <= 0 {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		p, err := a.Store.GetPost(r.Context(), id)
 		if err != nil || p.Status != "publish" || (idName == "page_id" && p.Type != "page") || (idName == "attachment_id" && p.Type != "attachment") {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		if _, ok := localizedPost(p, lang); !ok {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		single = &p
@@ -336,7 +337,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	} else {
 		filtered, valid := filterPublicPosts(posts, settings, q, lang)
 		if !valid {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		if view.IsJournal {
@@ -349,7 +350,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 		if q.Has("paged") {
 			page, err = strconv.Atoi(q.Get("paged"))
 			if err != nil || page < 1 {
-				publicNotFound(w)
+				publicNotFound(w, publicRequestLanguage(r))
 				return
 			}
 		}
@@ -368,12 +369,12 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 		}
 		view.Canonical = publicArchiveURL(settings, lang, q)
 		if page > 1 && page > (len(filtered)+settings.PostsPerPage-1)/settings.PostsPerPage {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		start := (page - 1) * settings.PostsPerPage
 		if page > 1 && start >= len(filtered) {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		end := start + settings.PostsPerPage
@@ -428,6 +429,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 			view.Languages = append(view.Languages, publicLink{Label: nativeLanguageName(language), Lang: language, URL: publicArchiveURL(settings, language, q)})
 		}
 	}
+	view.Languages = selectedPublicLanguageFirst(view.Languages, lang)
 	view.ShowSidebar = !view.IsArticle || settings.ArticleSidebarEnabled
 	if view.ShowSidebar {
 		a.populatePublicSidebar(r.Context(), &view, settings, posts)
@@ -446,7 +448,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	}
 	var buf bytes.Buffer
 	if err := publicTemplate.ExecuteTemplate(&buf, "public.html", view); err != nil {
-		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		http.Error(w, publicText(lang, "服务暂时不可用", "Service unavailable", "Dienst tijdelijk niet beschikbaar", "Servicio no disponible"), http.StatusServiceUnavailable)
 		return
 	}
 	_, _ = w.Write(buf.Bytes())
@@ -1115,9 +1117,13 @@ func publicTime(value string) (time.Time, error) {
 	}
 	return time.Time{}, errors.New("invalid timestamp")
 }
-func publicNotFound(w http.ResponseWriter) {
+func publicNotFound(w http.ResponseWriter, selected ...string) {
+	lang := "zh"
+	if len(selected) > 0 {
+		lang = selected[0]
+	}
 	w.Header().Set("X-Robots-Tag", "noindex")
-	http.Error(w, "404 — 页面不存在", http.StatusNotFound)
+	http.Error(w, "404 — "+publicText(lang, "页面不存在", "Page not found", "Pagina niet gevonden", "Página no encontrada"), http.StatusNotFound)
 }
 
 var publicMediaTypes = map[string]string{".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp", ".avif": "image/avif", ".heic": "image/heic", ".heif": "image/heif", ".ico": "image/x-icon", ".mp4": "video/mp4", ".m4v": "video/mp4", ".mov": "video/quicktime", ".webm": "video/webm", ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".ogg": "audio/ogg", ".wav": "audio/wav", ".pdf": "application/pdf", ".txt": "text/plain; charset=utf-8"}
@@ -1130,18 +1136,18 @@ func (a *App) servePublicMedia(w http.ResponseWriter, r *http.Request) bool {
 	}
 	file, err := publicMediaPath(a.Config.MediaDir, r.URL.Path)
 	if err != nil {
-		publicNotFound(w)
+		publicNotFound(w, publicRequestLanguage(r))
 		return true
 	}
 	f, err := os.Open(file)
 	if err != nil {
-		publicNotFound(w)
+		publicNotFound(w, publicRequestLanguage(r))
 		return true
 	}
 	defer f.Close()
 	info, err := f.Stat()
 	if err != nil || !info.Mode().IsRegular() {
-		publicNotFound(w)
+		publicNotFound(w, publicRequestLanguage(r))
 		return true
 	}
 	w.Header().Set("Content-Type", mime)
@@ -1517,7 +1523,7 @@ func (a *App) servePublicSitemap(w http.ResponseWriter, r *http.Request, s SiteS
 	if strings.HasPrefix(kind, "posts-") {
 		parts := strings.Split(kind, "-")
 		if len(parts) != 3 || parts[2] != "1" {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		kind, sub = "posts", parts[1]
@@ -1525,7 +1531,7 @@ func (a *App) servePublicSitemap(w http.ResponseWriter, r *http.Request, s SiteS
 	if strings.HasPrefix(kind, "taxonomies-") {
 		parts := strings.Split(kind, "-")
 		if len(parts) != 3 || parts[2] != "1" {
-			publicNotFound(w)
+			publicNotFound(w, publicRequestLanguage(r))
 			return
 		}
 		kind, sub = "taxonomies", parts[1]
@@ -1534,7 +1540,7 @@ func (a *App) servePublicSitemap(w http.ResponseWriter, r *http.Request, s SiteS
 		kind = "users"
 	}
 	if q.Has("paged") && q.Get("paged") != "1" {
-		publicNotFound(w)
+		publicNotFound(w, publicRequestLanguage(r))
 		return
 	}
 	set := publicSitemap{XMLNS: "http://www.sitemaps.org/schemas/sitemap/0.9"}
@@ -1607,7 +1613,7 @@ func (a *App) servePublicSitemap(w http.ResponseWriter, r *http.Request, s SiteS
 		}
 	}
 	if !(kind == "posts" && (sub == "post" || sub == "page")) && !(kind == "taxonomies" && (sub == "category" || sub == "post_tag" || sub == "post_format")) && kind != "users" {
-		publicNotFound(w)
+		publicNotFound(w, publicRequestLanguage(r))
 		return
 	}
 	publicXML(w, set)

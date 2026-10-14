@@ -61,7 +61,13 @@ func TestPublicLanguageDropdownNativeLinksPreserveArchiveContext(t *testing.T) {
 					}
 				}
 			}
-			if !reflect.DeepEqual(gotLanguages, wantLanguages) || current != 1 {
+			expectedLanguages := []string{selected}
+			for _, code := range wantLanguages {
+				if code != selected {
+					expectedLanguages = append(expectedLanguages, code)
+				}
+			}
+			if !reflect.DeepEqual(gotLanguages, expectedLanguages) || current != 1 {
 				t.Fatalf("unexpected language order/current state: %v / %d", gotLanguages, current)
 			}
 			if got := publicMetadataOneText(t, body, "span", "language-current"); got != nativeLanguageName(selected) {
@@ -103,7 +109,11 @@ func TestPublicLanguageDropdownOnlyLinksPublishedArticleTranslations(t *testing.
 				t.Fatalf("article context lost for %s: %v", lang, link)
 			}
 		}
-		if !reflect.DeepEqual(got, []string{"zh", "en"}) {
+		expectedLanguages := []string{"zh", "en"}
+		if selected == "en" {
+			expectedLanguages = []string{"en", "zh"}
+		}
+		if !reflect.DeepEqual(got, expectedLanguages) {
 			t.Fatalf("unavailable article translations exposed: %v", got)
 		}
 	}

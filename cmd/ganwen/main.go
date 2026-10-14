@@ -193,7 +193,7 @@ func run() error {
 	return err
 }
 
-var version = "1.0.0"
+var version = "1.0.1"
 
 func configureSite(ctx context.Context, store *blog.Store, siteURL string) (blog.SiteSettings, error) {
 	settings, err := store.Settings(ctx)

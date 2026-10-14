@@ -155,7 +155,7 @@ test('failed initial settings and translation reads never enable default-value s
     const c = client(() => ({status: 503, data: {error: 'temporarily unavailable'}}), '');
     c.state.authenticated = true;
     c.state.user = 'editor';
-    await assert.rejects(c.run(load), /temporarily unavailable/);
+    await assert.rejects(c.run(load), /请求失败，请稍后重试/);
     assert.equal(c.get(form).inert, true);
     assert.equal(c.get(button).disabled, true);
     await c.get(form).onsubmit({preventDefault() {}});

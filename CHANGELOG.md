@@ -1,5 +1,17 @@
 # 更新日志 / Changelog
 
+## v1.0.1 — 2026-10-15
+
+- 前台和后台补齐 11 种显示语言，菜单、按钮和操作提示都跟随选择。
+- 当前语言排在语言列表第一位，后台记住这台浏览器的选择；阿拉伯语和乌尔都语使用从右到左排版。
+- 调整了一些生硬的中文用语，修好英文按钮拼词和小屏幕下的界面遮挡。
+- 界面翻译直接打包，不需要配置翻译服务。文章和已有译文保持原样。
+
+- Completed the public and admin interface in 11 display languages, including menus, buttons and messages.
+- The selected language comes first. The admin interface remembers the browser's choice and supports right-to-left layouts for Arabic and Urdu.
+- Made Chinese labels more natural and fixed joined English labels and overlapping controls on small screens.
+- Interface translations are built in and need no translation service. Existing articles and translations are unchanged.
+
 ## v1.0.0 — 2026-10-14
 
 - 首次公开发布，提供独立运行的 Windows x64 和 Linux x64 程序包。

@@ -223,7 +223,7 @@ func TestPublicRetiredFeedsReturnGoneWithoutDatabase(t *testing.T) {
 							if w.Body.Len() != 0 {
 								t.Fatal("HEAD feed response includes a body")
 							}
-						} else if w.Body.String() != "RSS feeds are no longer available.\n" {
+						} else if expected, ok := publicMessage(lang, "RSS 已停用"); !ok || w.Body.String() != expected+"\n" {
 							t.Fatalf("retired feed unexpectedly exposed content: %q", w.Body.String())
 						}
 					})

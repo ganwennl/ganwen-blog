@@ -8,7 +8,8 @@ const vm = require('node:vm');
 const html = fs.readFileSync(path.join(__dirname, '../internal/blog/admin_ui.html'), 'utf8');
 const helperSource = html.slice(html.indexOf('const editorHelperSelector='), html.indexOf('function stripEditorHelpers('));
 const documentHelperSource = ['independentDocument', 'documentReturnView', 'documentNoun', 'validPublicPath'].map(name => html.match(new RegExp('function ' + name + '\\([^\\r\\n]+'))[0]).join('\n');
-const mediaSource = documentHelperSource + '\n' + helperSource + html.slice(html.indexOf('// Keep pasted image bytes'), html.indexOf('// End pasted image handling.'));
+const actionSource = html.slice(html.indexOf('function documentActionLabel('),html.indexOf('function validPublicPath('));
+const mediaSource = documentHelperSource + '\n' + actionSource + '\n' + helperSource + html.slice(html.indexOf('// Keep pasted image bytes'), html.indexOf('// End pasted image handling.'));
 const saveSource = html.match(/async function saveEditor\(\)\{[^\r\n]+/)[0];
 const manualSource = [html.match(/function chooseMedia\(kind\)\{[^\r\n]+/)[0], html.match(/\$\('mediaFile'\)\.onchange=[^\r\n]+/)[0]].join('\n');
 const pixel = 'data:image/png;base64,iVBORw0KGgo=';
@@ -75,6 +76,7 @@ function client(respond = async () => ({url: uploaded, type: 'image/png'})) {
     setAdminRoute() {}, showEditor() {state.editorGeneration++;}, notifyEditorParent() {}, rememberSaveInteraction() {return null;}, restoreSaveInteraction() {}
   };
   vm.createContext(context);
+  require("./admin-i18n-test-harness.cjs")(context);
   vm.runInContext(mediaSource + '\n' + manualSource + '\n' + saveSource, context);
   return {state, get, body, calls, notices, timers, revoked, storedFiles, context, run: source => vm.runInContext(source, context)};
 }

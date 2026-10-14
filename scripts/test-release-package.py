@@ -24,6 +24,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--package", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--expected-version", default="1.0.1")
     args = parser.parse_args()
     check(os.name == "nt", "This startup test requires Windows")
     output = Path(args.output).resolve()
@@ -38,7 +39,7 @@ def main():
     root = roots[0]
     environment = {key: value for key, value in os.environ.items() if not key.startswith("GBLOG_")}
     version = subprocess.check_output([str(root / "ganwen.exe"), "version"], text=True, encoding="utf-8", env=environment).strip()
-    check(version == "Ganwen Blog 1.0.0", "Incorrect executable version")
+    check(version == "Ganwen Blog " + args.expected_version, "Incorrect executable version")
     data = root / "data"
     checks = []
     before_credentials = None

@@ -117,6 +117,7 @@ function client() {
     ResizeObserver: class {observe() {}}, getComputedStyle: () => ({paddingLeft: '0px', paddingRight: '0px'}), FormData, Blob, URL, URLSearchParams, TextEncoder, atob, console,
     JSON: {parse: JSON.parse, stringify: (...args) => {metrics.stringify++; return JSON.stringify(...args);}}, fetch: async () => {throw Error('unexpected network request');}};
   vm.createContext(context);
+  require("./admin-i18n-test-harness.cjs")(context);
   const run = text => vm.runInContext(text, context);
   run(source);
   const state = run('state');

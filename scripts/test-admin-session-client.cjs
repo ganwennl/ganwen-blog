@@ -44,6 +44,7 @@ function client(respond, query = '?embed=1&edit=2&editor_session=fixture-instanc
     }
   };
   vm.createContext(context);
+  require("./admin-i18n-test-harness.cjs")(context);
   vm.runInContext(source, context);
   const run = js => vm.runInContext(js, context);
   const state = run('state');
@@ -213,14 +214,14 @@ for (const failure of ['503', 'network']) {
       if (call.path !== 'session') return authenticatedFixture(call);
       if (++attempts > 1) return new Promise(resolve => release = resolve);
       if (failure === 'network') throw Error('Failed to fetch');
-      return {status: 503, data: {error: '暂时无法读取登录状态'}};
+      return {status: 503, data: {error: '暂时无法读取登录状态，请稍后重试'}};
     });
     await c.run('start()');
     assert.equal(c.state.authenticated, false);
     assert.equal(c.get('login').classList.contains('hidden'), true);
     assert.equal(c.get('startup').classList.contains('hidden'), false);
     assert.equal(c.get('startupError').classList.contains('hidden'), false);
-    assert.match(c.get('startupError').textContent, failure === 'network' ? /Failed to fetch/ : /暂时无法读取登录状态/);
+    assert.match(c.get('startupError').textContent, failure === 'network' ? /请求失败，请稍后重试/ : /暂时无法读取登录状态/);
     assert.equal(c.get('startupRetry').classList.contains('hidden'), false);
     assert.equal(c.get('startupRetry').disabled, false);
     const pending = c.get('startupRetry').onclick();
@@ -247,7 +248,7 @@ test('startup category failure retains authenticated editor shell and provides a
   assert.equal(c.get('startup').classList.contains('hidden'), true);
   assert.equal(c.get('login').classList.contains('hidden'), true);
   assert.equal(c.get('startupAppError').classList.contains('hidden'), false);
-  assert.match(c.get('startupAppErrorMessage').textContent, /分类暂时不可用/);
+  assert.match(c.get('startupAppErrorMessage').textContent, /请求失败，请稍后重试/);
   await c.get('startupAppRetry').onclick();
   assert.equal(c.state.post.id, 2);
   assert.equal(c.get('startupAppError').classList.contains('hidden'), true);
@@ -263,7 +264,7 @@ test('startup article failure retries its requested article inside the authentic
   assert.equal(c.get('shell').classList.contains('hidden'), false);
   assert.equal(c.get('login').classList.contains('hidden'), true);
   assert.equal(c.get('startupAppError').classList.contains('hidden'), false);
-  assert.match(c.get('startupAppErrorMessage').textContent, /文章暂时不可用/);
+  assert.match(c.get('startupAppErrorMessage').textContent, /请求失败，请稍后重试/);
   await c.get('startupAppRetry').onclick();
   assert.equal(c.state.post.id, 2);
   assert.equal(articleCalls, 2);
@@ -300,7 +301,7 @@ test('startup retry session failure retains previously verified identity until a
   assert.equal(c.get('startup').classList.contains('hidden'), true);
   assert.equal(c.get('shell').classList.contains('hidden'), false);
   assert.equal(c.get('startupAppError').classList.contains('hidden'), false);
-  assert.match(c.get('startupAppErrorMessage').textContent, /会话读取暂时失败/);
+  assert.match(c.get('startupAppErrorMessage').textContent, /请求失败，请稍后重试/);
   await c.get('startupAppRetry').onclick();
   assert.equal(c.state.post.id, 2);
   assert.deepEqual(c.get('login').visibilityChanges, []);
@@ -574,7 +575,7 @@ test('remember-login starts unchecked and retained drafts still trigger the leav
 });
 
 test('a temporary session-store failure leaves the editor authenticated and its draft intact', async () => {
-  const c = client(() => ({status: 503, data: {error: '暂时无法读取登录状态'}}));
+  const c = client(() => ({status: 503, data: {error: '暂时无法读取登录状态，请稍后重试'}}));
   draft(c);
   await assert.rejects(c.run("api('post',{id:2})"), /暂时无法/);
   assert.equal(c.calls.length, 1);
@@ -768,7 +769,7 @@ test('site default layout supports both choices, tracks changes and retains the 
     saved = JSON.parse(options.body);
     return {data: saved};
   });
-  assert.match(html, /<select id="defaultLayout"><option value="journal">日志阅读<\/option><option value="classic">经典卡片<\/option><\/select>/);
+  assert.match(html, /<select id="defaultLayout"><option value="journal"[^>]*>日志阅读<\/option><option value="classic"[^>]*>经典卡片<\/option><\/select>/);
   c.run("state.authenticated=true;state.user='editor';applySiteSettings({title:'甘文',posts_per_page:10,default_layout:''});");
   assert.equal(c.get('defaultLayout').value, 'journal');
   assert.equal(c.state.settingsDirty, false);
