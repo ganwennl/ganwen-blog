@@ -1,0 +1,21 @@
+[Unit]
+Description=Ganwen Go Blog
+After=network.target
+
+[Service]
+Type=simple
+User=www
+Group=www
+WorkingDirectory=/www/wwwroot/ganwen-go
+ExecStart=/www/wwwroot/ganwen-go/ganwen serve --data /www/wwwroot/ganwen-go/data --media /www/wwwroot/ganwen-go/data/media --listen 127.0.0.1:8097 --preview=false
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/www/wwwroot/ganwen-go/data
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

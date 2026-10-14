@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="{{.HTMLLang}}" dir="{{languageDir .Lang}}" data-layout="{{if .IsJournal}}journal{{else}}classic{{end}}" data-supported-languages="{{range languages}}{{.}} {{end}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <meta name="description" content="{{.Description}}">
+  <meta name="robots" content="{{if .Robots}}{{.Robots}}{{else}}max-image-preview:large{{end}}">
+  <link rel="canonical" href="{{.Canonical}}">
+  {{range .Languages}}<link rel="alternate" hreflang="{{if eq .Lang "zh"}}zh-Hans{{else}}{{.Lang}}{{end}}" href="{{.URL}}">{{end}}
+  {{range .Languages}}{{if eq .Lang "zh"}}<link rel="alternate" hreflang="x-default" href="{{.URL}}">{{end}}{{end}}
+  {{if .IsBlogPost}}{{if .Published}}<meta property="article:published_time" content="{{.Published}}">{{end}}{{if .Modified}}<meta property="article:modified_time" content="{{.Modified}}">{{end}}{{end}}
+  <meta property="og:type" content="{{.OGType}}">
+  <meta property="og:title" content="{{.Title}}">
+  <meta property="og:description" content="{{.Description}}">
+  <meta property="og:url" content="{{.Canonical}}">
+  <meta property="og:site_name" content="{{.SiteTitle}}">
+  <meta name="twitter:card" content="{{.SocialCard}}">
+  <meta name="twitter:title" content="{{.Title}}">
+  <meta name="twitter:description" content="{{.Description}}">
+  {{if .SocialImage}}<meta property="og:image" content="{{.SocialImage}}"><meta property="og:image:alt" content="{{.SocialImageAlt}}"><meta name="twitter:image" content="{{.SocialImage}}"><meta name="twitter:image:alt" content="{{.SocialImageAlt}}">{{end}}
+  {{if .SchemaJSON}}<script type="application/ld+json">{{.SchemaJSON}}</script>{{end}}
+  <meta name="theme-color" content="#eff4f9">
+  <script src="/assets/public-theme.js?v={{.AssetVersion}}"></script>
+  <link rel="stylesheet" href="/assets/public.css?v={{.AssetVersion}}">
+  <script src="/assets/public.js?v={{.AssetVersion}}" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#articles">{{text .Lang "跳至正文" "Skip to content" "Naar de inhoud" "Saltar al contenido"}}</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="{{localLink .HomeURL}}" aria-label="{{.SiteTitle}}"><span class="avatar" aria-hidden="true"><span data-avatar-fallback>{{if eq .Lang "zh"}}甘{{else}}G{{end}}</span>{{if .AvatarURL}}<img class="avatar-image" data-avatar-image src="{{localLink .AvatarURL}}" alt="" width="53" height="53" decoding="async">{{end}}</span><span class="wordmark">GANWEN{{if eq .Lang "zh"}}<span class="brand-zh">甘文</span>{{end}}</span></a>
+    <nav id="main-nav" class="main-nav open" aria-label="{{.MenuLabel}}">
+      <a class="nav-item{{if .HomeCurrent}} active{{end}}" {{if .HomeCurrent}}aria-current="page"{{end}} href="{{localLink .HomeURL}}">{{icon "home"}}<span>{{text .Lang "首页" "Home" "Home" "Inicio"}}</span></a>
+      <a class="nav-item{{if .ArticlesCurrent}} active{{end}}" {{if .ArticlesCurrent}}aria-current="page"{{end}} href="{{localLink .AllArticlesURL}}">{{icon "article"}}<span>{{text .Lang "文章" "Articles" "Artikelen" "Artículos"}}</span></a>
+      {{if .AboutURL}}<a class="nav-item{{if .AboutCurrent}} active{{end}}" {{if .AboutCurrent}}aria-current="page"{{end}} href="{{localLink .AboutURL}}">{{icon "book"}}<span>{{text .Lang "关于" "About" "Over mij" "Sobre mí"}}</span></a>{{end}}
+      <details class="nav-language language-picker" data-language-picker>
+        <summary aria-label="{{text .Lang "语言" "Language" "Taal" "Idioma"}}: {{range .Languages}}{{if eq $.Lang .Lang}}{{.Label}}{{end}}{{end}}">{{icon "globe"}}<span class="language-current">{{range .Languages}}{{if eq $.Lang .Lang}}{{.Label}}{{end}}{{end}}</span><span class="language-chevron" aria-hidden="true"></span></summary>
+        <div class="language-links">{{range .Languages}}<a href="{{if .SwitchURL}}{{localLink .SwitchURL}}{{else}}{{localLink .URL}}{{end}}" lang="{{.Lang}}" dir="{{languageDir .Lang}}" {{if eq $.Lang .Lang}}aria-current="true"{{end}}>{{.Label}}</a>{{end}}</div>
+      </details>
+      <button type="button" class="search-toggle" aria-label="{{text .Lang "搜索" "Search" "Zoeken" "Buscar"}}" aria-controls="site-search" aria-expanded="{{if .IsSearch}}true{{else}}false{{end}}">{{icon "search"}}</button>
+    </nav>
+    <div class="header-actions">
+      <label class="layout-control"><span class="sr-only">{{text .Lang "版式" "Layout" "Indeling" "Diseño"}}</span><select data-layout-picker aria-label="{{text .Lang "版式" "Layout" "Indeling" "Diseño"}}"><option value="journal" {{if .IsJournal}}selected{{end}}>{{text .Lang "日志阅读" "Journal" "Dagboek" "Diario"}}</option><option value="classic" {{if not .IsJournal}}selected{{end}}>{{text .Lang "经典卡片" "Classic cards" "Klassieke kaarten" "Tarjetas clásicas"}}</option></select></label>
+      <div class="theme-switch" role="group" aria-label="{{text .Lang "外观" "Appearance" "Weergave" "Apariencia"}}">
+        <button type="button" data-theme-choice="light" aria-pressed="false" title="{{text .Lang "浅色" "Light" "Licht" "Claro"}}">{{icon "sun"}}<span class="sr-only">{{text .Lang "浅色" "Light" "Licht" "Claro"}}</span></button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false" title="{{text .Lang "深色" "Dark" "Donker" "Oscuro"}}">{{icon "moon"}}<span class="sr-only">{{text .Lang "深色" "Dark" "Donker" "Oscuro"}}</span></button>
+        <button type="button" data-theme-choice="system" aria-pressed="true" title="{{text .Lang "跟随系统" "System" "Systeem" "Sistema"}}">{{icon "monitor"}}<span class="sr-only">{{text .Lang "跟随系统" "System" "Systeem" "Sistema"}}</span></button>
+      </div>
+      <button class="menu-toggle" type="button" aria-label="{{.MenuLabel}}" aria-expanded="true" aria-controls="main-nav">{{icon "menu"}}</button>
+    </div>
+  </div>
+  <form id="site-search" class="site-search" action="{{.BasePath}}/" method="get" role="search" data-search-open="{{if .IsSearch}}true{{else}}false{{end}}"><label for="search-text">{{text .Lang "搜索文章" "Search articles" "Zoek artikelen" "Buscar artículos"}}</label><input id="search-text" name="s" type="search" value="{{.Search}}" required><button type="submit" aria-label="{{text .Lang "搜索" "Search" "Zoeken" "Buscar"}}">{{icon "search"}}</button></form>
+</header>
+<main class="site-main{{if .IsArticle}} reading-page{{if not .ShowSidebar}} reading-full-width{{end}}{{else if .IsOverview}} overview-page{{else}} archive-page{{end}}" id="articles" tabindex="-1" data-public-language="{{.Lang}}"{{if .Post}} data-post-id="{{.Post.ID}}"{{end}}{{if .IsIndependentPage}} data-independent-page="true"{{end}}>
+{{if .IsArticle}}
+  <div class="{{if .ShowSidebar}}page-with-sidebar{{else}}page-reading-content{{end}}"><div class="page-content">
+  <nav class="article-toolbar" aria-label="{{.BackLabel}}">
+    <a class="back-link" data-back-link href="{{localLink .BackURL}}">← {{.BackLabel}} <kbd>Esc</kbd></a>
+    <div class="article-directions">{{if .Previous}}<a data-previous href="{{localLink .Previous.URL}}" title="{{.Previous.Title}}">← {{$.PreviousLabel}}</a>{{end}}{{if .Next}}<a data-next href="{{localLink .Next.URL}}" title="{{.Next.Title}}">{{$.NextLabel}} →</a>{{end}}<button type="button" class="article-edit-button" data-article-edit hidden data-edit-post-id="{{.Post.ID}}">{{icon "edit"}}<span>{{text .Lang "编辑文章" "Edit article" "Artikel bewerken" "Editar artículo"}}</span></button><button type="button" data-scroll-top aria-label="{{text .Lang "回到顶部" "Back to top" "Naar boven" "Volver arriba"}}">↑</button></div>
+  </nav>
+  <details class="shortcut-help" data-shortcuts><summary>{{.ShortcutLabel}} <kbd>?</kbd></summary><p>{{.ShortcutHelp}}</p></details>
+  <article class="article-card">
+    <header class="article-header">{{if and .IsJournal .Post.Categories}}<nav class="article-categories" aria-label="{{.CategoryLabel}}">{{range .Post.Categories}}<a href="{{localLink .URL}}">{{.Label}}</a>{{end}}</nav>{{end}}<h1>{{.Heading}}</h1><div class="intro-meta"><p class="post-meta"><time{{if .Published}} datetime="{{.Published}}"{{end}}>{{.Date}}</time>{{if .Author}}<span> · {{.Author}}</span>{{end}}{{if and .IsJournal .IsBlogPost}}<span> · {{text .Lang "阅读约" "About" "Circa" "Unos"}} {{.Post.ReadMinutes}} {{text .Lang "分钟" "min read" "min lezen" "min de lectura"}}</span>{{end}}</p>{{template "intro-contacts" .}}</div></header>
+    {{if .IsJournal}}<details class="article-toc" data-article-toc hidden><summary>{{text .Lang "文章目录" "On this page" "Op deze pagina" "En esta página"}}</summary><nav data-toc-links aria-label="{{text .Lang "文章目录" "On this page" "Op deze pagina" "En esta página"}}"></nav></details>{{end}}
+    <div class="article-body">{{.HTML}}</div>
+    {{if .Tags}}<footer class="post-tags">{{range .Tags}}<a href="{{localLink .URL}}">#{{.Label}}</a>{{end}}</footer>{{end}}
+    <nav class="article-bottom-nav" aria-label="{{.BackLabel}}">{{if .Previous}}<a href="{{localLink .Previous.URL}}"><span>← {{$.PreviousLabel}}</span><strong>{{.Previous.Title}}</strong></a>{{end}}{{if .Next}}<a href="{{localLink .Next.URL}}"><span>{{$.NextLabel}} →</span><strong>{{.Next.Title}}</strong></a>{{end}}</nav>
+    <a class="bottom-back" data-back-link href="{{localLink .BackURL}}">← {{.BackLabel}}</a>
+  </article>
+  </div>{{if .ShowSidebar}}{{template "blog-sidebar" .}}{{end}}</div>
+{{else}}
+  {{if .IsJournal}}{{template "journal-list" .}}{{else}}<div class="page-with-sidebar"><div class="page-content">{{template "classic-list" .}}</div>{{template "blog-sidebar" .}}</div>{{end}}
+{{end}}
+</main>
+<dialog class="article-editor-dialog" data-public-editor aria-labelledby="article-editor-title"><header class="article-editor-heading"><h2 id="article-editor-title">{{text .Lang "编辑文章" "Edit article" "Artikel bewerken" "Editar artículo"}}</h2><button type="button" data-article-editor-close aria-label="{{text .Lang "关闭" "Close" "Sluiten" "Cerrar"}}">{{icon "close"}}</button></header><iframe data-public-editor-frame title="{{text .Lang "文章编辑器" "Article editor" "Artikeleditor" "Editor de artículos"}}"></iframe></dialog>
+<footer class="site-footer"><span class="footer-text">{{.FooterText}}</span><a href="/admin/" data-admin-link hidden rel="nofollow">{{text .Lang "管理" "Admin" "Beheer" "Administración"}}</a></footer>
+</body>
+</html>
+{{define "intro-contacts"}}{{if .Contacts}}
+<nav class="intro-contacts" aria-label="{{.ContactHeading}}">
+  <span class="contact-caption">{{if eq .Lang "zh"}}联系方式：{{else}}{{text .Lang "联系" "Contact" "Contact" "Contacto"}}:{{end}}</span>
+  <div class="contact-links">{{range .Contacts}}<a class="contact-link contact-link-{{.Icon}}" data-contact-kind="{{.Kind}}" data-contact-platform="{{.Icon}}" href="{{.URL}}" aria-label="{{.Label}}{{if .Account}}：{{.Account}}{{end}}" title="{{.Label}}{{if .Account}}：{{.Account}}{{end}}" {{if .NewTab}}target="_blank"{{end}} rel="noopener noreferrer"><span class="contact-icon-shell" aria-hidden="true"><span data-contact-fallback>{{contactIcon .Icon}}</span>{{if .FaviconURL}}<img class="contact-favicon" data-contact-image src="{{.FaviconURL}}" alt="" width="18" height="18" loading="lazy" decoding="async" referrerpolicy="no-referrer">{{end}}</span><span class="contact-copy"><strong>{{.Label}}</strong>{{if .Account}}<span class="sr-only">{{.Account}}</span>{{end}}</span></a>{{end}}</div>
+</nav>
+{{end}}{{end}}
+
+{{define "classic-list"}}
+  <div class="page-heading"><div class="heading-copy"><h1>{{.Heading}}</h1><div class="intro-meta">{{if .SiteDescription}}<p>{{.SiteDescription}}</p>{{end}}{{template "intro-contacts" .}}</div></div></div>
+  <div class="list-tools"><a href="{{localLink .AllArticlesURL}}">{{text .Lang "全部文章" "All articles" "Alle artikelen" "Todos los artículos"}} →</a><details class="shortcut-help" data-shortcuts><summary>{{.ShortcutLabel}} <kbd>?</kbd></summary><p>{{.ShortcutHelp}}</p></details></div>
+  <div class="post-grid{{if eq (len .ArchiveCards) 1}} single-result{{end}}">
+    {{if .IsOverview}}
+    {{range .Groups}}<section class="category-card"><h2 class="category-title"><a href="{{localLink .URL}}">{{.Title}}</a></h2><div class="preview-list">{{range .Cards}}<article class="post-preview">{{if .Image}}<a href="{{localLink .URL}}" class="preview-image"><img src="{{localLink .ThumbnailURL}}"{{if .ImageSrcset}} srcset="{{.ImageSrcset}}" sizes="(max-width: 560px) 90vw, (max-width: 1200px) 45vw, 600px"{{end}} alt="" loading="lazy" decoding="async"></a>{{end}}<h3><a href="{{localLink .URL}}">{{.Title}}</a>{{if .Sticky}}<span class="sticky-marker" title="{{text $.Lang "置顶" "Pinned" "Vastgezet" "Fijado"}}">●</span>{{end}}</h3><p class="post-meta"><time>{{.Date}}</time></p><p class="post-excerpt">{{.HTML}}</p><a class="read-more" href="{{localLink .URL}}">{{$.ReadMore}} <span aria-hidden="true">→</span></a>{{template "card-edit" (cardContext $ .)}}</article>{{end}}</div></section>{{else}}<section class="empty-card">{{.EmptyLabel}}</section>{{end}}
+    {{else}}
+    {{range .ArchiveCards}}<article class="archive-card post-preview">{{if .Image}}<a href="{{localLink .URL}}" class="preview-image"><img src="{{localLink .ThumbnailURL}}"{{if .ImageSrcset}} srcset="{{.ImageSrcset}}" sizes="(max-width: 560px) 90vw, (max-width: 1200px) 45vw, 600px"{{end}} alt="" loading="lazy" decoding="async"></a>{{end}}<h2><a href="{{localLink .URL}}">{{.Title}}</a>{{if .Sticky}}<span class="sticky-marker" title="{{text $.Lang "置顶" "Pinned" "Vastgezet" "Fijado"}}">●</span>{{end}}</h2><p class="post-meta"><time>{{.Date}}</time></p><p class="post-excerpt">{{.HTML}}</p><a class="read-more" href="{{localLink .URL}}">{{$.ReadMore}} <span aria-hidden="true">→</span></a>{{template "card-edit" (cardContext $ .)}}</article>{{else}}<section class="empty-card">{{.EmptyLabel}}</section>{{end}}
+    {{end}}
+  </div>
+  {{if .Pages}}<nav class="pagination" aria-label="{{.PageLabel}}"><div>{{if .Newer}}<a data-previous href="{{localLink .Newer}}">← {{.NewerLabel}}</a>{{end}}</div><div class="page-numbers">{{range .Pages}}{{if .URL}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}>{{.Label}}</a>{{else}}<span>{{.Label}}</span>{{end}}{{end}}</div><div>{{if .Older}}<a data-next href="{{localLink .Older}}">{{.OlderLabel}} →</a>{{end}}</div></nav><form class="page-jump" action="{{.BasePath}}/" method="get">{{range .QueryFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}<label for="page-number">{{.PageLabel}}</label><input id="page-number" type="number" name="paged" min="1" max="{{.PageCount}}" value="{{.Page}}" required><span>/ {{.PageCount}}</span><button type="submit">{{.GoLabel}}</button></form>{{end}}
+{{end}}
+
+{{define "journal-list"}}
+  <header class="page-heading journal-heading"><div class="heading-copy"><p class="journal-eyebrow">GANWEN / {{text .Lang "按时间阅读" "Notes over time" "Notities door de tijd" "Notas en el tiempo"}}</p><h1>{{if .IsOverview}}{{.SiteTitle}}{{else}}{{.Heading}}{{end}}</h1><div class="intro-meta">{{if .SiteDescription}}<p class="journal-description">{{.SiteDescription}}</p>{{end}}{{template "intro-contacts" .}}</div></div><a class="journal-count" href="{{localLink .AllArticlesURL}}"><strong>{{.PostCount}}</strong><span>{{text .Lang "文章总数" "Articles" "Artikelen" "Artículos"}}</span></a></header>
+  <div class="journal-layout">
+    <div class="journal-content">
+      <details class="journal-mobile-topics"><summary>{{.CategoryLabel}}</summary><nav class="category-tabs" aria-label="{{.CategoryLabel}}"><a href="{{localLink .CategoryAllURL}}" {{if .CategoryAllCurrent}}aria-current="page"{{end}}>{{text .Lang "全部文章" "All articles" "Alle artikelen" "Todos los artículos"}}</a>{{range .Categories}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}><span>{{.Label}}</span><span class="category-count">{{.Count}}</span></a>{{end}}</nav></details>
+      {{if .IsOverview}}
+        {{with .Featured}}<section class="featured-story{{if .Image}} has-image{{end}}" aria-labelledby="featured-title">
+          <div class="featured-copy"><p class="journal-eyebrow">{{if .Sticky}}{{text $.Lang "置顶" "Pinned" "Vastgezet" "Fijado"}} · {{end}}{{text $.Lang "精选阅读" "Featured story" "Uitgelicht" "Lectura destacada"}}</p>
+          <h2 id="featured-title"><a href="{{localLink .URL}}">{{.Title}}</a></h2>
+          <p class="post-excerpt">{{.HTML}}</p><p class="post-meta"><time{{if .Published}} datetime="{{.Published}}"{{end}}>{{.Date}}</time><span> · {{text $.Lang "阅读约" "About" "Circa" "Unos"}} {{.ReadMinutes}} {{text $.Lang "分钟" "min read" "min lezen" "min de lectura"}}</span></p>
+          <a class="journal-read-link" href="{{localLink .URL}}">{{$.ReadMore}} <span aria-hidden="true">↗</span><span class="sr-only">：{{.Title}}</span></a>{{template "card-edit" (cardContext $ .)}}</div>
+          {{if .Image}}<a href="{{localLink .URL}}" class="featured-image" tabindex="-1" aria-hidden="true"><picture>{{if .ImageSrcset}}<source media="(max-width: 560px)" srcset="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1'%20height='1'/%3E"><source media="(max-width: 820px)" srcset="{{.ImageSrcset}}" sizes="240px"><source media="(max-width: 1180px)" srcset="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1'%20height='1'/%3E"><source srcset="{{.ImageSrcset}}" sizes="(min-width: 1800px) 480px, 380px">{{end}}<img src="{{localLink .Image}}" alt="" width="640" height="720" fetchpriority="high" decoding="async"></picture></a>{{end}}
+        </section>{{end}}
+      {{end}}
+      <div class="journal-section-heading"><h2>{{if .IsOverview}}{{text .Lang "最近更新" "Recent writing" "Recent geschreven" "Últimos artículos"}}{{else}}{{.Heading}}{{end}}</h2><span>{{text .Lang "按时间阅读" "Notes over time" "Notities door de tijd" "Notas en el tiempo"}}</span></div>
+      <div class="journal-post-list">
+      {{if .IsOverview}}{{range .RecentCards}}{{template "journal-post" (cardContext $ .)}}{{else}}{{if not .Featured}}<p class="empty-card">{{.EmptyLabel}}</p>{{end}}{{end}}
+      {{else}}{{range .ArchiveCards}}{{template "journal-post" (cardContext $ .)}}{{else}}<p class="empty-card">{{.EmptyLabel}}</p>{{end}}{{end}}
+      </div>
+      {{if .IsOverview}}<a class="journal-all-link" href="{{localLink .AllArticlesURL}}">{{text .Lang "浏览全部文章" "Browse all articles" "Alle artikelen bekijken" "Ver todos los artículos"}} <span aria-hidden="true">→</span></a>{{end}}
+      {{template "journal-pagination" .}}
+    </div>
+    {{template "blog-sidebar" .}}
+  </div>
+{{end}}
+{{define "blog-sidebar"}}
+<aside class="blog-sidebar journal-sidebar" aria-label="{{text .Lang "博客侧栏" "Blog sidebar" "Blogzijbalk" "Barra lateral del blog"}}">
+  <section class="sidebar-section sidebar-search-section"><h2 class="sidebar-heading" id="sidebar-search-heading">{{text .Lang "搜索文章" "Search articles" "Zoek artikelen" "Buscar artículos"}}</h2>
+    <form class="sidebar-search" action="{{.BasePath}}/" method="get" role="search" aria-labelledby="sidebar-search-heading"><label class="sr-only" for="sidebar-search-input">{{text .Lang "搜索文章" "Search articles" "Zoek artikelen" "Buscar artículos"}}</label><input id="sidebar-search-input" name="s" type="search" value="{{.Search}}" placeholder="{{text .Lang "输入关键词" "Enter a keyword" "Voer een zoekwoord in" "Introduce una palabra clave"}}" required><button class="sidebar-search-submit" type="submit" aria-label="{{text .Lang "搜索" "Search" "Zoeken" "Buscar"}}">{{icon "search"}}</button></form>
+  </section>
+  <section class="sidebar-section sidebar-popular" aria-labelledby="sidebar-popular-heading"><div class="sidebar-title-row"><h2 class="sidebar-heading" id="sidebar-popular-heading">{{text .Lang "热门文章" "Popular articles" "Populaire artikelen" "Artículos populares"}}</h2><span class="sidebar-period">{{text .Lang "近30天" "Last 30 days" "Laatste 30 dagen" "Últimos 30 días"}}</span></div>
+    <ol class="popular-list">{{range $index, $post := .SidebarPopular}}<li class="popular-item"><a class="popular-link" href="{{localLink .URL}}"><span class="popular-rank" aria-hidden="true">{{rankNumber $index}}</span><span class="popular-title">{{.Title}}</span></a><span class="popular-views"><bdi>{{.Views}}</bdi> {{text $.Lang "次浏览" "views" "weergaven" "visitas"}}</span></li>{{else}}<li class="sidebar-empty">{{text .Lang "暂无浏览记录" "No views recorded yet" "Nog geen weergaven geregistreerd" "Aún no hay visitas registradas"}}</li>{{end}}</ol>
+  </section>
+  <section class="sidebar-section" aria-labelledby="sidebar-stats-heading"><h2 class="sidebar-heading" id="sidebar-stats-heading">{{text .Lang "站点统计" "Site statistics" "Sitestatistieken" "Estadísticas del sitio"}}</h2><dl class="site-stats"><div><dt>{{text .Lang "文章总数" "Articles" "Artikelen" "Artículos"}}</dt><dd><bdi>{{.PostCount}}</bdi></dd></div><div><dt>{{text .Lang "今日浏览" "Views today" "Weergaven vandaag" "Visitas de hoy"}}</dt><dd><bdi>{{.SidebarStats.TodayViews}}</bdi></dd></div><div><dt>{{text .Lang "近365天浏览" "Views in last 365 days" "Weergaven in 365 dagen" "Visitas en 365 días"}}</dt><dd><bdi>{{.SidebarStats.YearViews}}</bdi></dd></div><div><dt>{{text .Lang "历史总访问" "Total visits" "Totaal bezoeken" "Visitas totales"}}</dt><dd><bdi>{{.SidebarStats.HistoricalViews}}</bdi></dd></div></dl></section>
+  {{with .SidebarAd}}
+  <section class="sidebar-section sidebar-ad" data-sidebar-ad aria-label="{{text $.Lang "广告" "Advertisement" "Advertentie" "Publicidad"}}">
+    <h2 class="ad-card-heading"><a href="{{.TargetURL}}" target="_blank" rel="sponsored noopener noreferrer">{{.Title}}</a></h2>
+    <a class="ad-card-image" href="{{.TargetURL}}" target="_blank" rel="sponsored noopener noreferrer" aria-label="{{.Title}}"><img src="{{localLink .ImageURL}}" alt="" width="640" height="640" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a>
+    <div class="ad-card-body">{{if .Description}}<p class="ad-description">{{.Description}}</p>{{end}}<a class="ad-card-button" href="{{.TargetURL}}" target="_blank" rel="sponsored noopener noreferrer">{{if .ButtonLabel}}{{.ButtonLabel}}{{else}}{{text $.Lang "查看详情" "View details" "Bekijk details" "Ver detalles"}}{{end}}</a></div>
+    <footer class="ad-card-footer"><span class="ad-promoted">{{if .Sponsor}}{{text $.Lang "推广方" "Promoted by" "Gepromoot door" "Promocionado por"}} <span class="ad-sponsor">{{.Sponsor}}</span>{{end}}</span><span>{{text $.Lang "广告" "Advertisement" "Advertentie" "Publicidad"}}</span></footer>
+  </section>{{end}}
+  <section class="sidebar-section archive-filters" aria-label="{{.CategoryLabel}}"><div class="filter-heading"><h2 class="sidebar-heading">{{.CategoryLabel}}</h2>{{if .FiltersActive}}<a class="clear-filters" href="{{localLink .ClearFiltersURL}}">{{.ClearFiltersLabel}}</a>{{end}}</div><nav class="category-tabs" aria-label="{{.CategoryLabel}}"><a class="filter-all" href="{{localLink .CategoryAllURL}}" {{if .CategoryAllCurrent}}aria-current="page"{{end}}><span>{{text .Lang "全部文章" "All articles" "Alle artikelen" "Todos los artículos"}}</span><span class="category-count"><bdi>{{.PostCount}}</bdi></span></a>{{range .Categories}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}><span>{{.Label}}</span><span class="category-count"><bdi>{{.Count}}</bdi></span></a>{{end}}</nav>{{if .FilterTags}}<details class="journal-tags" open><summary>{{.FilterTagsLabel}}</summary><nav class="tag-tabs" aria-label="{{.FilterTagsLabel}}"><a class="filter-all" href="{{localLink .TagAllURL}}" {{if .TagAllCurrent}}aria-current="page"{{end}}>{{text .Lang "全部" "All" "Alles" "Todos"}}</a>{{range .FilterTags}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}>#{{.Label}}</a>{{end}}</nav></details>{{end}}</section>
+</aside>
+{{end}}
+{{define "journal-post"}}{{$page := .Page}}{{with .Card}}
+<article class="journal-post{{if .Image}} has-image{{end}}">
+  <div class="journal-post-copy"><div class="journal-post-categories">{{range .Categories}}<a href="{{localLink .URL}}">{{.Label}}</a>{{end}}{{if .Sticky}}<span>{{text $page.Lang "置顶" "Pinned" "Vastgezet" "Fijado"}}</span>{{end}}</div><h3><a href="{{localLink .URL}}">{{.Title}}</a></h3><p class="post-excerpt">{{.HTML}}</p><p class="post-meta"><time{{if .Published}} datetime="{{.Published}}"{{end}}>{{.Date}}</time><span> · {{text $page.Lang "阅读约" "About" "Circa" "Unos"}} {{.ReadMinutes}} {{text $page.Lang "分钟" "min read" "min lezen" "min de lectura"}}</span></p>{{template "card-edit" (cardContext $page .)}}</div>
+  {{if .Image}}<a class="journal-thumbnail" href="{{localLink .URL}}" aria-hidden="true" tabindex="-1"><img src="{{localLink .ThumbnailURL}}" alt="" width="240" height="180" loading="lazy" decoding="async"></a>{{end}}
+</article>
+{{end}}{{end}}
+
+{{define "journal-pagination"}}{{if gt .PageCount 1}}
+  {{if .Pages}}<nav class="pagination" aria-label="{{.PageLabel}}"><div>{{if .Newer}}<a data-previous href="{{localLink .Newer}}">← {{.NewerLabel}}</a>{{end}}</div><div class="page-numbers">{{range .Pages}}{{if .URL}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}>{{.Label}}</a>{{else}}<span>{{.Label}}</span>{{end}}{{end}}</div><div>{{if .Older}}<a data-next href="{{localLink .Older}}">{{.OlderLabel}} →</a>{{end}}</div></nav><form class="page-jump" action="{{.BasePath}}/" method="get">{{range .QueryFields}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}<label for="page-number">{{.PageLabel}}</label><input id="page-number" type="number" name="paged" min="1" max="{{.PageCount}}" value="{{.Page}}" required><span>/ {{.PageCount}}</span><button type="submit">{{.GoLabel}}</button></form>{{end}}
+{{end}}
+{{end}}
+
+{{define "card-edit"}}<button type="button" class="article-edit-button list-edit-button" data-article-edit hidden data-edit-post-id="{{.Card.ID}}">{{icon "edit"}}<span>{{text .Page.Lang "编辑文章" "Edit article" "Artikel bewerken" "Editar artículo"}}</span><span class="sr-only">：{{.Card.Title}}</span></button>{{end}}

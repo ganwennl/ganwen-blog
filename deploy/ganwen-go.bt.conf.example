@@ -1,0 +1,127 @@
+# Complete replacement for /www/server/panel/vhost/nginx/go_ganwen_blog.conf.
+# BaoTa Go project ganwen_blog; verified migration configuration.
+# Keep the old document root as a fallback for unmigrated static media.
+# Ganwen data/secrets belong ONLY in /www/wwwroot/ganwen-go/data.
+server
+{
+    listen 80;
+    listen 443 ssl;
+    listen 443 quic;
+    http2 on;
+    server_name ganwen.nl www.ganwen.nl;
+    root /www/wwwroot/ganwen.nl;
+    autoindex off;
+
+    #CERT-APPLY-CHECK--START
+    # BaoTa certificate renewal include; retain this file and its path.
+    include /www/server/panel/vhost/nginx/well-known/ganwen_blog.conf;
+    #CERT-APPLY-CHECK--END
+    # Currently this directory contains only the site_total access log include.
+    include /www/server/panel/vhost/nginx/extension/ganwen_blog/*.conf;
+
+    #SSL-START
+    #error_page 404/404.html;
+    #HTTP_TO_HTTPS_START
+    set $isRedcert 1;
+    if ($server_port != 443) {
+        set $isRedcert 2;
+    }
+    if ($uri ~ /\.well-known/) {
+        set $isRedcert 1;
+    }
+    if ($isRedcert != 1) {
+        rewrite ^(/.*)$ https://$host$1 permanent;
+    }
+    #HTTP_TO_HTTPS_END
+    ssl_certificate /www/server/panel/vhost/cert/ganwen_blog/fullchain.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/ganwen_blog/privkey.pem;
+    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_tickets on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    add_header Strict-Transport-Security "max-age=31536000";
+    add_header Alt-Svc 'quic=":443"; h3=":443"; h3-29=":443"; h3-27=":443";h3-25=":443"; h3-T050=":443"; h3-Q050=":443";h3-Q049=":443";h3-Q048=":443"; h3-Q046=":443"; h3-Q043=":443"';
+    add_header X-Content-Type-Options nosniff;
+    error_page 497 https://$host$request_uri;
+    #SSL-END
+
+    # No PHP include, WordPress rewrite, index.php filesystem fallback,
+    # or 404 HTML rewrite: Go must return its actual status and canonical.
+    client_max_body_size 34m;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_connect_timeout 10s;
+    proxy_send_timeout 100s;
+    proxy_read_timeout 100s;
+    proxy_intercept_errors off;
+
+    # Certificate checks remain static, including HTTP requests.
+    location ^~ /.well-known/acme-challenge/ {
+        root /www/wwwroot/java_node_ssl;
+        allow all;
+        default_type text/plain;
+        try_files $uri =404;
+    }
+    if ($uri ~ "^/\.well-known/.*\.(php|jsp|py|js|css|lua|ts|go|zip|tar\.gz|rar|7z|sql|bak)$") {
+        return 403;
+    }
+
+    # Explicit legacy PHP entry: no URI suffix on proxy_pass, retaining
+    # /index.php?p=ID and every original query argument unchanged.
+    location = /index.php {
+        proxy_pass http://127.0.0.1:8099;
+    }
+    location = /robots.txt {
+        proxy_pass http://127.0.0.1:8099;
+    }
+
+    # Embedded Go CSS/JS takes priority over any old filesystem asset.
+    location ^~ /assets/ {
+        proxy_pass http://127.0.0.1:8099;
+    }
+
+    # Hide old scripts/configuration and private/new application paths.
+    location ~* \.(php[0-9]*|phtml)(?:/|$) { return 404; }
+    location ~ /\. { return 404; }
+    location ~* ^/(?:data|deploy|migration|ganwen-go)(?:/|$) { return 404; }
+    location ~* ^/(?:LICENSE|license\.txt|README(?:\.md|\.html)?)(?:/|$) { return 404; }
+
+    # Blog media, including migrated evidence, takes priority. Unmigrated
+    # original files remain available as a fallback on an actual Go 404.
+    # Do not alias the entire private data directory into the public root.
+    location ~* \.(jpg|jpeg|png|gif|webp|avif|heic|heif|ico|bmp|swf|mp4|m4v|mov|webm|mp3|m4a|ogg|wav|pdf|txt)$ {
+        proxy_pass http://127.0.0.1:8099;
+        proxy_intercept_errors on;
+        error_page 404 = @legacy_media;
+        expires 30d;
+    }
+    location @legacy_media {
+        try_files $uri =404;
+    }
+
+    # Existing static page dependencies remain available from the old root.
+    # Go public assets are handled by the /assets/ prefix above.
+    location ~* \.(css|js|woff2?|ttf|otf|eot)$ {
+        try_files $uri =404;
+        expires 12h;
+    }
+
+    # Blog, admin, language prefixes, feeds and sitemaps keep their URI/query.
+    # Independent pages (including /bewijs.html) are managed by Go too.
+    location / {
+        proxy_pass http://127.0.0.1:8099;
+    }
+
+    access_log /www/wwwlogs/ganwen_blog.log;
+    error_log /www/wwwlogs/ganwen_blog.error.log;
+    #Monitor-Config-Start
+    access_log syslog:server=unix:/tmp/bt-monitor.sock,nohostname,tag=1__access monitor;
+    error_log syslog:server=unix:/tmp/bt-monitor.sock,nohostname,tag=1__error;
+    #Monitor-Config-End
+}

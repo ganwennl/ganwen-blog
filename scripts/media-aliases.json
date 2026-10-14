@@ -1,0 +1,8 @@
+[
+  {
+    "path": "wp-content/uploads/2012/08/WP_000221.jpg",
+    "fallback": "wp-content/uploads/2012/08/WP_000221-224x300.jpg",
+    "sha256": "bd65479a8b919c500e2589a1f85a5fa1689f51897010ceaaf2e6df79e359a0ae",
+    "reason": "原站原图已丢失且返回404；保留原URL，使用现存最大缩略图224x300，不声称恢复原始分辨率。"
+  }
+]
