@@ -4,7 +4,7 @@
 
 This is the blog software I use myself. It is written in Go: download, extract and run it. It supports posts, standalone pages, images, videos and visitor statistics. The public pages and admin interface include 11 display languages. SQLite is the default database; MySQL is also supported.
 
-当前版本 / Current version: **v1.0.1** · [更新日志 / Changelog](CHANGELOG.md)
+当前版本 / Current version: **v1.0.2** · [更新日志 / Changelog](CHANGELOG.md)
 
 ## 下载运行
 
@@ -12,7 +12,7 @@ This is the blog software I use myself. It is written in Go: download, extract a
 
 ### Windows
 
-1. 解压 `ganwen-blog-v1.0.1-windows-amd64.zip` 到可写的本地目录。
+1. 解压 `ganwen-blog-v1.0.2-windows-amd64.zip` 到可写的本地目录。
 2. 双击 `Start.bat`，保持打开的窗口；关闭窗口就停止服务。
 3. 浏览器打开 `http://127.0.0.1:8097/`，后台是 `http://127.0.0.1:8097/admin/`。
 4. 第一次启动会生成账号 `ganwen` 和随机密码，密码在 `data/admin-access.txt`。请保管好此文件。
@@ -35,8 +35,8 @@ This is the blog software I use myself. It is written in Go: download, extract a
 ### Linux
 
 ```sh
-unzip ganwen-blog-v1.0.1-linux-amd64.zip
-cd ganwen-blog-v1.0.1-linux-amd64
+unzip ganwen-blog-v1.0.2-linux-amd64.zip
+cd ganwen-blog-v1.0.2-linux-amd64
 chmod +x ganwen start.sh
 ./start.sh
 ```
@@ -83,7 +83,7 @@ chmod +x ganwen start.sh
 ```sh
 go test ./cmd/... ./internal/...
 go build -o ganwen ./cmd/ganwen
-python scripts/build-release.py --output dist/releases/v1.0.1
+python scripts/build-release.py --output dist/releases/v1.0.2
 ```
 
 构建脚本只打包程序、启动脚本、说明和许可，不复制本地数据库、媒体或配置。
