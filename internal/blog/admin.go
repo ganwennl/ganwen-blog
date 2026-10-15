@@ -110,7 +110,7 @@ func (a *Admin) serve(w http.ResponseWriter, r *http.Request) {
 			ancestors = "'self'"
 		}
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: http: data: blob:; frame-src 'self'; connect-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors "+ancestors)
-		_, _ = w.Write(adminUI)
+		_, _ = w.Write(adminUIPage)
 		return
 	}
 	if r.URL.Path == "/admin/api/session" && r.Method == http.MethodGet {

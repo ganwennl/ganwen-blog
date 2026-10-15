@@ -1,5 +1,15 @@
 # 更新日志 / Changelog
 
+## v1.0.2 — 2026-10-15
+
+- 修复后台一直停在“正在打开编辑后台…”的问题。
+- 界面语言资源直接包含在后台页面里，启动不再依赖额外的语言脚本请求。
+- 保留已有文章、设置和登录状态，不需要重新安装或重置账号。
+
+- Fixed the admin interface getting stuck on its opening screen.
+- Included interface language resources directly in the admin page, removing the extra script request from startup.
+- Existing articles, settings and sign-in sessions are preserved; no reinstall or account reset is needed.
+
 ## v1.0.1 — 2026-10-15
 
 - 前台和后台补齐 11 种显示语言，菜单、按钮和操作提示都跟随选择。
