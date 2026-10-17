@@ -12,7 +12,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location("independent_release", ROOT / "scripts/release/release-independent-page.py")
+spec = importlib.util.spec_from_file_location("independent_release", ROOT / "scripts/packaging/release-independent-page.py")
 release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
 

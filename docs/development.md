@@ -5,7 +5,7 @@
 ```powershell
 .\scripts\test.ps1
 go build -o dist/ganwen.exe ./cmd/ganwen
-python scripts/release/build-release.py --output dist/releases/local
+python scripts/packaging/build-release.py --output dist/releases/local
 ```
 
 分项检查：
@@ -18,7 +18,7 @@ Get-ChildItem tests/client/test-*.cjs | ForEach-Object { node $_.FullName; if ($
 ```
 
 - Go 测试与实现同包放置；嵌入前端文件在 `internal/blog/web/admin` 和 `web/public`，HTTP 地址保持不变。
-- `scripts/release` 负责打包与更新；`scripts/backup` 负责备份；`scripts/migration` 处理导入；`scripts/verify` 做线上检查。生产脚本不属于普通测试入口，运行前须明确目标和参数。
+- `scripts/packaging` 负责打包与更新；`scripts/backup` 负责备份；`scripts/migration` 处理导入；`scripts/verify` 做线上检查。生产脚本不属于普通测试入口，运行前须明确目标和参数。
 - `tests/scripts` 是不接触真实生产数据的 Python 回归；`tests/client` 是 Node.js 前端回归。
 - `tests/package/test_release_package.py --package <Windows包> --output <新的临时目录>` 使用隔离数据验证成品启动。
 - `packaging/windows`、`packaging/linux` 是发布包的启动脚本模板；`deploy` 只放配置模板，部署说明在 [deployment](deployment/)。

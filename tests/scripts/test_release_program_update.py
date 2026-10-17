@@ -12,7 +12,7 @@ import types
 import unittest
 from unittest import mock
 
-SCRIPT = (Path(__file__).resolve().parents[2] / "scripts/release/release-program-update.py")
+SCRIPT = (Path(__file__).resolve().parents[2] / "scripts/packaging/release-program-update.py")
 spec = importlib.util.spec_from_file_location("program_update_under_test", SCRIPT)
 update = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(update)

@@ -111,7 +111,7 @@ class DatabaseRestoreConsumersTests(unittest.TestCase):
                         [(row['key'], row['value']) for row in self.document['values']])
 
     def prepare_package(self):
-        for folder in ('data/media', 'migration', 'deploy', 'dist', 'scripts/migration', 'scripts/release', 'docs/deployment'):
+        for folder in ('data/media', 'migration', 'deploy', 'dist', 'scripts/migration', 'scripts/packaging', 'docs/deployment'):
             (self.root / folder).mkdir(parents=True, exist_ok=True)
         (self.data / 'runtime.env').write_text('GBLOG_ADMIN_USER=isolated-fixture\n', encoding='utf-8')
         (self.data / 'admin-access.txt').write_text('isolated fixture\n', encoding='utf-8')
@@ -127,8 +127,8 @@ class DatabaseRestoreConsumersTests(unittest.TestCase):
         header[:6] = b'\x7fELF\x02\x01'
         header[18:20] = (62).to_bytes(2, 'little')
         (self.root / 'linux-fixture').write_bytes(header)
-        path = self.root / 'scripts/release/package-bt.py'
-        shutil.copy2(ROOT / 'scripts/release/package-bt.py', path)
+        path = self.root / 'scripts/packaging/package-bt.py'
+        shutil.copy2(ROOT / 'scripts/packaging/package-bt.py', path)
         return load_script('restore_package_under_test', path)
 
     def run_package(self, package, name, document):

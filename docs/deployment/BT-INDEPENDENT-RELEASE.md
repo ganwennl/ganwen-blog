@@ -10,7 +10,7 @@
 - 上传包 `incoming-independent-sidebar-20261013.tar.gz`，SHA-256 `200b46028b1b235f715ad214012592b296c4b4af113b6e6a5c9bc421bab8480e`。
 - 首次发布前程序 SHA-256 `ea63350988fb0b43f48ff0f21ccf8f9bc40fe0d07e73c53aa502c069ceed2dc1`；首次执行不一致时停止处理并查明，不自行覆盖。
 
-将 `scripts/release/release-independent-page.py` 上传为维护目录内的 `release-independent-page.py`。宝塔任务使用已确认可用的 Python 3，以下 `python3` 应替换成该任务原先已验证的绝对 Python 路径；不要新装定时部署任务。
+将 `scripts/packaging/release-independent-page.py` 上传为维护目录内的 `release-independent-page.py`。宝塔任务使用已确认可用的 Python 3，以下 `python3` 应替换成该任务原先已验证的绝对 Python 路径；不要新装定时部署任务。
 
 ```sh
 python3 /www/backup/ganwen-maintenance-20261013/release-independent-page.py stage
@@ -46,7 +46,7 @@ helper 先保存最新数据库、程序和配置，再恢复上线前一致快�
 
 ## 证据页语言程序更新
 
-独立页首次发布后的程序 SHA-256 为 `25a37aea40cbc42f7f33c80e277fa32676053c871ca95d405499333a02efea19`。语言更新使用单独的 `scripts/release/release-program-update.py`，仅替换程序，保留数据、媒体、Nginx 及首次发布状态。它核对固定目录、旧/新指纹、Linux amd64 ELF、停止状态和原权限，保存私有旧程序及独立 `program-update-state.json`；安装失败恢复旧程序。
+独立页首次发布后的程序 SHA-256 为 `25a37aea40cbc42f7f33c80e277fa32676053c871ca95d405499333a02efea19`。语言更新使用单独的 `scripts/packaging/release-program-update.py`，仅替换程序，保留数据、媒体、Nginx 及首次发布状态。它核对固定目录、旧/新指纹、Linux amd64 ELF、停止状态和原权限，保存私有旧程序及独立 `program-update-state.json`；安装失败恢复旧程序。
 
 先上传 helper 与已核对的 `incoming-evidence-language-20261013.bin` 至同一私密维护目录，在宝塔停止 Go 项目，再执行：
 

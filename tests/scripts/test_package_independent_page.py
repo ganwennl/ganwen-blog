@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 SCRIPT_ROOT = Path(__file__).resolve().parent
-spec = importlib.util.spec_from_file_location("independent_package", SCRIPT_ROOT.parents[1] / "scripts/release/package-independent-page.py")
+spec = importlib.util.spec_from_file_location("independent_package", SCRIPT_ROOT.parents[1] / "scripts/packaging/package-independent-page.py")
 packager = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(packager)
 fixture_spec = importlib.util.spec_from_file_location("independent_fixture", SCRIPT_ROOT / "test_prepare_independent_page.py")

@@ -83,7 +83,7 @@ chmod +x ganwen start.sh
 ```sh
 go test ./cmd/... ./internal/...
 go build -o ganwen ./cmd/ganwen
-python scripts/release/build-release.py --output dist/releases/v1.0.2
+python scripts/packaging/build-release.py --output dist/releases/v1.0.2
 ```
 
 构建脚本只打包程序、启动脚本、说明和许可，不复制本地数据库、媒体或配置。
