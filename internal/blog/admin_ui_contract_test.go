@@ -81,7 +81,7 @@ func TestAdminUISessionRecovery(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "scripts", "test-admin-session-client.cjs")).CombinedOutput()
+	out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "tests", "client", "test-admin-session-client.cjs")).CombinedOutput()
 	if err != nil {
 		t.Fatalf("admin session recovery failed: %v\n%s", err, out)
 	}
@@ -94,7 +94,7 @@ func TestAdminUIPastedMedia(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "scripts", "test-admin-media-client.cjs")).CombinedOutput()
+	out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "tests", "client", "test-admin-media-client.cjs")).CombinedOutput()
 	if err != nil {
 		t.Fatalf("pasted media recovery failed: %v\n%s", err, out)
 	}

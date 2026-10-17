@@ -27,7 +27,7 @@ import (
 	"unicode/utf8"
 )
 
-//go:embed admin_ui.html
+//go:embed web/admin/admin_ui.html
 var adminUI []byte
 
 var errCredentials = errors.New("用户名或密码不正确")

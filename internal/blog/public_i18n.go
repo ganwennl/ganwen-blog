@@ -12,7 +12,7 @@ func publicRequestLanguage(r *http.Request) string {
 	return lang
 }
 
-//go:embed public_messages.json
+//go:embed web/public/public_messages.json
 var publicMessagesJSON []byte
 
 var publicMessages = func() map[string]map[string]string {

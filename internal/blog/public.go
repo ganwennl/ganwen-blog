@@ -24,7 +24,7 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-//go:embed public.html public.css public.js public-theme.js
+//go:embed web/public/public.html web/public/public.css web/public/public.js web/public/public-theme.js
 var publicFiles embed.FS
 
 type publicAsset struct {
@@ -36,7 +36,7 @@ type publicAsset struct {
 var publicAssets = func() map[string]publicAsset {
 	assets := make(map[string]publicAsset)
 	for _, name := range []string{"public.css", "public.js", "public-theme.js"} {
-		data, err := publicFiles.ReadFile(name)
+		data, err := publicFiles.ReadFile("web/public/" + name)
 		if err != nil {
 			panic(err)
 		}
@@ -71,7 +71,7 @@ var publicTemplate = template.Must(template.New("public.html").Funcs(template.Fu
 			Card publicCard
 		}{page, card}
 	},
-}).ParseFS(publicFiles, "public.html"))
+}).ParseFS(publicFiles, "web/public/public.html"))
 
 type publicLink struct {
 	Label, URL, Lang string

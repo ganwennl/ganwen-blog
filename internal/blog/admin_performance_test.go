@@ -63,7 +63,7 @@ func TestAdminUILongDocumentPerformanceContracts(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "scripts", "test-admin-performance-client.cjs")).CombinedOutput()
+	out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "tests", "client", "test-admin-performance-client.cjs")).CombinedOutput()
 	if err != nil {
 		t.Fatalf("long document client contracts failed: %v\n%s", err, out)
 	}

@@ -21,7 +21,7 @@ import (
 )
 
 func TestAdminI18nMessagesCoverAllLanguagesAndParameters(t *testing.T) {
-	raw, err := adminI18nFiles.ReadFile("admin_messages.json")
+	raw, err := adminI18nFiles.ReadFile("web/admin/admin_messages.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestAdminI18nMessagesCoverAllLanguagesAndParameters(t *testing.T) {
 }
 
 func TestAdminStaticTextAndAttributesHaveExplicitDictionaryKeys(t *testing.T) {
-	raw, _ := adminI18nFiles.ReadFile("admin_messages.json")
+	raw, _ := adminI18nFiles.ReadFile("web/admin/admin_messages.json")
 	var messages map[string]map[string]string
 	if err := json.Unmarshal(raw, &messages); err != nil {
 		t.Fatal(err)
@@ -96,7 +96,7 @@ func TestAdminUILanguageSelectionClient(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	if out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "scripts", "test-admin-i18n-client.cjs")).CombinedOutput(); err != nil {
+	if out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "tests", "client", "test-admin-i18n-client.cjs")).CombinedOutput(); err != nil {
 		t.Fatalf("UI language selection failed: %v\n%s", err, out)
 	}
 }

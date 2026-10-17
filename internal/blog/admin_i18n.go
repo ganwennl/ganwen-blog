@@ -7,15 +7,15 @@ import (
 	"net/http"
 )
 
-//go:embed admin_i18n.js admin_messages.json
+//go:embed web/admin/admin_i18n.js web/admin/admin_messages.json
 var adminI18nFiles embed.FS
 
 func adminI18nScript() []byte {
-	script, err := adminI18nFiles.ReadFile("admin_i18n.js")
+	script, err := adminI18nFiles.ReadFile("web/admin/admin_i18n.js")
 	if err != nil {
 		panic(err)
 	}
-	messages, err := adminI18nFiles.ReadFile("admin_messages.json")
+	messages, err := adminI18nFiles.ReadFile("web/admin/admin_messages.json")
 	if err != nil {
 		panic("invalid admin UI messages")
 	}
