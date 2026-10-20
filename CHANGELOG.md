@@ -1,5 +1,10 @@
 # 更新日志 / Changelog
 
+## 未发布 / Unreleased
+
+- 修复新增显示语言的访问统计无法完整导出和恢复的问题，保留全部 11 种语言的统计记录。
+- Fixed analytics export and restore for all 11 supported languages, preserving records for the newer display languages.
+
 ## v1.0.2 — 2026-10-15
 
 - 修复后台一直停在“正在打开编辑后台…”的问题。

@@ -398,6 +398,69 @@ func TestAnalyticsExportRestoreLegacyAndOccupiedDestination(t *testing.T) {
 	}
 }
 
+func TestAnalyticsBackupRoundTripAllPublicLanguages(t *testing.T) {
+	app, _ := analyticsFixture(t)
+	for i, language := range publicLanguages() {
+		payload := analyticsPayloadFor(100+i, publicLanguagePrefix(language)+"/")
+		payload.Language = language
+		if w := analyticsEventRequest(app, payload, nil); w.Code != http.StatusNoContent {
+			t.Fatalf("collect %s: status %d", language, w.Code)
+		}
+	}
+	ctx := context.Background()
+	before, err := app.Store.DatabaseSnapshot(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	languages := map[string]int64{}
+	for _, row := range before.Analytics.Aggregates {
+		if row.Kind == "language" {
+			languages[row.Label] = row.PV
+		}
+	}
+	if len(languages) != len(publicLanguages()) || len(before.Analytics.Events) != len(publicLanguages()) {
+		t.Fatal("collection omitted supported public languages")
+	}
+	for _, language := range publicLanguages() {
+		if languages[language] != 1 {
+			t.Fatalf("missing or incorrect %s language count", language)
+		}
+	}
+	file := filepath.Join(t.TempDir(), "languages.json")
+	if err = app.Store.ExportDatabaseFile(ctx, file, app.Config.DataDir); err != nil {
+		t.Fatal("export collected public languages", err)
+	}
+	dir := t.TempDir()
+	restored, err := OpenStore(filepath.Join(dir, "blog.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer restored.Close()
+	if err = restored.ImportDatabaseFile(ctx, file, "", dir); err != nil {
+		t.Fatal("restore collected public languages", err)
+	}
+	after, err := restored.DatabaseSnapshot(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before.CreatedAt = after.CreatedAt
+	if !reflect.DeepEqual(before, after) {
+		t.Fatal("language statistics changed during export and restore")
+	}
+	for _, invalidLanguage := range []string{"de", "FR", "fr-FR", ""} {
+		invalid := before
+		invalid.Analytics = &AnalyticsBackup{Aggregates: []AnalyticsAggregate{{Date: analyticsTestDate.Format(time.DateOnly), Kind: "language", Label: invalidLanguage, PV: 1}}}
+		if err := validateDatabaseBackup(invalid); err == nil {
+			t.Fatalf("accepted unsupported analytics language %q", invalidLanguage)
+		}
+	}
+	legacy := before
+	legacy.Analytics = &AnalyticsBackup{Aggregates: []AnalyticsAggregate{{Date: analyticsTestDate.Format(time.DateOnly), Kind: "language", Label: "other", PV: 1}}}
+	if err := validateDatabaseBackup(legacy); err != nil {
+		t.Fatal("legacy other language rejected", err)
+	}
+}
+
 func TestAnalyticsRetentionAndMySQLDialect(t *testing.T) {
 	app, _ := analyticsFixture(t)
 	ctx := context.Background()

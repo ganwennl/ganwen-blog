@@ -206,7 +206,7 @@ func TestMySQLIntegrationRoundTrip(t *testing.T) {
 		t.Fatal("isolated test database is not empty; refusing to modify it")
 	}
 	source, sourceDir, file := databaseFixture(t)
-	if _, err = source.RecordAnalytics(ctx, time.Now().UTC(), "mysql_roundtrip_event_0123456789", "mysql_roundtrip_visitor_0123456789", []AnalyticsAggregate{{Kind: "page", Label: "/?p=1447", PostID: 1447}}); err != nil {
+	if _, err = source.RecordAnalytics(ctx, time.Now().UTC(), "mysql_roundtrip_event_0123456789", "mysql_roundtrip_visitor_0123456789", []AnalyticsAggregate{{Kind: "page", Label: "/?p=1447", PostID: 1447}, {Kind: "language", Label: "fr"}}); err != nil {
 		t.Fatal(err)
 	}
 	file = filepath.Join(t.TempDir(), "mysql-analytics-roundtrip.json")
@@ -226,6 +226,37 @@ func TestMySQLIntegrationRoundTrip(t *testing.T) {
 	if !reflect.DeepEqual(want, got) {
 		t.Fatal("SQLite to MySQL changed the database")
 	}
+	t.Run("admin sessions", func(t *testing.T) {
+		now := time.Now().UTC().Truncate(time.Second)
+		tokenHash := adminHash("mysql-integration-session-token")
+		originHash := adminHash("https://mysql-integration.example.test")
+		credentialHash := adminHash("mysql-integration-credentials")
+		session := adminSession{CSRF: strings.Repeat("s", 43), Expires: now.Add(time.Hour)}
+		if err := s.createAdminSession(ctx, tokenHash, "", originHash, credentialHash, session); err != nil {
+			t.Fatal("MySQL admin session creation failed", err)
+		}
+		stored, authenticated, err := s.adminSession(ctx, tokenHash, originHash, credentialHash, now)
+		if err != nil || !authenticated || stored.CSRF != session.CSRF || !stored.Expires.Equal(session.Expires) {
+			t.Fatal("MySQL admin session read failed", err)
+		}
+		for _, invalid := range []struct{ origin, credential string }{
+			{adminHash("other-origin"), credentialHash},
+			{originHash, adminHash("other-credentials")},
+		} {
+			if _, authenticated, err := s.adminSession(ctx, tokenHash, invalid.origin, invalid.credential, now); err != nil || authenticated {
+				t.Fatal("MySQL admin session accepted mismatched authentication", err)
+			}
+		}
+		if _, authenticated, err := s.adminSession(ctx, tokenHash, originHash, credentialHash, session.Expires); err != nil || authenticated {
+			t.Fatal("MySQL admin session accepted an expired session", err)
+		}
+		if err := s.revokeAdminSession(ctx, tokenHash); err != nil {
+			t.Fatal("MySQL admin session revocation failed", err)
+		}
+		if _, authenticated, err := s.adminSession(ctx, tokenHash, originHash, credentialHash, now); err != nil || authenticated {
+			t.Fatal("MySQL admin session remained authenticated after revocation", err)
+		}
+	})
 	if inserted, err := s.RecordAnalytics(ctx, time.Now().UTC(), "mysql_roundtrip_event_0123456789", "mysql_roundtrip_visitor_0123456789", nil); err != nil || inserted {
 		t.Fatal("MySQL restore lost event dedupe", err)
 	}

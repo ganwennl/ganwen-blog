@@ -248,7 +248,7 @@ func validateAnalyticsBackup(b DatabaseBackup) error {
 				return invalid
 			}
 		case "language":
-			if row.Label != "zh" && row.Label != "en" && row.Label != "nl" && row.Label != "es" && row.Label != "other" {
+			if row.Label != "zh" && row.Label != "other" && !isTranslationLanguage(row.Label) {
 				return invalid
 			}
 		case "device":
