@@ -7,6 +7,70 @@ import (
 )
 
 var sidebarModuleOrder = [...]string{"search", "popular", "stats", "archives", "categories", "tags"}
+var defaultSidebarOrder = [...]string{"search", "popular", "stats", "archives", "ads", "categories", "tags"}
+
+func validSidebarOrder(input []string) bool {
+	if len(input) != len(defaultSidebarOrder) {
+		return false
+	}
+	seen := make(map[string]bool, len(input))
+	for _, item := range input {
+		if !sidebarModuleSelected(defaultSidebarOrder[:], item) || seen[item] {
+			return false
+		}
+		seen[item] = true
+	}
+	return true
+}
+
+func savedSidebarOrder(settings SiteSettings) []string {
+	if validSidebarOrder(settings.SidebarOrder) {
+		return append([]string{}, settings.SidebarOrder...)
+	}
+	return append([]string{}, defaultSidebarOrder[:]...)
+}
+
+// Switching back to defaults preserves the saved custom order for later use.
+func effectiveSidebarOrder(settings SiteSettings) []string {
+	if settings.SidebarCustomOrderEnabled {
+		return savedSidebarOrder(settings)
+	}
+	return append([]string{}, defaultSidebarOrder[:]...)
+}
+
+func parsedSidebarOrder(raw json.RawMessage) ([]string, error) {
+	var order []string
+	if err := json.Unmarshal(raw, &order); err != nil || !validSidebarOrder(order) {
+		return nil, errors.New("侧栏排序必须包含全部 7 个组件，且不能重复")
+	}
+	return order, nil
+}
+
+func parsedSidebarCustomOrderEnabled(raw json.RawMessage) (bool, error) {
+	var enabled *bool
+	if err := json.Unmarshal(raw, &enabled); err != nil || enabled == nil {
+		return false, errors.New("侧栏排序开关不正确")
+	}
+	return *enabled, nil
+}
+
+func patchSidebarOrdering(settings *SiteSettings, enabled, order json.RawMessage) error {
+	if len(enabled) > 0 {
+		value, err := parsedSidebarCustomOrderEnabled(enabled)
+		if err != nil {
+			return err
+		}
+		settings.SidebarCustomOrderEnabled = value
+	}
+	if len(order) > 0 {
+		value, err := parsedSidebarOrder(order)
+		if err != nil {
+			return err
+		}
+		settings.SidebarOrder = value
+	}
+	return nil
+}
 
 func sidebarModuleSelected(modules []string, wanted string) bool {
 	for _, module := range modules {
@@ -70,7 +134,7 @@ func parsedSidebarModules(raw json.RawMessage) ([]string, error) {
 	return modules, nil
 }
 
-// Validate this field before restoring any rows, while preserving legacy
+// Validate sidebar fields before restoring any rows, while preserving legacy
 // backups that omitted sidebar settings or use unrelated old site fields.
 func validateSidebarModulesJSON(raw []byte) error {
 	var fields map[string]json.RawMessage
@@ -78,16 +142,19 @@ func validateSidebarModulesJSON(raw []byte) error {
 		return nil
 	}
 	if modules, supplied := fields["sidebar_modules"]; supplied {
-		_, err := parsedSidebarModules(modules)
-		return err
+		if _, err := parsedSidebarModules(modules); err != nil {
+			return err
+		}
 	}
-	return nil
+	return patchSidebarOrdering(&SiteSettings{}, fields["sidebar_custom_order_enabled"], fields["sidebar_order"])
 }
 
 type sidebarSettingsResponse struct {
 	Modules               []string         `json:"modules"`
 	ArticleSidebarEnabled bool             `json:"article_sidebar_enabled"`
 	SidebarAds            SidebarAdsConfig `json:"sidebar_ads"`
+	CustomOrderEnabled    bool             `json:"custom_order_enabled"`
+	Order                 []string         `json:"order"`
 }
 
 func (a *Admin) sidebar(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +168,8 @@ func (a *Admin) sidebar(w http.ResponseWriter, r *http.Request) {
 			Modules               json.RawMessage `json:"modules"`
 			ArticleSidebarEnabled *bool           `json:"article_sidebar_enabled"`
 			SidebarAds            json.RawMessage `json:"sidebar_ads"`
+			CustomOrderEnabled    json.RawMessage `json:"custom_order_enabled"`
+			Order                 json.RawMessage `json:"order"`
 		}
 		if !readAdminJSON(w, r, &input) {
 			return
@@ -120,6 +189,10 @@ func (a *Admin) sidebar(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		current.SidebarModules = &modules
+		if err := patchSidebarOrdering(&current, input.CustomOrderEnabled, input.Order); err != nil {
+			adminError(w, 400, err.Error())
+			return
+		}
 		current.ArticleSidebarEnabled = *input.ArticleSidebarEnabled
 		current.SidebarAds = ads
 		showStats := sidebarModuleSelected(modules, "stats")
@@ -138,5 +211,7 @@ func (a *Admin) sidebar(w http.ResponseWriter, r *http.Request) {
 		Modules:               publicSidebarModules(current),
 		ArticleSidebarEnabled: current.ArticleSidebarEnabled,
 		SidebarAds:            ads,
+		CustomOrderEnabled:    current.SidebarCustomOrderEnabled,
+		Order:                 savedSidebarOrder(current),
 	})
 }

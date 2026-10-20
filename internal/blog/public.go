@@ -136,6 +136,7 @@ type publicView struct {
 	SidebarStats                                                                                                  publicSidebarStats
 	SidebarAd                                                                                                     *SidebarAd
 	SidebarModules                                                                                                map[string]bool
+	SidebarOrder                                                                                                  []string
 	ArchiveYears                                                                                                  []publicArchiveYear
 	ArchiveAllURL                                                                                                 string
 	ArchiveAllCurrent                                                                                             bool

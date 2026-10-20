@@ -124,31 +124,48 @@
 {{end}}
 {{define "blog-sidebar"}}{{if .ShowSidebar}}
 <aside class="blog-sidebar journal-sidebar" aria-label="{{text .Lang "博客侧栏" "Blog sidebar" "Blogzijbalk" "Barra lateral del blog"}}">
-  {{if index .SidebarModules "search"}}
-  <section class="sidebar-section sidebar-search-section"><h2 class="sidebar-heading" id="sidebar-search-heading">{{text .Lang "搜索文章" "Search articles" "Zoek artikelen" "Buscar artículos"}}</h2>
+  {{$page := .}}{{range .SidebarOrder}}
+    {{if eq . "search"}}{{template "sidebar-module-search" $page}}
+    {{else if eq . "popular"}}{{template "sidebar-module-popular" $page}}
+    {{else if eq . "stats"}}{{template "sidebar-module-stats" $page}}
+    {{else if eq . "archives"}}{{template "sidebar-module-archives" $page}}
+    {{else if eq . "ads"}}{{template "sidebar-module-ads" $page}}
+    {{else if eq . "categories"}}{{template "sidebar-module-categories" $page}}
+    {{else if eq . "tags"}}{{template "sidebar-module-tags" $page}}{{end}}
+  {{end}}
+</aside>
+{{end}}{{end}}
+{{define "sidebar-module-search"}}{{if index .SidebarModules "search"}}
+  <section class="sidebar-section sidebar-search-section" data-sidebar-module="search"><h2 class="sidebar-heading" id="sidebar-search-heading">{{text .Lang "搜索文章" "Search articles" "Zoek artikelen" "Buscar artículos"}}</h2>
     <form class="sidebar-search" action="{{.BasePath}}/" method="get" role="search" aria-labelledby="sidebar-search-heading"><label class="sr-only" for="sidebar-search-input">{{text .Lang "搜索文章" "Search articles" "Zoek artikelen" "Buscar artículos"}}</label><input id="sidebar-search-input" name="s" type="search" value="{{.Search}}" placeholder="{{text .Lang "输入关键词" "Enter a keyword" "Voer een zoekwoord in" "Introduce una palabra clave"}}" required><button class="sidebar-search-submit" type="submit" aria-label="{{text .Lang "搜索" "Search" "Zoeken" "Buscar"}}">{{icon "search"}}</button></form>
   </section>
-  {{end}}{{if index .SidebarModules "popular"}}
-  <section class="sidebar-section sidebar-popular" aria-labelledby="sidebar-popular-heading"><div class="sidebar-title-row"><h2 class="sidebar-heading" id="sidebar-popular-heading">{{text .Lang "热门文章" "Popular articles" "Populaire artikelen" "Artículos populares"}}</h2><span class="sidebar-period">{{text .Lang "近30天" "Last 30 days" "Laatste 30 dagen" "Últimos 30 días"}}</span></div>
+{{end}}{{end}}
+{{define "sidebar-module-popular"}}{{if index .SidebarModules "popular"}}
+  <section class="sidebar-section sidebar-popular" data-sidebar-module="popular" aria-labelledby="sidebar-popular-heading"><div class="sidebar-title-row"><h2 class="sidebar-heading" id="sidebar-popular-heading">{{text .Lang "热门文章" "Popular articles" "Populaire artikelen" "Artículos populares"}}</h2><span class="sidebar-period">{{text .Lang "近30天" "Last 30 days" "Laatste 30 dagen" "Últimos 30 días"}}</span></div>
     <ol class="popular-list">{{range $index, $post := .SidebarPopular}}<li class="popular-item"><a class="popular-link" href="{{localLink .URL}}"><span class="popular-rank" aria-hidden="true">{{rankNumber $index}}</span><span class="popular-title">{{.Title}}</span></a><span class="popular-views"><bdi>{{.Views}}</bdi> {{text $.Lang "次浏览" "views" "weergaven" "visitas"}}</span></li>{{else}}<li class="sidebar-empty">{{text .Lang "暂无浏览记录" "No views recorded yet" "Nog geen weergaven geregistreerd" "Aún no hay visitas registradas"}}</li>{{end}}</ol>
   </section>
-  {{end}}{{if .ShowPublicStats}}
-  <section class="sidebar-section" aria-labelledby="sidebar-stats-heading"><h2 class="sidebar-heading" id="sidebar-stats-heading">{{text .Lang "站点统计" "Site statistics" "Sitestatistieken" "Estadísticas del sitio"}}</h2><dl class="site-stats"><div><dt>{{text .Lang "文章总数" "Articles" "Artikelen" "Artículos"}}</dt><dd><bdi>{{.PostCount}}</bdi></dd></div><div><dt>{{text .Lang "今日浏览" "Views today" "Weergaven vandaag" "Visitas de hoy"}}</dt><dd><bdi>{{.SidebarStats.TodayViews}}</bdi></dd></div><div><dt>{{text .Lang "近365天浏览" "Views in last 365 days" "Weergaven in 365 dagen" "Visitas en 365 días"}}</dt><dd><bdi>{{.SidebarStats.YearViews}}</bdi></dd></div><div><dt>{{text .Lang "历史总访问" "Total visits" "Totaal bezoeken" "Visitas totales"}}</dt><dd><bdi>{{.SidebarStats.HistoricalViews}}</bdi></dd></div></dl></section>
-  {{end}}
-  {{if index .SidebarModules "archives"}}
-  <section class="sidebar-section sidebar-archives" aria-labelledby="sidebar-archives-heading"><div class="sidebar-title-row"><h2 class="sidebar-heading" id="sidebar-archives-heading">{{text .Lang "文章归档" "Article archives" "Artikelarchief" "Archivo de artículos"}}</h2><a class="archive-all" href="{{localLink .ArchiveAllURL}}"{{if .ArchiveAllCurrent}} aria-current="page"{{end}}>{{text .Lang "全部日期" "All dates" "Alle datums" "Todas las fechas"}}</a></div>
+{{end}}{{end}}
+{{define "sidebar-module-stats"}}{{if .ShowPublicStats}}
+  <section class="sidebar-section" data-sidebar-module="stats" aria-labelledby="sidebar-stats-heading"><h2 class="sidebar-heading" id="sidebar-stats-heading">{{text .Lang "站点统计" "Site statistics" "Sitestatistieken" "Estadísticas del sitio"}}</h2><dl class="site-stats"><div><dt>{{text .Lang "文章总数" "Articles" "Artikelen" "Artículos"}}</dt><dd><bdi>{{.PostCount}}</bdi></dd></div><div><dt>{{text .Lang "今日浏览" "Views today" "Weergaven vandaag" "Visitas de hoy"}}</dt><dd><bdi>{{.SidebarStats.TodayViews}}</bdi></dd></div><div><dt>{{text .Lang "近365天浏览" "Views in last 365 days" "Weergaven in 365 dagen" "Visitas en 365 días"}}</dt><dd><bdi>{{.SidebarStats.YearViews}}</bdi></dd></div><div><dt>{{text .Lang "历史总访问" "Total visits" "Totaal bezoeken" "Visitas totales"}}</dt><dd><bdi>{{.SidebarStats.HistoricalViews}}</bdi></dd></div></dl></section>
+{{end}}{{end}}
+{{define "sidebar-module-archives"}}{{if index .SidebarModules "archives"}}
+  <section class="sidebar-section sidebar-archives" data-sidebar-module="archives" aria-labelledby="sidebar-archives-heading"><div class="sidebar-title-row"><h2 class="sidebar-heading" id="sidebar-archives-heading">{{text .Lang "文章归档" "Article archives" "Artikelarchief" "Archivo de artículos"}}</h2><a class="archive-all" href="{{localLink .ArchiveAllURL}}"{{if .ArchiveAllCurrent}} aria-current="page"{{end}}>{{text .Lang "全部日期" "All dates" "Alle datums" "Todas las fechas"}}</a></div>
     {{range .ArchiveYears}}<details class="archive-year" data-archive-year="{{.Year}}"{{if .Open}} open{{end}}><summary><bdi>{{.Label}}</bdi><span class="archive-count"><bdi>{{.Count}}</bdi></span></summary><nav class="archive-months" aria-label="{{.Label}}"><a href="{{localLink .URL}}"{{if .Current}} aria-current="page"{{end}}><span>{{text $.Lang "全年" "Full year" "Heel jaar" "Todo el año"}}</span><span class="archive-count"><bdi>{{.Count}}</bdi></span></a>{{range .Months}}<a href="{{localLink .URL}}"{{if .Current}} aria-current="page"{{end}}><bdi>{{.Label}}</bdi><span class="archive-count"><bdi>{{.Count}}</bdi></span></a>{{end}}</nav></details>{{else}}<p class="sidebar-empty">{{.EmptyLabel}}</p>{{end}}
-  </section>{{end}}
-  {{with .SidebarAd}}
-  <section class="sidebar-section sidebar-ad" data-sidebar-ad aria-label="{{text $.Lang "广告" "Advertisement" "Advertentie" "Publicidad"}}">
+  </section>
+{{end}}{{end}}
+{{define "sidebar-module-ads"}}{{with .SidebarAd}}
+  <section class="sidebar-section sidebar-ad" data-sidebar-module="ads" data-sidebar-ad aria-label="{{text $.Lang "广告" "Advertisement" "Advertentie" "Publicidad"}}">
     <h2 class="ad-card-heading"><a href="{{.TargetURL}}" target="_blank" rel="sponsored noopener noreferrer">{{.Title}}</a></h2>
     <a class="ad-card-image" href="{{.TargetURL}}" target="_blank" rel="sponsored noopener noreferrer" aria-label="{{.Title}}"><img src="{{localLink .ImageURL}}" alt="" width="640" height="640" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a>
     <div class="ad-card-body">{{if .Description}}<p class="ad-description">{{.Description}}</p>{{end}}<a class="ad-card-button" href="{{.TargetURL}}" target="_blank" rel="sponsored noopener noreferrer">{{if .ButtonLabel}}{{.ButtonLabel}}{{else}}{{text $.Lang "查看详情" "View details" "Bekijk details" "Ver detalles"}}{{end}}</a></div>
     <footer class="ad-card-footer"><span class="ad-promoted">{{if .Sponsor}}{{text $.Lang "推广方" "Promoted by" "Gepromoot door" "Promocionado por"}} <span class="ad-sponsor">{{.Sponsor}}</span>{{end}}</span><span>{{text $.Lang "广告" "Advertisement" "Advertentie" "Publicidad"}}</span></footer>
-  </section>{{end}}
-  {{if index .SidebarModules "categories"}}<section class="sidebar-section archive-filters" aria-label="{{.CategoryLabel}}"><div class="filter-heading"><h2 class="sidebar-heading">{{.CategoryLabel}}</h2>{{if .FiltersActive}}<a class="clear-filters" href="{{localLink .ClearFiltersURL}}">{{.ClearFiltersLabel}}</a>{{end}}</div><nav class="category-tabs" aria-label="{{.CategoryLabel}}"><a class="filter-all" href="{{localLink .CategoryAllURL}}" {{if .CategoryAllCurrent}}aria-current="page"{{end}}><span>{{text .Lang "全部文章" "All articles" "Alle artikelen" "Todos los artículos"}}</span><span class="category-count"><bdi>{{.PostCount}}</bdi></span></a>{{range .Categories}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}><span>{{.Label}}</span><span class="category-count"><bdi>{{.Count}}</bdi></span></a>{{end}}</nav></section>{{end}}
-  {{if and (index .SidebarModules "tags") .FilterTags}}<section class="sidebar-section archive-filters sidebar-tags"><details class="journal-tags" open><summary>{{.FilterTagsLabel}}</summary><nav class="tag-tabs" aria-label="{{.FilterTagsLabel}}"><a class="filter-all" href="{{localLink .TagAllURL}}" {{if .TagAllCurrent}}aria-current="page"{{end}}>{{text .Lang "全部" "All" "Alles" "Todos"}}</a>{{range .FilterTags}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}>#{{.Label}}</a>{{end}}</nav></details></section>{{end}}
-</aside>
+  </section>
+{{end}}{{end}}
+{{define "sidebar-module-categories"}}{{if index .SidebarModules "categories"}}
+  <section class="sidebar-section archive-filters" data-sidebar-module="categories" aria-label="{{.CategoryLabel}}"><div class="filter-heading"><h2 class="sidebar-heading">{{.CategoryLabel}}</h2>{{if .FiltersActive}}<a class="clear-filters" href="{{localLink .ClearFiltersURL}}">{{.ClearFiltersLabel}}</a>{{end}}</div><nav class="category-tabs" aria-label="{{.CategoryLabel}}"><a class="filter-all" href="{{localLink .CategoryAllURL}}" {{if .CategoryAllCurrent}}aria-current="page"{{end}}><span>{{text .Lang "全部文章" "All articles" "Alle artikelen" "Todos los artículos"}}</span><span class="category-count"><bdi>{{.PostCount}}</bdi></span></a>{{range .Categories}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}><span>{{.Label}}</span><span class="category-count"><bdi>{{.Count}}</bdi></span></a>{{end}}</nav></section>
+{{end}}{{end}}
+{{define "sidebar-module-tags"}}{{if and (index .SidebarModules "tags") .FilterTags}}
+  <section class="sidebar-section archive-filters sidebar-tags" data-sidebar-module="tags"><details class="journal-tags" open><summary>{{.FilterTagsLabel}}</summary><nav class="tag-tabs" aria-label="{{.FilterTagsLabel}}"><a class="filter-all" href="{{localLink .TagAllURL}}" {{if .TagAllCurrent}}aria-current="page"{{end}}>{{text .Lang "全部" "All" "Alles" "Todos"}}</a>{{range .FilterTags}}<a href="{{localLink .URL}}" {{if .Current}}aria-current="page"{{end}}>#{{.Label}}</a>{{end}}</nav></details></section>
 {{end}}{{end}}
 {{define "journal-post"}}{{$page := .Page}}{{with .Card}}
 <article class="journal-post{{if .Image}} has-image{{end}}">

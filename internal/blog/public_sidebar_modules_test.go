@@ -3,6 +3,7 @@ package blog
 import (
 	"context"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -200,6 +201,8 @@ func TestPublicSidebarEmptyTagsDoNotReserveColumnOrResetSelection(t *testing.T) 
 		t.Fatal(err)
 	}
 	settings.SidebarModules = sidebarHTTPModules("tags")
+	settings.SidebarCustomOrderEnabled = true
+	settings.SidebarOrder = []string{"tags", "ads", "archives", "search", "categories", "popular", "stats"}
 	settings.ArticleSidebarEnabled = true
 	if err := app.Store.SaveSettings(ctx, settings); err != nil {
 		t.Fatal(err)
@@ -242,5 +245,81 @@ func TestPublicSidebarEmptyTagsDoNotReserveColumnOrResetSelection(t *testing.T) 
 			t.Fatalf("%s public tag returned HTTP %d", layout, response.Code)
 		}
 		assertSidebarHTTPModules(t, response.Body.String(), "tags")
+	}
+}
+
+func sidebarHTTPDOMOrder(t *testing.T, body string) []string {
+	t.Helper()
+	asides := publicMetadataNodes(t, body, "aside", "blog-sidebar")
+	if len(asides) == 0 {
+		return nil
+	}
+	if len(asides) != 1 {
+		t.Fatalf("expected one ordered sidebar, got %d", len(asides))
+	}
+	var order []string
+	for node := asides[0].FirstChild; node != nil; node = node.NextSibling {
+		if node.Type != html.ElementNode {
+			continue
+		}
+		module := publicMetadataAttr(node, "data-sidebar-module")
+		if node.Data != "section" || module == "" {
+			t.Fatalf("sidebar contains an unidentified module: %s", node.Data)
+		}
+		order = append(order, module)
+	}
+	return order
+}
+
+func TestPublicSidebarOrderingChangesDOMAcrossLayoutsAndRoutes(t *testing.T) {
+	app := publicTestApp(t)
+	settings, err := app.Store.Settings(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	settings.ArticleSidebarEnabled = true
+	custom := []string{"tags", "ads", "archives", "search", "categories", "popular", "stats"}
+	for _, test := range []struct {
+		name       string
+		custom     bool
+		order      []string
+		modules    *[]string
+		adsEnabled bool
+		wanted     []string
+	}{
+		{"legacy default order", false, nil, nil, true, []string{"search", "popular", "stats", "archives", "ads", "categories", "tags"}},
+		{"default toggle ignores saved custom order", false, custom, nil, true, []string{"search", "popular", "stats", "archives", "ads", "categories", "tags"}},
+		{"custom all modules", true, custom, nil, true, []string{"tags", "ads", "archives", "search", "categories", "popular", "stats"}},
+		{"hidden modules retain relative order", true, custom, sidebarHTTPModules("search", "archives", "categories"), true, []string{"ads", "archives", "search", "categories"}},
+		{"disabled ad keeps its saved slot", true, custom, sidebarHTTPModules("search", "archives"), false, []string{"archives", "search"}},
+		{"reenabled ad returns to custom slot", true, custom, sidebarHTTPModules("search", "archives"), true, []string{"ads", "archives", "search"}},
+		{"ads alone follow custom order", true, custom, sidebarHTTPModules(), true, []string{"ads"}},
+		{"all custom modules hidden", true, custom, sidebarHTTPModules(), false, nil},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			settings.SidebarCustomOrderEnabled = test.custom
+			settings.SidebarOrder = append([]string(nil), test.order...)
+			settings.SidebarModules = test.modules
+			settings.SidebarAds = sidebarAdsFixture()
+			settings.SidebarAds.Enabled = test.adsEnabled
+			if err := app.Store.SaveSettings(context.Background(), settings); err != nil {
+				t.Fatal(err)
+			}
+			for _, layout := range []string{"journal", "classic"} {
+				for _, target := range []string{"/", "/?m=2025", "/?p=1447", "/en/?p=1447"} {
+					response := publicLayoutTestRequest(app, target, layout)
+					if response.Code != http.StatusOK {
+						t.Fatalf("%s %s returned HTTP %d", layout, target, response.Code)
+					}
+					if got := sidebarHTTPDOMOrder(t, response.Body.String()); !reflect.DeepEqual(got, test.wanted) {
+						t.Fatalf("%s %s DOM module order %v, want %v", layout, target, got, test.wanted)
+					}
+				}
+			}
+			persisted, err := app.Store.Settings(context.Background())
+			if err != nil || !reflect.DeepEqual(persisted.SidebarOrder, settings.SidebarOrder) || persisted.SidebarCustomOrderEnabled != test.custom {
+				t.Fatal("rendering changed the saved custom order/toggle", err)
+			}
+		})
 	}
 }

@@ -2,6 +2,8 @@
 
 ## 未发布 / Unreleased
 
+- 侧栏支持自定义排序：默认沿用系统顺序，开启后可拖动组件或使用上下移动按钮调整位置。
+- Sidebar ordering can now be customized by dragging components or using the move buttons; the default mode keeps the system order.
 - 新增独立“侧栏设置”页面，可选择搜索、热门文章、统计、年月归档、分类、标签和广告；归档支持按年或月浏览文章。
 - Added a dedicated sidebar settings page for search, popular articles, statistics, date archives, categories, tags and ads. Archives support browsing posts by year or month.
 - 修复新增显示语言的访问统计无法完整导出和恢复的问题，保留全部 11 种语言的统计记录。

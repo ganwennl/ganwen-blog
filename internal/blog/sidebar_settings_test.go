@@ -268,3 +268,177 @@ func TestSidebarModulesRestorePreservesLegacyEmptyAndExplicitSelections(t *testi
 		}
 	}
 }
+
+func sidebarOrderFixture() []string {
+	return []string{"ads", "tags", "archives", "search", "categories", "stats", "popular"}
+}
+
+func TestSidebarOrderDefaultCustomSwitchAndSafeCopies(t *testing.T) {
+	wantDefault := []string{"search", "popular", "stats", "archives", "ads", "categories", "tags"}
+	settings := SiteSettings{SidebarOrder: sidebarOrderFixture()}
+	if !reflect.DeepEqual(effectiveSidebarOrder(settings), wantDefault) || !reflect.DeepEqual(savedSidebarOrder(settings), sidebarOrderFixture()) {
+		t.Fatal("default mode did not preserve the saved custom order independently")
+	}
+	settings.SidebarCustomOrderEnabled = true
+	got := effectiveSidebarOrder(settings)
+	if !reflect.DeepEqual(got, sidebarOrderFixture()) {
+		t.Fatalf("custom order ignored: %v", got)
+	}
+	got[0] = "changed"
+	if settings.SidebarOrder[0] != "ads" {
+		t.Fatal("effective order aliases stored settings")
+	}
+	for _, malformed := range [][]string{nil, {}, {"search"}, {"search", "popular", "stats", "archives", "ads", "categories", "categories"}, {"search", "popular", "stats", "archives", "ads", "categories", "unknown"}} {
+		settings.SidebarOrder = malformed
+		if !reflect.DeepEqual(effectiveSidebarOrder(settings), wantDefault) {
+			t.Fatal("invalid imported custom order did not fall back safely")
+		}
+	}
+	got = effectiveSidebarOrder(SiteSettings{})
+	got[0] = "changed"
+	if !reflect.DeepEqual(effectiveSidebarOrder(SiteSettings{}), wantDefault) {
+		t.Fatal("effective default order returned shared storage")
+	}
+}
+
+func TestAdminSidebarCustomOrderPersistenceLegacyAndDefaultSwitch(t *testing.T) {
+	c := adminTestSetup(t, true)
+	c.login()
+	ctx := context.Background()
+	code, raw := c.request(http.MethodGet, "sidebar", nil, "", "")
+	var response sidebarSettingsResponse
+	if code != http.StatusOK || json.Unmarshal(raw, &response) != nil || response.CustomOrderEnabled || !reflect.DeepEqual(response.Order, effectiveSidebarOrder(SiteSettings{})) {
+		t.Fatalf("legacy sidebar order defaults were not exposed: %d %s", code, raw)
+	}
+	input := map[string]any{"modules": []string{"search", "archives"}, "article_sidebar_enabled": true, "sidebar_ads": map[string]any{}, "custom_order_enabled": true, "order": sidebarOrderFixture()}
+	code, raw = c.request(http.MethodPut, "sidebar", input, c.server.URL, c.csrf)
+	if code != http.StatusOK || json.Unmarshal(raw, &response) != nil || !response.CustomOrderEnabled || !reflect.DeepEqual(response.Order, sidebarOrderFixture()) {
+		t.Fatalf("custom sidebar save failed: %d %s", code, raw)
+	}
+	reopened, err := OpenStore(filepath.Join(c.app.Config.DataDir, "blog.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	stored, err := reopened.Settings(ctx)
+	if err != nil || !stored.SidebarCustomOrderEnabled || !reflect.DeepEqual(stored.SidebarOrder, sidebarOrderFixture()) || !reflect.DeepEqual(effectiveSidebarOrder(stored), sidebarOrderFixture()) {
+		t.Fatal("custom sidebar order did not survive reopening", err)
+	}
+	delete(input, "custom_order_enabled")
+	delete(input, "order")
+	input["article_sidebar_enabled"] = false
+	code, raw = c.request(http.MethodPut, "sidebar", input, c.server.URL, c.csrf)
+	if code != http.StatusOK || json.Unmarshal(raw, &response) != nil || !response.CustomOrderEnabled || !reflect.DeepEqual(response.Order, sidebarOrderFixture()) {
+		t.Fatalf("older sidebar client reset custom ordering: %d %s", code, raw)
+	}
+	code, raw = c.request(http.MethodPost, "settings", map[string]any{"title": "旧站点设置客户端", "posts_per_page": 10}, c.server.URL, c.csrf)
+	if code != http.StatusOK || json.Unmarshal(raw, &stored) != nil || !stored.SidebarCustomOrderEnabled || !reflect.DeepEqual(stored.SidebarOrder, sidebarOrderFixture()) {
+		t.Fatalf("older settings client reset custom ordering: %d %s", code, raw)
+	}
+	input["custom_order_enabled"] = false
+	code, raw = c.request(http.MethodPut, "sidebar", input, c.server.URL, c.csrf)
+	if code != http.StatusOK || json.Unmarshal(raw, &response) != nil || response.CustomOrderEnabled || !reflect.DeepEqual(response.Order, sidebarOrderFixture()) {
+		t.Fatalf("switching to defaults erased saved custom ordering: %d %s", code, raw)
+	}
+	stored, err = reopened.Settings(ctx)
+	if err != nil || stored.SidebarCustomOrderEnabled || !reflect.DeepEqual(stored.SidebarOrder, sidebarOrderFixture()) || !reflect.DeepEqual(effectiveSidebarOrder(stored), effectiveSidebarOrder(SiteSettings{})) {
+		t.Fatal("default mode did not take effect without erasing custom order", err)
+	}
+	input["custom_order_enabled"] = true
+	code, raw = c.request(http.MethodPut, "sidebar", input, c.server.URL, c.csrf)
+	if code != http.StatusOK || json.Unmarshal(raw, &response) != nil || !response.CustomOrderEnabled || !reflect.DeepEqual(response.Order, sidebarOrderFixture()) {
+		t.Fatalf("switching back to custom lost saved ordering: %d %s", code, raw)
+	}
+	code, raw = c.request(http.MethodPost, "settings", map[string]any{"title": "显式站点排序设置", "posts_per_page": 10, "sidebar_custom_order_enabled": false, "sidebar_order": effectiveSidebarOrder(SiteSettings{})}, c.server.URL, c.csrf)
+	if code != http.StatusOK || json.Unmarshal(raw, &stored) != nil || stored.SidebarCustomOrderEnabled || !reflect.DeepEqual(stored.SidebarOrder, effectiveSidebarOrder(SiteSettings{})) {
+		t.Fatalf("legacy settings API ignored valid explicit ordering: %d %s", code, raw)
+	}
+}
+
+func TestAdminSidebarOrderingRejectsBadUpdatesThroughBothAPIs(t *testing.T) {
+	c := adminTestSetup(t, true)
+	c.login()
+	ctx := context.Background()
+	before, err := c.app.Store.Settings(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []struct {
+		api, settings string
+		values        []json.RawMessage
+	}{
+		{"custom_order_enabled", "sidebar_custom_order_enabled", []json.RawMessage{json.RawMessage(`null`), json.RawMessage(`"true"`), json.RawMessage(`1`), json.RawMessage(`[]`)}},
+		{"order", "sidebar_order", []json.RawMessage{json.RawMessage(`null`), json.RawMessage(`"search"`), json.RawMessage(`[]`), json.RawMessage(`["search"]`), json.RawMessage(`["search","popular","stats","archives","ads","categories","categories"]`), json.RawMessage(`["search","popular","stats","archives","ads","categories","unknown"]`), json.RawMessage(`["search","popular","stats","archives","ads","categories",null]`)}},
+	} {
+		for _, value := range field.values {
+			for _, route := range []string{"sidebar", "settings"} {
+				payload := map[string]any{"modules": []string{"search"}, "article_sidebar_enabled": true, "sidebar_ads": map[string]any{}}
+				method := http.MethodPut
+				if route == "settings" {
+					payload = map[string]any{"title": "不应保存", "posts_per_page": 10, field.settings: value}
+					method = http.MethodPost
+				} else {
+					payload[field.api] = value
+				}
+				if code, raw := c.request(method, route, payload, c.server.URL, c.csrf); code != http.StatusBadRequest {
+					t.Fatalf("%s accepted malformed %s=%s: %d %s", route, field.api, value, code, raw)
+				}
+				after, err := c.app.Store.Settings(ctx)
+				if err != nil || !reflect.DeepEqual(before, after) {
+					t.Fatal("rejected ordering update changed saved settings", err)
+				}
+			}
+		}
+	}
+}
+
+func TestSidebarOrderRestoreValidationAndRoundTrip(t *testing.T) {
+	ctx := context.Background()
+	for _, fields := range []string{
+		`"sidebar_custom_order_enabled":null`, `"sidebar_custom_order_enabled":"true"`,
+		`"sidebar_order":null`, `"sidebar_order":[]`, `"sidebar_order":"search"`,
+		`"sidebar_order":["search","popular","stats","archives","ads","categories","categories"]`,
+		`"sidebar_order":["search","popular","stats","archives","ads","categories","unknown"]`,
+	} {
+		store, err := OpenStore(filepath.Join(t.TempDir(), "blog.db"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		before, err := store.DatabaseSnapshot(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		backup := DatabaseBackup{Format: "ganwen-blog-database", Version: 1, Posts: []Post{{ID: 42, Type: "post", Status: "publish"}}, Values: []DatabaseValue{{Key: "site", Value: `{"sidebar_modules":[],` + fields + `}`}}}
+		if err := store.RestoreDatabase(ctx, backup); err == nil {
+			t.Fatal("restore accepted malformed sidebar ordering", fields)
+		}
+		after, err := store.DatabaseSnapshot(ctx)
+		_ = store.Close()
+		if err != nil || !reflect.DeepEqual(before.Posts, after.Posts) || !reflect.DeepEqual(before.Values, after.Values) || !reflect.DeepEqual(before.Jobs, after.Jobs) || !reflect.DeepEqual(before.Analytics, after.Analytics) {
+			t.Fatal("rejected sidebar ordering restore changed the empty target", err)
+		}
+	}
+	for _, custom := range []bool{false, true} {
+		settings := SiteSettings{Title: "保留排序", BaseURL: "https://restore.example", PostsPerPage: 10, SidebarCustomOrderEnabled: custom, SidebarOrder: sidebarOrderFixture()}
+		raw, _ := json.Marshal(settings)
+		backup := DatabaseBackup{Format: "ganwen-blog-database", Version: 1, Values: []DatabaseValue{{Key: "site", Value: string(raw)}}}
+		for range 2 {
+			store, err := OpenStore(filepath.Join(t.TempDir(), "blog.db"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := store.RestoreDatabase(ctx, backup); err != nil {
+				t.Fatal("valid ordering restore was rejected", err)
+			}
+			stored, err := store.Settings(ctx)
+			if err != nil || !reflect.DeepEqual(stored, settings) {
+				t.Fatal("ordering restore changed saved mode or custom sequence", err)
+			}
+			backup, err = store.DatabaseSnapshot(ctx)
+			_ = store.Close()
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+}

@@ -574,6 +574,8 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 		DefaultLayout             json.RawMessage               `json:"default_layout"`
 		ArticleSidebarEnabled     json.RawMessage               `json:"article_sidebar_enabled"`
 		SidebarModules            json.RawMessage               `json:"sidebar_modules"`
+		SidebarCustomOrderEnabled json.RawMessage               `json:"sidebar_custom_order_enabled"`
+		SidebarOrder              json.RawMessage               `json:"sidebar_order"`
 		FooterText                json.RawMessage               `json:"footer_text"`
 		FooterTranslations        *map[string]FooterTranslation `json:"footer_translations"`
 		SidebarAds                json.RawMessage               `json:"sidebar_ads"`
@@ -609,6 +611,10 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 	current.Description = s.Description
 	current.PostsPerPage = s.PostsPerPage
 	current.HeaderImage = s.HeaderImage
+	if err := patchSidebarOrdering(&current, input.SidebarCustomOrderEnabled, input.SidebarOrder); err != nil {
+		adminError(w, 400, err.Error())
+		return
+	}
 	if len(input.ArticleSidebarEnabled) > 0 {
 		var enabled *bool
 		if err := json.Unmarshal(input.ArticleSidebarEnabled, &enabled); err != nil || enabled == nil {

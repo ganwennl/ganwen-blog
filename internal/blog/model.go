@@ -116,6 +116,8 @@ type SiteSettings struct {
 	DefaultLayout             string                       `json:"default_layout"`
 	ArticleSidebarEnabled     bool                         `json:"article_sidebar_enabled"`
 	SidebarModules            *[]string                    `json:"sidebar_modules,omitempty"`
+	SidebarCustomOrderEnabled bool                         `json:"sidebar_custom_order_enabled,omitempty"`
+	SidebarOrder              []string                     `json:"sidebar_order,omitempty"`
 	Categories                []Term                       `json:"categories"`
 	Tags                      []Term                       `json:"tags"`
 	HeaderImage               string                       `json:"header_image"`

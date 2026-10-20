@@ -55,6 +55,8 @@ chmod +x ganwen start.sh
 
 “侧栏设置”独立管理搜索、热门文章、站点统计、年月归档、分类、标签和广告，也可选择是否在文章页显示侧栏。勾选所需组件并保存，再点击“预览网站”查看效果；全部关闭后正文使用完整宽度。年月归档按文章发布日期生成，展开年份可选择全年或具体月份。已有站点保留原统计开关，并默认显示其他组件。
 
+排序默认使用系统顺序。开启“自定义排序”后，可拖动组件或使用上下移动按钮调整位置；保存后前台按此顺序显示，关闭的组件会跳过。切回默认排序不会清除已保存的自定义顺序。
+
 本地运行默认只监听本机，并禁止搜索引擎收录。对外使用时，请先配置自己的 HTTPS 域名及反向代理，再按自己的环境运行：
 
 ```powershell
@@ -111,6 +113,8 @@ Interface translations are included in the program and need no translation servi
 Fresh installations display recorded view counts. The admin site settings let you enable virtual counts and set their daily display target (0–1000000). Turning virtual counts off uses real counts for both totals and popular articles. Admin analytics always uses real records.
 
 The dedicated sidebar settings page controls search, popular articles, site statistics, date archives, categories, tags and ads, as well as sidebar visibility on article pages. Save your selection and use “Preview website” to check it. Disabling all components gives the content the full width. Date archives use publication dates; expand a year to browse the full year or a particular month. Existing sites retain their statistics visibility setting and show the other components by default.
+
+Ordering uses the system order by default. Enable custom ordering to drag components or use the move buttons. After saving, the public sidebar follows that order and skips disabled components. Switching back to the default order retains the saved custom order.
 
 Local preview listens on loopback and prevents indexing. For a public site, set up your own HTTPS domain and reverse proxy, then use `--preview=false --site-url https://blog.example.com`. The URL is saved for later runs. Translation is optional and requires your own compatible service configuration in the admin interface.
 

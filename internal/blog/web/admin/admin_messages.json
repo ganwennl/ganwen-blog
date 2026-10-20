@@ -538,7 +538,16 @@
     "搜索": "搜索",
     "热门文章": "热门文章",
     "站点统计": "站点统计",
-    "此接口仅允许 GET 或 PUT": "此接口仅允许 GET 或 PUT"
+    "此接口仅允许 GET 或 PUT": "此接口仅允许 GET 或 PUT",
+    "自定义排序": "自定义排序",
+    "默认排序": "默认排序",
+    "侧栏组件排序": "侧栏组件排序",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。",
+    "上移{0}": "上移{0}",
+    "下移{0}": "下移{0}",
+    "已将{0}移至第 {1} 位": "已将{0}移至第 {1} 位",
+    "侧栏排序开关不正确": "侧栏排序开关不正确",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "侧栏排序必须包含全部 7 个组件，且不能重复"
   },
   "nl": {
     "甘文 · 内容管理": "Ganwen · Blogbeheer",
@@ -1079,7 +1088,16 @@
     "搜索": "Zoeken",
     "热门文章": "Populaire artikelen",
     "站点统计": "Sitestatistieken",
-    "此接口仅允许 GET 或 PUT": "Dit eindpunt accepteert alleen GET of PUT"
+    "此接口仅允许 GET 或 PUT": "Dit eindpunt accepteert alleen GET of PUT",
+    "自定义排序": "Aangepaste volgorde",
+    "默认排序": "Standaardvolgorde",
+    "侧栏组件排序": "Volgorde van zijbalkonderdelen",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "Sleep onderdelen of gebruik de knoppen omhoog en omlaag om de volgorde aan te passen. Verborgen onderdelen behouden hun positie. Sla op om deze volgorde op de website toe te passen.",
+    "上移{0}": "{0} omhoog verplaatsen",
+    "下移{0}": "{0} omlaag verplaatsen",
+    "已将{0}移至第 {1} 位": "{0} naar positie {1} verplaatst",
+    "侧栏排序开关不正确": "De instelling voor de zijbalkvolgorde is ongeldig",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "De zijbalkvolgorde moet alle 7 onderdelen bevatten, zonder dubbele vermeldingen"
   },
   "en": {
     "甘文 · 内容管理": "Ganwen · Blog admin",
@@ -1620,7 +1638,16 @@
     "搜索": "Search",
     "热门文章": "Popular articles",
     "站点统计": "Site statistics",
-    "此接口仅允许 GET 或 PUT": "This endpoint only accepts GET or PUT"
+    "此接口仅允许 GET 或 PUT": "This endpoint only accepts GET or PUT",
+    "自定义排序": "Custom order",
+    "默认排序": "Default order",
+    "侧栏组件排序": "Sidebar component order",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "Drag components or use the up and down buttons to change their order. Hidden components keep their positions. Save to apply this order on the site.",
+    "上移{0}": "Move {0} up",
+    "下移{0}": "Move {0} down",
+    "已将{0}移至第 {1} 位": "Moved {0} to position {1}",
+    "侧栏排序开关不正确": "The sidebar ordering setting is invalid",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "The sidebar order must contain all 7 components with no duplicates"
   },
   "hi": {
     "甘文 · 内容管理": "Ganwen · ब्लॉग प्रशासन",
@@ -2161,7 +2188,16 @@
     "搜索": "खोजें",
     "热门文章": "लोकप्रिय लेख",
     "站点统计": "साइट के आँकड़े",
-    "此接口仅允许 GET 或 PUT": "यह एंडपॉइंट केवल GET या PUT स्वीकार करता है"
+    "此接口仅允许 GET 或 PUT": "यह एंडपॉइंट केवल GET या PUT स्वीकार करता है",
+    "自定义排序": "कस्टम क्रम",
+    "默认排序": "डिफ़ॉल्ट क्रम",
+    "侧栏组件排序": "साइडबार के घटकों का क्रम",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "क्रम बदलने के लिए घटकों को खींचें या ऊपर और नीचे के बटन इस्तेमाल करें। छिपे हुए घटकों का स्थान बना रहता है। साइट पर यह क्रम लागू करने के लिए सहेजें।",
+    "上移{0}": "{0} को ऊपर ले जाएँ",
+    "下移{0}": "{0} को नीचे ले जाएँ",
+    "已将{0}移至第 {1} 位": "{0} को स्थान {1} पर ले जाया गया",
+    "侧栏排序开关不正确": "साइडबार के क्रम की सेटिंग अमान्य है",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "साइडबार के क्रम में सभी 7 घटक बिना दोहराव के होने चाहिए"
   },
   "es": {
     "甘文 · 内容管理": "Ganwen · Administración del blog",
@@ -2702,7 +2738,16 @@
     "搜索": "Buscar",
     "热门文章": "Artículos populares",
     "站点统计": "Estadísticas del sitio",
-    "此接口仅允许 GET 或 PUT": "Este endpoint solo acepta GET o PUT"
+    "此接口仅允许 GET 或 PUT": "Este endpoint solo acepta GET o PUT",
+    "自定义排序": "Orden personalizado",
+    "默认排序": "Orden predeterminado",
+    "侧栏组件排序": "Orden de los componentes de la barra lateral",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "Arrastra los componentes o usa los botones para subirlos y bajarlos. Los componentes ocultos conservan su posición. Guarda para aplicar este orden en el sitio.",
+    "上移{0}": "Subir {0}",
+    "下移{0}": "Bajar {0}",
+    "已将{0}移至第 {1} 位": "{0} se ha movido a la posición {1}",
+    "侧栏排序开关不正确": "La configuración de orden de la barra lateral no es válida",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "El orden de la barra lateral debe incluir los 7 componentes sin duplicados"
   },
   "ar": {
     "甘文 · 内容管理": "Ganwen · لوحة إدارة المدونة",
@@ -3243,7 +3288,16 @@
     "搜索": "بحث",
     "热门文章": "المقالات الشائعة",
     "站点统计": "إحصاءات الموقع",
-    "此接口仅允许 GET 或 PUT": "تقبل هذه الواجهة GET أو PUT فقط"
+    "此接口仅允许 GET 或 PUT": "تقبل هذه الواجهة GET أو PUT فقط",
+    "自定义排序": "ترتيب مخصص",
+    "默认排序": "الترتيب الافتراضي",
+    "侧栏组件排序": "ترتيب مكونات الشريط الجانبي",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "اسحب المكونات أو استخدم زري التحريك لأعلى ولأسفل لتغيير ترتيبها. تحتفظ المكونات المخفية بمواقعها. احفظ لتطبيق هذا الترتيب على الموقع.",
+    "上移{0}": "تحريك {0} لأعلى",
+    "下移{0}": "تحريك {0} لأسفل",
+    "已将{0}移至第 {1} 位": "تم نقل {0} إلى الموضع {1}",
+    "侧栏排序开关不正确": "إعداد ترتيب الشريط الجانبي غير صالح",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "يجب أن يتضمن ترتيب الشريط الجانبي جميع المكونات السبعة دون تكرار"
   },
   "fr": {
     "甘文 · 内容管理": "Ganwen · Administration du blog",
@@ -3784,7 +3838,16 @@
     "搜索": "Rechercher",
     "热门文章": "Articles populaires",
     "站点统计": "Statistiques du site",
-    "此接口仅允许 GET 或 PUT": "Ce point d’accès accepte uniquement GET ou PUT"
+    "此接口仅允许 GET 或 PUT": "Ce point d’accès accepte uniquement GET ou PUT",
+    "自定义排序": "Ordre personnalisé",
+    "默认排序": "Ordre par défaut",
+    "侧栏组件排序": "Ordre des composants de la barre latérale",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "Faites glisser les composants ou utilisez les boutons pour les monter et les descendre. Les composants masqués conservent leur position. Enregistrez pour appliquer cet ordre sur le site.",
+    "上移{0}": "Monter {0}",
+    "下移{0}": "Descendre {0}",
+    "已将{0}移至第 {1} 位": "{0} déplacé en position {1}",
+    "侧栏排序开关不正确": "Le réglage de l’ordre de la barre latérale est invalide",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "L’ordre de la barre latérale doit contenir les 7 composants sans doublon"
   },
   "bn": {
     "甘文 · 内容管理": "গানওয়েন · ব্লগের প্রশাসন",
@@ -4325,7 +4388,16 @@
     "搜索": "খুঁজুন",
     "热门文章": "জনপ্রিয় লেখা",
     "站点统计": "সাইটের পরিসংখ্যান",
-    "此接口仅允许 GET 或 PUT": "এই এন্ডপয়েন্ট শুধু GET বা PUT গ্রহণ করে"
+    "此接口仅允许 GET 或 PUT": "এই এন্ডপয়েন্ট শুধু GET বা PUT গ্রহণ করে",
+    "自定义排序": "নিজস্ব ক্রম",
+    "默认排序": "ডিফল্ট ক্রম",
+    "侧栏组件排序": "সাইডবারের উপাদানের ক্রম",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "ক্রম বদলাতে উপাদানগুলো টানুন অথবা উপরে ও নিচে নেওয়ার বোতাম ব্যবহার করুন। লুকানো উপাদানের অবস্থানও রাখা হবে। সাইটে এই ক্রম প্রয়োগ করতে সংরক্ষণ করুন।",
+    "上移{0}": "{0} উপরে নিন",
+    "下移{0}": "{0} নিচে নিন",
+    "已将{0}移至第 {1} 位": "{0} অবস্থান {1}-এ নেওয়া হয়েছে",
+    "侧栏排序开关不正确": "সাইডবারের ক্রমের সেটিং সঠিক নয়",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "সাইডবারের ক্রমে ৭টি উপাদানের সবগুলো থাকতে হবে, কোনোটি একাধিকবার নয়"
   },
   "pt": {
     "甘文 · 内容管理": "Ganwen · Administração do blog",
@@ -4866,7 +4938,16 @@
     "搜索": "Pesquisar",
     "热门文章": "Artigos populares",
     "站点统计": "Estatísticas do site",
-    "此接口仅允许 GET 或 PUT": "Este endpoint aceita apenas GET ou PUT"
+    "此接口仅允许 GET 或 PUT": "Este endpoint aceita apenas GET ou PUT",
+    "自定义排序": "Ordem personalizada",
+    "默认排序": "Ordem padrão",
+    "侧栏组件排序": "Ordem dos componentes da barra lateral",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "Arraste os componentes ou use os botões para movê-los para cima e para baixo. Os componentes ocultos mantêm suas posições. Salve para aplicar esta ordem no site.",
+    "上移{0}": "Mover {0} para cima",
+    "下移{0}": "Mover {0} para baixo",
+    "已将{0}移至第 {1} 位": "{0} movido para a posição {1}",
+    "侧栏排序开关不正确": "A configuração da ordem da barra lateral é inválida",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "A ordem da barra lateral deve conter os 7 componentes sem repetições"
   },
   "id": {
     "甘文 · 内容管理": "Ganwen · Pengelolaan blog",
@@ -5407,7 +5488,16 @@
     "搜索": "Cari",
     "热门文章": "Artikel populer",
     "站点统计": "Statistik situs",
-    "此接口仅允许 GET 或 PUT": "Endpoint ini hanya menerima GET atau PUT"
+    "此接口仅允许 GET 或 PUT": "Endpoint ini hanya menerima GET atau PUT",
+    "自定义排序": "Urutan khusus",
+    "默认排序": "Urutan bawaan",
+    "侧栏组件排序": "Urutan komponen bilah sisi",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "Seret komponen atau gunakan tombol naik dan turun untuk mengubah urutannya. Komponen tersembunyi tetap mempertahankan posisinya. Simpan untuk menerapkan urutan ini di situs.",
+    "上移{0}": "Naikkan {0}",
+    "下移{0}": "Turunkan {0}",
+    "已将{0}移至第 {1} 位": "{0} dipindahkan ke posisi {1}",
+    "侧栏排序开关不正确": "Pengaturan urutan bilah sisi tidak valid",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "Urutan bilah sisi harus memuat semua 7 komponen tanpa duplikat"
   },
   "ur": {
     "甘文 · 内容管理": "Ganwen · بلاگ انتظامیہ",
@@ -5948,6 +6038,15 @@
     "搜索": "تلاش",
     "热门文章": "مقبول مضامین",
     "站点统计": "سائٹ کے اعداد و شمار",
-    "此接口仅允许 GET 或 PUT": "یہ اینڈپوائنٹ صرف GET یا PUT قبول کرتا ہے"
+    "此接口仅允许 GET 或 PUT": "یہ اینڈپوائنٹ صرف GET یا PUT قبول کرتا ہے",
+    "自定义排序": "اپنی ترتیب",
+    "默认排序": "پہلے سے طے شدہ ترتیب",
+    "侧栏组件排序": "سائیڈبار کے حصوں کی ترتیب",
+    "拖动组件或使用上下按钮调整顺序；关闭的组件也会保留位置。保存后网站按此顺序显示。": "ترتیب بدلنے کے لیے حصوں کو گھسیٹیں یا اوپر اور نیچے کے بٹن استعمال کریں۔ چھپے ہوئے حصوں کی جگہ برقرار رہتی ہے۔ سائٹ پر یہ ترتیب نافذ کرنے کے لیے محفوظ کریں۔",
+    "上移{0}": "{0} کو اوپر لے جائیں",
+    "下移{0}": "{0} کو نیچے لے جائیں",
+    "已将{0}移至第 {1} 位": "{0} کو مقام {1} پر منتقل کر دیا گیا",
+    "侧栏排序开关不正确": "سائیڈبار کی ترتیب کی سیٹنگ درست نہیں",
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "سائیڈبار کی ترتیب میں تمام 7 حصے ہونے چاہئیں اور کوئی حصہ دہرایا نہ جائے"
   }
 }
