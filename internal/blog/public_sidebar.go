@@ -100,8 +100,15 @@ func (a *Analytics) publicSidebarCountsAt(ctx context.Context, now time.Time) pu
 func (a *App) populatePublicSidebar(ctx context.Context, view *publicView, settings SiteSettings, posts []Post) {
 	view.SidebarPopular = nil
 	view.SidebarStats = publicSidebarStats{}
-	view.ShowPublicStats = publicStatsEnabled(settings)
-	if a.Analytics == nil {
+	view.SidebarModules = make(map[string]bool)
+	for _, module := range publicSidebarModules(settings) {
+		if module == "tags" && len(view.FilterTags) == 0 {
+			continue
+		}
+		view.SidebarModules[module] = true
+	}
+	view.ShowPublicStats = view.SidebarModules["stats"] && publicStatsEnabled(settings)
+	if a.Analytics == nil || !view.SidebarModules["popular"] && !view.SidebarModules["stats"] {
 		return
 	}
 	now := a.Analytics.now()

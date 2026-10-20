@@ -793,17 +793,18 @@ test('sidebar advertisements default off and preserve multi-item configuration a
   let saved, submitted;
   const c = client(({path, options}) => {
     if (path === 'session') return {data: {authenticated: true, user: 'editor', csrf: 'csrf'}};
-    assert.equal(path, 'settings');
+    assert.equal(path, 'sidebar');
+    assert.equal(options.method, 'PUT');
     submitted = JSON.parse(options.body);
     saved = {...submitted, sidebar_ads: {...submitted.sidebar_ads, interval_seconds: 12}};
     return {data: saved};
   });
-  c.run("state.authenticated=true;state.user='editor';applySiteSettings({title:'甘文',posts_per_page:10,sidebar_ads:{enabled:false,interval_seconds:12,items:[]}});");
+  c.run("state.authenticated=true;state.user='editor';applySidebarSettings({title:'甘文',posts_per_page:10,sidebar_ads:{enabled:false,interval_seconds:12,items:[]}});");
   assert.equal(c.get('adEnabled').checked, false);
   assert.doesNotMatch(html, /\bid="adInterval"|轮播间隔/);
   assert.match(html, /按下方顺序每次刷新换下一条/);
   assert.equal(c.state.adItems.length, 0);
-  assert.equal(c.state.settingsDirty, false);
+  assert.equal(c.state.sidebarDirty, false);
   assert.equal(c.calls.length, 0, 'empty advertisement settings must not fetch images or APIs');
   for (const values of [
     {title: 'First <plain> advertisement', description: 'Plain description\nSecond line <text>', image_url: '/wp-content/uploads/ad-one.png', target_url: 'https://example.com/one', button_label: 'Learn more', sponsor: 'First sponsor'},
@@ -823,9 +824,9 @@ test('sidebar advertisements default off and preserve multi-item configuration a
     assert.equal(fields[5].children[1].maxLength, 80);
   }
   c.get('adEnabled').checked = true;
-  c.get('settingsForm').oninput();
-  assert.equal(c.state.settingsDirty, true);
-  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  c.get('sidebarForm').oninput();
+  assert.equal(c.state.sidebarDirty, true);
+  await c.get('sidebarForm').onsubmit({preventDefault() {}});
   assert.equal(saved.sidebar_ads.enabled, true);
   assert.equal(saved.sidebar_ads.interval_seconds, 12);
   assert.equal(Object.hasOwn(submitted.sidebar_ads, 'interval_seconds'), false, 'new UI must leave the legacy interval to the server');
@@ -834,31 +835,31 @@ test('sidebar advertisements default off and preserve multi-item configuration a
   assert.equal(saved.sidebar_ads.items[0].description, 'Plain description\nSecond line <text>');
   assert.equal(saved.sidebar_ads.items[0].button_label, 'Learn more');
   assert.equal(saved.sidebar_ads.items[0].sponsor, 'First sponsor');
-  assert.equal(c.state.settingsDirty, false);
+  assert.equal(c.state.sidebarDirty, false);
   assert.equal(c.state.adItems[1].image_url, 'https://images.example/ad-two.webp');
   assert.equal(c.get('adFields').children[0].titleInput.value, 'First <plain> advertisement');
   assert.equal(c.get('adFields').children[0].children[0].children[1].children[1].value, 'Plain description\nSecond line <text>');
   c.get('adEnabled').checked = false;
-  c.get('settingsForm').oninput();
-  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  c.get('sidebarForm').oninput();
+  await c.get('sidebarForm').onsubmit({preventDefault() {}});
   assert.equal(saved.sidebar_ads.enabled, false);
   assert.equal(saved.sidebar_ads.items.length, 2, 'disabling the slot must retain its items');
   c.get('adFields').children[0].children[1].children[0].onclick();
-  assert.equal(c.state.settingsDirty, true);
-  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  assert.equal(c.state.sidebarDirty, true);
+  await c.get('sidebarForm').onsubmit({preventDefault() {}});
   assert.equal(saved.sidebar_ads.items.length, 1);
   assert.equal(saved.sidebar_ads.items[0].title, 'Second advertisement');
   c.get('adFields').children[0].children[1].children[0].onclick();
-  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  await c.get('sidebarForm').onsubmit({preventDefault() {}});
   assert.deepEqual(saved.sidebar_ads.items, []);
-  assert.equal(c.state.settingsDirty, false);
+  assert.equal(c.state.sidebarDirty, false);
   assert.equal(c.get('adEnabled').checked, false);
-  assert.equal(c.state.settings.sidebar_ads.interval_seconds, 12);
+  assert.equal(c.state.sidebar.sidebar_ads.interval_seconds, 12);
 });
 
 test('sidebar advertisement failed save retains its draft and account cleanup clears all advertisement fields', async () => {
   const c = client(({path}) => path === 'session' ? {data: {authenticated: true, user: 'editor', csrf: 'csrf'}} : {status: 503, data: {error: '暂时无法保存'}});
-  c.run("state.authenticated=true;state.user='editor';applySiteSettings({title:'甘文',posts_per_page:10,sidebar_ads:{enabled:false,interval_seconds:8,items:[{title:'Saved advertisement',description:'Saved description',image_url:'/wp-content/uploads/ad.png',target_url:'https://example.com/',button_label:'Read more',sponsor:'Saved sponsor'}]}});");
+  c.run("state.authenticated=true;state.user='editor';applySidebarSettings({title:'甘文',posts_per_page:10,sidebar_ads:{enabled:false,interval_seconds:8,items:[{title:'Saved advertisement',description:'Saved description',image_url:'/wp-content/uploads/ad.png',target_url:'https://example.com/',button_label:'Read more',sponsor:'Saved sponsor'}]}});");
   const title = c.get('adFields').children[0].titleInput;
   title.value = 'Unsaved advertisement';
   title.oninput();
@@ -866,42 +867,42 @@ test('sidebar advertisement failed save retains its draft and account cleanup cl
   description.value = 'Unsaved description\nSecond line';
   description.oninput();
   c.get('adEnabled').checked = true;
-  c.get('settingsForm').oninput();
-  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  c.get('sidebarForm').oninput();
+  await c.get('sidebarForm').onsubmit({preventDefault() {}});
   assert.equal(c.state.adItems[0].title, 'Unsaved advertisement');
   assert.equal(c.state.adItems[0].description, 'Unsaved description\nSecond line');
   assert.equal(c.state.adItems[0].button_label, 'Read more');
   assert.equal(c.state.adItems[0].sponsor, 'Saved sponsor');
   assert.equal(c.get('adEnabled').checked, true);
-  assert.equal(c.state.settingsDirty, true);
-  assert.equal(c.state.settingsSaving, false);
-  assert.equal(c.get('settingsForm').inert, false);
+  assert.equal(c.state.sidebarDirty, true);
+  assert.equal(c.state.sidebarSaving, false);
+  assert.equal(c.get('sidebarForm').inert, false);
   c.run('clearSessionContent()');
   assert.equal(c.state.adItems.length, 0);
   assert.equal(c.get('adFields').children.length, 0);
   assert.equal(c.get('adEnabled').checked, false);
-  assert.equal(c.state.settings, null);
-  assert.equal(c.state.settingsDirty, false);
+  assert.equal(c.state.sidebar, null);
+  assert.equal(c.state.sidebarDirty, false);
 });
 
 test('sidebar advertisements read older minimal items and keep optional text in the dirty snapshot', () => {
   const c = client(() => {throw Error('reading advertisements must not fetch media or APIs');});
-  c.run("state.authenticated=true;state.user='editor';applySiteSettings({title:'甘文',posts_per_page:10,sidebar_ads:{enabled:false,interval_seconds:120,items:[{title:'Old advertisement',image_url:'/wp-content/uploads/ad.png',target_url:'https://example.com/'}]}});");
+  c.run("state.authenticated=true;state.user='editor';applySidebarSettings({title:'甘文',posts_per_page:10,sidebar_ads:{enabled:false,interval_seconds:120,items:[{title:'Old advertisement',image_url:'/wp-content/uploads/ad.png',target_url:'https://example.com/'}]}});");
   assert.equal(c.state.adItems[0].description, '');
   assert.equal(c.state.adItems[0].button_label, '');
   assert.equal(c.state.adItems[0].sponsor, '');
-  assert.equal(c.state.settingsDirty, false);
-  c.state.settings.sidebar_ads.interval_seconds = 3;
-  c.run('refreshSettingsDirty()');
-  assert.equal(c.state.settingsDirty, false, 'legacy interval must not enter the editable snapshot');
+  assert.equal(c.state.sidebarDirty, false);
+  c.state.sidebar.sidebar_ads.interval_seconds = 3;
+  c.run('refreshSidebarDirty()');
+  assert.equal(c.state.sidebarDirty, false, 'legacy interval must not enter the editable snapshot');
   for (const index of [1, 4, 5]) {
     const input = c.get('adFields').children[0].children[0].children[index].children[1];
     input.value = 'New plain text';
     input.oninput();
-    assert.equal(c.state.settingsDirty, true);
+    assert.equal(c.state.sidebarDirty, true);
     input.value = '';
     input.oninput();
-    assert.equal(c.state.settingsDirty, false);
+    assert.equal(c.state.sidebarDirty, false);
   }
   assert.equal(c.calls.length, 0);
 });
@@ -909,28 +910,28 @@ test('sidebar advertisements read older minimal items and keep optional text in 
 test('sidebar advertisements validate optional text limits before sending a save', async () => {
   for (const [index, limit, label] of [[1, 500, '说明'], [4, 40, '按钮文字'], [5, 80, '推广来源']]) {
     const c = client(() => {throw Error('overlong advertisement text must not issue a save');});
-    c.run("state.authenticated=true;state.user='editor';applySiteSettings({title:'甘文',posts_per_page:10,sidebar_ads:{items:[{title:'Ad',image_url:'/wp-content/uploads/ad.png',target_url:'https://example.com/'}]}});");
+    c.run("state.authenticated=true;state.user='editor';applySidebarSettings({title:'甘文',posts_per_page:10,sidebar_ads:{items:[{title:'Ad',image_url:'/wp-content/uploads/ad.png',target_url:'https://example.com/'}]}});");
     const input = c.get('adFields').children[0].children[0].children[index].children[1];
     input.value = '文'.repeat(limit + 1);
     input.oninput();
-    await c.get('settingsForm').onsubmit({preventDefault() {}});
+    await c.get('sidebarForm').onsubmit({preventDefault() {}});
     assert.equal(c.calls.length, 0);
     assert.equal(c.get('toast').textContent, '广告' + label + '最多 ' + limit + ' 字');
-    assert.equal(c.state.settingsDirty, true);
+    assert.equal(c.state.sidebarDirty, true);
   }
 });
 
 test('sidebar advertisements reject incomplete drafts before sending a save and limit editable rows', async () => {
   const c = client(() => {throw Error('incomplete advertisements must not issue a save');});
-  c.run("state.authenticated=true;state.user='editor';applySiteSettings({title:'甘文',posts_per_page:10});");
+  c.run("state.authenticated=true;state.user='editor';applySidebarSettings({title:'甘文',posts_per_page:10});");
   c.get('addAdButton').onclick();
   const title = c.get('adFields').children[0].titleInput;
   title.value = 'Incomplete advertisement';
   title.oninput();
-  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  await c.get('sidebarForm').onsubmit({preventDefault() {}});
   assert.equal(c.calls.length, 0);
   assert.match(c.get('toast').textContent, /标题、图片地址和目标网址/);
-  assert.equal(c.state.settingsDirty, true);
+  assert.equal(c.state.sidebarDirty, true);
   for (let i = 0; i < 12; i++) c.get('addAdButton').onclick();
   assert.equal(c.state.adItems.length, 12);
   assert.equal(c.get('addAdButton').disabled, true);

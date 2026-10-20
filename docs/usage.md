@@ -51,7 +51,9 @@ chmod +x ganwen start.sh
 
 ## 设置和自己的站点地址
 
-后台“站点设置”可以修改标题、描述、布局、联系信息、广告和统计展示。新安装默认使用真实访问量；“启用虚拟访问量”开启后才使用展示用计算，可设置每日基数（0–1000000）。关闭该开关会停止主页总数和热门文章的虚拟计算；“显示站点统计”可隐藏统计组件。后台访问报告一直统计真实记录。旧站没有这些新字段时保留原展示行为。
+后台“站点设置”可以修改标题、描述、布局、联系信息和虚拟访问量。新安装默认使用真实访问量；“启用虚拟访问量”开启后才使用展示用计算，可设置每日基数（0–1000000）。关闭该开关会停止主页总数和热门文章的虚拟计算。后台访问报告一直统计真实记录。
+
+“侧栏设置”独立管理搜索、热门文章、站点统计、年月归档、分类、标签和广告，也可选择是否在文章页显示侧栏。勾选所需组件并保存，再点击“预览网站”查看效果；全部关闭后正文使用完整宽度。年月归档按文章发布日期生成，展开年份可选择全年或具体月份。已有站点保留原统计开关，并默认显示其他组件。
 
 本地运行默认只监听本机，并禁止搜索引擎收录。对外使用时，请先配置自己的 HTTPS 域名及反向代理，再按自己的环境运行：
 
@@ -106,7 +108,9 @@ Interface translations are included in the program and need no translation servi
 
 ## Settings, backup and development
 
-Fresh installations display recorded view counts. The admin site settings let you enable virtual counts, set their daily display target (0–1000000), or hide the site statistics component. Turning virtual counts off uses real counts for both totals and popular articles. Admin analytics always uses real records. Existing sites keep their previous display behavior until the new settings are changed.
+Fresh installations display recorded view counts. The admin site settings let you enable virtual counts and set their daily display target (0–1000000). Turning virtual counts off uses real counts for both totals and popular articles. Admin analytics always uses real records.
+
+The dedicated sidebar settings page controls search, popular articles, site statistics, date archives, categories, tags and ads, as well as sidebar visibility on article pages. Save your selection and use “Preview website” to check it. Disabling all components gives the content the full width. Date archives use publication dates; expand a year to browse the full year or a particular month. Existing sites retain their statistics visibility setting and show the other components by default.
 
 Local preview listens on loopback and prevents indexing. For a public site, set up your own HTTPS domain and reverse proxy, then use `--preview=false --site-url https://blog.example.com`. The URL is saved for later runs. Translation is optional and requires your own compatible service configuration in the admin interface.
 

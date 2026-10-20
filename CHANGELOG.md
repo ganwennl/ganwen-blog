@@ -2,6 +2,8 @@
 
 ## 未发布 / Unreleased
 
+- 新增独立“侧栏设置”页面，可选择搜索、热门文章、统计、年月归档、分类、标签和广告；归档支持按年或月浏览文章。
+- Added a dedicated sidebar settings page for search, popular articles, statistics, date archives, categories, tags and ads. Archives support browsing posts by year or month.
 - 修复新增显示语言的访问统计无法完整导出和恢复的问题，保留全部 11 种语言的统计记录。
 - Fixed analytics export and restore for all 11 supported languages, preserving records for the newer display languages.
 

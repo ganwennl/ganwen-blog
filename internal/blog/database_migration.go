@@ -190,6 +190,9 @@ func validateDatabaseBackup(b DatabaseBackup) error {
 			if err := validatePublicTrafficSettingsJSON([]byte(v.Value)); err != nil {
 				return err
 			}
+			if err := validateSidebarModulesJSON([]byte(v.Value)); err != nil {
+				return err
+			}
 		}
 	}
 	jobIDs := map[int64]bool{}

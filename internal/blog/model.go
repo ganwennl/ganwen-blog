@@ -115,6 +115,7 @@ type SiteSettings struct {
 	PostsPerPage              int                          `json:"posts_per_page"`
 	DefaultLayout             string                       `json:"default_layout"`
 	ArticleSidebarEnabled     bool                         `json:"article_sidebar_enabled"`
+	SidebarModules            *[]string                    `json:"sidebar_modules,omitempty"`
 	Categories                []Term                       `json:"categories"`
 	Tags                      []Term                       `json:"tags"`
 	HeaderImage               string                       `json:"header_image"`

@@ -25,64 +25,6 @@ function deferredReads() {
   return {pending, respond: () => new Promise(resolve => pending.push(resolve))};
 }
 
-test('article sidebar defaults off, restores saved state and tracks checkbox drafts', () => {
-  const c = setup(() => {throw Error('editing the sidebar must not write');});
-  assert.equal(c.get('articleSidebarEnabled').checked, false);
-  assert.equal(c.state.settingsDirty, false);
-  c.get('articleSidebarEnabled').checked = true;
-  c.get('settingsForm').oninput();
-  assert.equal(c.state.settingsDirty, true);
-  c.get('articleSidebarEnabled').checked = false;
-  c.get('settingsForm').oninput();
-  assert.equal(c.state.settingsDirty, false);
-  c.context.fixtureSettings = {...settings, article_sidebar_enabled: true};
-  c.run('applySiteSettings(fixtureSettings)');
-  assert.equal(c.get('articleSidebarEnabled').checked, true);
-  assert.equal(c.state.settingsDirty, false);
-  c.run('clearSessionContent()');
-  assert.equal(c.get('articleSidebarEnabled').checked, false);
-});
-
-test('article sidebar saves explicit booleans and preserves a rejected draft', async () => {
-  let reject = false;
-  const submitted = [];
-  const c = setup(call => {
-    if (call.path === 'session') return {data: session};
-    assert.equal(call.path, 'settings');
-    const payload = JSON.parse(call.options.body);
-    submitted.push(payload);
-    return reject ? {status: 503, data: {error: '保存失败'}} : {data: payload};
-  });
-  for (const enabled of [true, false]) {
-    c.get('articleSidebarEnabled').checked = enabled;
-    c.get('settingsForm').oninput();
-    await c.get('settingsForm').onsubmit({preventDefault() {}});
-    assert.equal(submitted.at(-1).article_sidebar_enabled, enabled);
-    assert.equal(c.state.settings.article_sidebar_enabled, enabled);
-    assert.equal(c.state.settingsDirty, false);
-  }
-  reject = true;
-  c.get('articleSidebarEnabled').checked = true;
-  c.get('settingsForm').oninput();
-  await c.get('settingsForm').onsubmit({preventDefault() {}});
-  assert.equal(c.get('articleSidebarEnabled').checked, true);
-  assert.equal(c.state.settings.article_sidebar_enabled, false);
-  assert.equal(c.state.settingsDirty, true);
-  assert.equal(c.get('settingsForm').inert, false);
-});
-
-test('a delayed settings read cannot replace an article sidebar draft', async () => {
-  const {pending, respond} = deferredReads(), c = setup(respond);
-  const read = c.run('loadSettings()');
-  c.get('articleSidebarEnabled').checked = true;
-  c.get('settingsForm').oninput();
-  pending[0]({data: settings});
-  await read;
-  assert.equal(c.get('articleSidebarEnabled').checked, true);
-  assert.equal(c.state.settingsDirty, true);
-  assert.equal(c.get('settingsForm').inert, false);
-});
-
 async function waitFor(predicate) {
   for (let i = 0; !predicate() && i < 40; i++) await new Promise(resolve => setImmediate(resolve));
   assert.ok(predicate(), 'the expected request did not start');

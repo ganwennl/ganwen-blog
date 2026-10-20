@@ -135,6 +135,10 @@ type publicView struct {
 	SidebarPopular                                                                                                []publicPopular
 	SidebarStats                                                                                                  publicSidebarStats
 	SidebarAd                                                                                                     *SidebarAd
+	SidebarModules                                                                                                map[string]bool
+	ArchiveYears                                                                                                  []publicArchiveYear
+	ArchiveAllURL                                                                                                 string
+	ArchiveAllCurrent                                                                                             bool
 	IsJournal, IsBlogPost, IsPage, HomeCurrent, ArticlesCurrent, AboutCurrent                                     bool
 	IsIndependentPage                                                                                             bool
 	ShowSidebar                                                                                                   bool
@@ -243,6 +247,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	view.IsJournal = publicLayout(r, settings) == "journal"
 	populatePublicTaxonomy(&view, settings, posts, q, lang)
 	populatePublicNavigation(&view, settings, posts, lang)
+	populatePublicArchives(&view, settings, posts, q, lang)
 	if a.Config.Preview {
 		view.Robots = "noindex, nofollow"
 	}
@@ -434,6 +439,7 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 	if view.ShowSidebar {
 		a.populatePublicSidebar(r.Context(), &view, settings, posts)
 		a.populatePublicSidebarAd(w, r, &view, settings)
+		view.ShowSidebar = len(view.SidebarModules) > 0 || view.SidebarAd != nil
 	}
 	a.populatePublicImages(&view, settings)
 	populatePublicSEO(&view, settings)
@@ -959,7 +965,7 @@ func filterPublicPosts(posts []Post, s SiteSettings, q url.Values, lang string) 
 	}
 	month := q.Get("m")
 	if month != "" {
-		if _, err := time.Parse("200601", month); err != nil {
+		if _, ok := parsePublicArchiveDate(month); !ok {
 			return nil, false
 		}
 	}
@@ -968,7 +974,7 @@ func filterPublicPosts(posts []Post, s SiteSettings, q url.Values, lang string) 
 	}
 	knownCat, knownTag, knownAuthor := cat == 0 && q.Get("category_name") == "", q.Get("tag") == "", author == 0
 	for _, p := range posts {
-		if p.Status != "publish" || p.Type != "post" {
+		if p.Status != "publish" || p.Type != "post" || p.Unlisted {
 			continue
 		}
 		catMatch := cat == 0 && q.Get("category_name") == ""
@@ -986,7 +992,7 @@ func filterPublicPosts(posts []Post, s SiteSettings, q url.Values, lang string) 
 		if author == p.AuthorID {
 			knownAuthor = true
 		}
-		if !catMatch || !tagMatch || (author != 0 && p.AuthorID != author) || (month != "" && strings.ReplaceAll(strings.TrimSpace(p.PublishedAt)[:min(7, len(strings.TrimSpace(p.PublishedAt)))], "-", "") != month) || (q.Get("post_format") != "" && p.Format != q.Get("post_format")) {
+		if !catMatch || !tagMatch || (author != 0 && p.AuthorID != author) || (month != "" && !publicPostInArchive(p, month)) || (q.Get("post_format") != "" && p.Format != q.Get("post_format")) {
 			continue
 		}
 		local, ok := localizedPost(p, lang)
@@ -1030,7 +1036,7 @@ func publicArchiveHeading(s SiteSettings, posts []Post, q url.Values, lang strin
 		}
 	}
 	if q.Get("m") != "" {
-		return q.Get("m")
+		return publicArchiveDateLabel(q.Get("m"), lang)
 	}
 	if q.Get("post_format") != "" {
 		return q.Get("post_format")

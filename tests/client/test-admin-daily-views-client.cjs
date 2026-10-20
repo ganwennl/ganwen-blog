@@ -21,7 +21,7 @@ function setDailyViews(c, value) {
 
 const session = {authenticated: true, configured: true, user: 'editor', csrf: 'daily-views-session'};
 
-test('virtual counts and component visibility load, disable and save independently', async () => {
+test('virtual counts save their daily target without changing sidebar component visibility', async () => {
   const submitted = [];
   const c = client(call => {
     if (call.path === 'session') return {data: session};
@@ -31,22 +31,18 @@ test('virtual counts and component visibility load, disable and save independent
   });
   applySettings(c, 2500);
   assert.equal(c.get('publicVirtualViewsEnabled').checked, true, 'legacy settings keep display behavior');
-  assert.equal(c.get('publicStatsEnabled').checked, true);
   c.get('publicVirtualViewsEnabled').checked = false;
   c.get('publicVirtualViewsEnabled').onchange();
   assert.equal(c.get('publicDailyViews').disabled, true);
   assert.equal(c.state.settingsDirty, true);
-  c.get('publicStatsEnabled').checked = false;
-  c.get('settingsForm').oninput();
   await c.get('settingsForm').onsubmit({preventDefault() {}});
   assert.equal(submitted.at(-1).public_virtual_views_enabled, false);
-  assert.equal(submitted.at(-1).public_stats_enabled, false);
+  assert.equal(Object.hasOwn(submitted.at(-1), 'public_stats_enabled'), false, 'sidebar settings own component visibility');
   assert.equal(submitted.at(-1).public_daily_views, 2500, 'disabling retains the daily target');
   assert.equal(c.get('publicDailyViews').disabled, true);
   assert.equal(c.state.settingsDirty, false);
   c.run('applySiteSettings({title:"Fresh",posts_per_page:10,public_virtual_views_enabled:false,public_stats_enabled:true})');
   assert.equal(c.get('publicVirtualViewsEnabled').checked, false);
-  assert.equal(c.get('publicStatsEnabled').checked, true);
 });
 
 test('daily views input exposes its whole-number range and UTC display explanation', () => {
@@ -56,7 +52,11 @@ test('daily views input exposes its whole-number range and UTC display explanati
     assert.ok(field.includes(attribute), 'missing input constraint: ' + attribute);
   }
   assert.match(html, /label for="publicDailyViews"[^>]*>每日保底浏览/);
-  assert.match(html, /保底按全天逐步增长，速度会自然波动，并叠加真实浏览；后台仍统计真实数据。统计日使用 UTC。/);
+  const hint = html.match(/data-ui-key="每日展示基数[^"]+">([^<]+)<\/p>/)?.[1];
+  assert.ok(hint, 'the daily views explanation is missing');
+  for (const explanation of [/按 UTC 统计日逐步增长/, /叠加真实浏览/, /后台始终统计真实访问/, /统计组件在侧栏设置中开关/]) {
+    assert.match(hint, explanation);
+  }
 });
 
 test('loading defaults to 1000, preserves explicit zero and tracks unsaved input changes', () => {

@@ -144,8 +144,13 @@ func (a *Admin) serve(w http.ResponseWriter, r *http.Request) {
 		adminError(w, 401, "请先登录")
 		return
 	}
+	if r.URL.Path == "/admin/api/sidebar" && r.Method != http.MethodGet && r.Method != http.MethodPut {
+		w.Header().Set("Allow", "GET, PUT")
+		adminError(w, http.StatusMethodNotAllowed, "此接口仅允许 GET 或 PUT")
+		return
+	}
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
-		if r.Method != http.MethodPost {
+		if r.Method != http.MethodPost && !(r.URL.Path == "/admin/api/sidebar" && r.Method == http.MethodPut) {
 			adminError(w, 405, "此接口仅允许 POST")
 			return
 		}
@@ -232,6 +237,11 @@ func (a *Admin) serve(w http.ResponseWriter, r *http.Request) {
 	case "/admin/api/settings":
 		if r.Method == http.MethodGet || r.Method == http.MethodPost {
 			a.settings(w, r)
+			return
+		}
+	case "/admin/api/sidebar":
+		if r.Method == http.MethodGet || r.Method == http.MethodPut {
+			a.sidebar(w, r)
 			return
 		}
 	case "/admin/api/footer/translate":
@@ -563,6 +573,7 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 		AvatarURL                 *string                       `json:"avatar_url"`
 		DefaultLayout             json.RawMessage               `json:"default_layout"`
 		ArticleSidebarEnabled     json.RawMessage               `json:"article_sidebar_enabled"`
+		SidebarModules            json.RawMessage               `json:"sidebar_modules"`
 		FooterText                json.RawMessage               `json:"footer_text"`
 		FooterTranslations        *map[string]FooterTranslation `json:"footer_translations"`
 		SidebarAds                json.RawMessage               `json:"sidebar_ads"`
@@ -621,6 +632,20 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		current.PublicStatsEnabled = enabled
+		if current.SidebarModules != nil {
+			modules := sidebarModulesWithStats(*current.SidebarModules, *enabled)
+			current.SidebarModules = &modules
+		}
+	}
+	if len(input.SidebarModules) > 0 {
+		modules, err := parsedSidebarModules(input.SidebarModules)
+		if err != nil {
+			adminError(w, 400, err.Error())
+			return
+		}
+		current.SidebarModules = &modules
+		showStats := sidebarModuleSelected(modules, "stats")
+		current.PublicStatsEnabled = &showStats
 	}
 	if len(input.PublicDailyViews) > 0 {
 		dailyViews, err := parsedPublicDailyViews(input.PublicDailyViews)

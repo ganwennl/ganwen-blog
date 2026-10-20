@@ -342,6 +342,21 @@ html[data-layout=journal] .journal-description{font-size:15px;color:var(--muted)
 .site-stats>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:5px 0;align-items:baseline}
 .site-stats dt{min-width:0;color:var(--muted);overflow-wrap:anywhere}
 .site-stats dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;text-align:end;overflow-wrap:anywhere}
+.archive-all{color:var(--muted);font-size:11px;text-decoration:none;white-space:nowrap}
+.archive-all:hover,.archive-all[aria-current=page]{color:var(--blue)}
+.archive-year{border-bottom:1px solid var(--border)}
+.archive-year:last-child{border-bottom:0}
+.archive-year>summary{display:flex;align-items:center;gap:9px;min-height:38px;padding:8px 4px;cursor:pointer;font-size:13px;font-weight:600;list-style:none}
+.archive-year>summary::-webkit-details-marker{display:none}
+.archive-year>summary::before{content:"+";width:12px;color:var(--muted);font-size:14px;text-align:center}
+.archive-year[open]>summary::before{content:"−"}
+.archive-count{margin-inline-start:auto;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.archive-months{display:flex;flex-direction:column;gap:2px;padding:0 0 9px 0;margin-inline-start:12px;border-inline-start:1px solid var(--border)}
+.archive-months>a{display:flex;align-items:center;gap:9px;min-height:34px;margin-inline-start:8px;padding:6px 9px;border-radius:5px;font-size:12px;color:var(--muted);text-decoration:none}
+.archive-months>a:hover,.archive-months>a[aria-current=page]{background:var(--subtle);color:var(--blue)}
+.archive-months>a[aria-current=page]{font-weight:650}
+.archive-year>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:5px}
+.journal-layout.without-sidebar,.page-with-sidebar.without-sidebar{grid-template-columns:minmax(0,1fr)}
 .blog-sidebar .archive-filters{padding:0;margin:0;border:0;border-radius:0;background:none}
 .blog-sidebar .filter-heading{margin-bottom:12px}
 .blog-sidebar .filter-heading h2{font-size:15px;color:var(--text)}
