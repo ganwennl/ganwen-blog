@@ -124,6 +124,8 @@ type publicView struct {
 	Pages                                                                                                         []publicPageLink
 	QueryFields                                                                                                   []publicQueryField
 	ContactHeading                                                                                                string
+	ContactNoticeEnabled                                                                                          bool
+	ContactNoticeText                                                                                             string
 	Contacts                                                                                                      []publicContactLink
 	AvatarURL                                                                                                     string
 	FilterTags                                                                                                    []publicLink
@@ -518,6 +520,8 @@ func newPublicView(s SiteSettings, lang string) publicView {
 	}
 	v.ContactHeading = publicText(lang, "保持联系", "Stay in touch", "Blijf in contact", "Sigamos en contacto")
 	v.Contacts = publicContactLinks(s.ContactLinks, lang)
+	v.ContactNoticeEnabled = s.ContactNoticeEnabled
+	v.ContactNoticeText = s.ContactNoticeText
 	if lang == "zh" {
 		v.HTMLLang = "zh-Hans"
 	}

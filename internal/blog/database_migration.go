@@ -187,6 +187,9 @@ func validateDatabaseBackup(b DatabaseBackup) error {
 		}
 		keys[v.Key] = true
 		if v.Key == "site" {
+			if err := validateContactNoticeSettingsJSON([]byte(v.Value)); err != nil {
+				return err
+			}
 			if err := validatePublicTrafficSettingsJSON([]byte(v.Value)); err != nil {
 				return err
 			}

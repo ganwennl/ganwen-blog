@@ -547,7 +547,14 @@
     "下移{0}": "下移{0}",
     "已将{0}移至第 {1} 位": "已将{0}移至第 {1} 位",
     "侧栏排序开关不正确": "侧栏排序开关不正确",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "侧栏排序必须包含全部 7 个组件，且不能重复"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "侧栏排序必须包含全部 7 个组件，且不能重复",
+    "联系前提示": "联系前提示",
+    "启用联系前提示": "启用联系前提示",
+    "提示内容": "提示内容",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。",
+    "联系提示开关不正确": "联系提示开关不正确",
+    "联系提示请使用不超过 4000 字的纯文本": "联系提示请使用不超过 4000 字的纯文本",
+    "启用联系提示前请填写提示内容": "启用联系提示前请填写提示内容"
   },
   "nl": {
     "甘文 · 内容管理": "Ganwen · Blogbeheer",
@@ -1097,7 +1104,14 @@
     "下移{0}": "{0} omlaag verplaatsen",
     "已将{0}移至第 {1} 位": "{0} naar positie {1} verplaatst",
     "侧栏排序开关不正确": "De instelling voor de zijbalkvolgorde is ongeldig",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "De zijbalkvolgorde moet alle 7 onderdelen bevatten, zonder dubbele vermeldingen"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "De zijbalkvolgorde moet alle 7 onderdelen bevatten, zonder dubbele vermeldingen",
+    "联系前提示": "Melding vóór contact",
+    "启用联系前提示": "Melding vóór contact inschakelen",
+    "提示内容": "Tekst van de melding",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "Bezoekers moeten elke keer akkoord gaan voordat ze een contactmogelijkheid openen. Maximaal 4000 tekens, als platte tekst; dezelfde inhoud wordt in alle talen getoond.",
+    "联系提示开关不正确": "Ongeldige instelling voor de contactmelding",
+    "联系提示请使用不超过 4000 字的纯文本": "Gebruik platte tekst van maximaal 4000 tekens voor de contactmelding",
+    "启用联系提示前请填写提示内容": "Vul de melding in voordat u deze inschakelt"
   },
   "en": {
     "甘文 · 内容管理": "Ganwen · Blog admin",
@@ -1647,7 +1661,14 @@
     "下移{0}": "Move {0} down",
     "已将{0}移至第 {1} 位": "Moved {0} to position {1}",
     "侧栏排序开关不正确": "The sidebar ordering setting is invalid",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "The sidebar order must contain all 7 components with no duplicates"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "The sidebar order must contain all 7 components with no duplicates",
+    "联系前提示": "Notice before contact",
+    "启用联系前提示": "Enable notice before contact",
+    "提示内容": "Notice text",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "When enabled, visitors must agree every time they open a contact option. Up to 4000 characters, displayed as plain text; the same content is used in all languages.",
+    "联系提示开关不正确": "Invalid contact notice setting",
+    "联系提示请使用不超过 4000 字的纯文本": "Use plain text of no more than 4000 characters for the contact notice",
+    "启用联系提示前请填写提示内容": "Enter the notice text before enabling it"
   },
   "hi": {
     "甘文 · 内容管理": "Ganwen · ब्लॉग प्रशासन",
@@ -2197,7 +2218,14 @@
     "下移{0}": "{0} को नीचे ले जाएँ",
     "已将{0}移至第 {1} 位": "{0} को स्थान {1} पर ले जाया गया",
     "侧栏排序开关不正确": "साइडबार के क्रम की सेटिंग अमान्य है",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "साइडबार के क्रम में सभी 7 घटक बिना दोहराव के होने चाहिए"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "साइडबार के क्रम में सभी 7 घटक बिना दोहराव के होने चाहिए",
+    "联系前提示": "संपर्क से पहले सूचना",
+    "启用联系前提示": "संपर्क से पहले सूचना चालू करें",
+    "提示内容": "सूचना का पाठ",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "चालू होने पर, संपर्क विकल्प खोलने से पहले आगंतुकों को हर बार सहमति देनी होगी। अधिकतम 4000 वर्ण, सादे पाठ में; सभी भाषाओं में यही सामग्री दिखाई जाएगी।",
+    "联系提示开关不正确": "संपर्क सूचना की सेटिंग अमान्य है",
+    "联系提示请使用不超过 4000 字的纯文本": "संपर्क सूचना के लिए अधिकतम 4000 वर्णों का सादा पाठ इस्तेमाल करें",
+    "启用联系提示前请填写提示内容": "संपर्क सूचना चालू करने से पहले उसका पाठ भरें"
   },
   "es": {
     "甘文 · 内容管理": "Ganwen · Administración del blog",
@@ -2747,7 +2775,14 @@
     "下移{0}": "Bajar {0}",
     "已将{0}移至第 {1} 位": "{0} se ha movido a la posición {1}",
     "侧栏排序开关不正确": "La configuración de orden de la barra lateral no es válida",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "El orden de la barra lateral debe incluir los 7 componentes sin duplicados"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "El orden de la barra lateral debe incluir los 7 componentes sin duplicados",
+    "联系前提示": "Aviso antes de contactar",
+    "启用联系前提示": "Activar aviso antes de contactar",
+    "提示内容": "Texto del aviso",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "Al activarlo, los visitantes deben aceptar cada vez que abran una opción de contacto. Máximo 4000 caracteres, como texto sin formato; se usa el mismo contenido en todos los idiomas.",
+    "联系提示开关不正确": "La configuración del aviso de contacto no es válida",
+    "联系提示请使用不超过 4000 字的纯文本": "Utiliza texto sin formato de hasta 4000 caracteres para el aviso de contacto",
+    "启用联系提示前请填写提示内容": "Introduce el texto del aviso antes de activarlo"
   },
   "ar": {
     "甘文 · 内容管理": "Ganwen · لوحة إدارة المدونة",
@@ -3297,7 +3332,14 @@
     "下移{0}": "تحريك {0} لأسفل",
     "已将{0}移至第 {1} 位": "تم نقل {0} إلى الموضع {1}",
     "侧栏排序开关不正确": "إعداد ترتيب الشريط الجانبي غير صالح",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "يجب أن يتضمن ترتيب الشريط الجانبي جميع المكونات السبعة دون تكرار"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "يجب أن يتضمن ترتيب الشريط الجانبي جميع المكونات السبعة دون تكرار",
+    "联系前提示": "تنبيه قبل التواصل",
+    "启用联系前提示": "تفعيل التنبيه قبل التواصل",
+    "提示内容": "نص التنبيه",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "عند التفعيل، يجب على الزائر الموافقة في كل مرة يفتح فيها وسيلة تواصل. الحد الأقصى 4000 حرف بنص عادي؛ يُعرض المحتوى نفسه بجميع اللغات.",
+    "联系提示开关不正确": "إعداد تنبيه التواصل غير صالح",
+    "联系提示请使用不超过 4000 字的纯文本": "استخدم نصًا عاديًا لا يتجاوز 4000 حرف لتنبيه التواصل",
+    "启用联系提示前请填写提示内容": "أدخل نص التنبيه قبل تفعيله"
   },
   "fr": {
     "甘文 · 内容管理": "Ganwen · Administration du blog",
@@ -3847,7 +3889,14 @@
     "下移{0}": "Descendre {0}",
     "已将{0}移至第 {1} 位": "{0} déplacé en position {1}",
     "侧栏排序开关不正确": "Le réglage de l’ordre de la barre latérale est invalide",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "L’ordre de la barre latérale doit contenir les 7 composants sans doublon"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "L’ordre de la barre latérale doit contenir les 7 composants sans doublon",
+    "联系前提示": "Avertissement avant contact",
+    "启用联系前提示": "Activer l’avertissement avant contact",
+    "提示内容": "Texte de l’avertissement",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "Une fois activé, les visiteurs doivent accepter chaque fois qu’ils ouvrent un moyen de contact. Jusqu’à 4000 caractères, affichés en texte brut ; le même contenu est utilisé dans toutes les langues.",
+    "联系提示开关不正确": "Le réglage de l’avertissement de contact est invalide",
+    "联系提示请使用不超过 4000 字的纯文本": "Utilisez du texte brut de 4000 caractères maximum pour l’avertissement de contact",
+    "启用联系提示前请填写提示内容": "Saisissez le texte de l’avertissement avant de l’activer"
   },
   "bn": {
     "甘文 · 内容管理": "গানওয়েন · ব্লগের প্রশাসন",
@@ -4397,7 +4446,14 @@
     "下移{0}": "{0} নিচে নিন",
     "已将{0}移至第 {1} 位": "{0} অবস্থান {1}-এ নেওয়া হয়েছে",
     "侧栏排序开关不正确": "সাইডবারের ক্রমের সেটিং সঠিক নয়",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "সাইডবারের ক্রমে ৭টি উপাদানের সবগুলো থাকতে হবে, কোনোটি একাধিকবার নয়"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "সাইডবারের ক্রমে ৭টি উপাদানের সবগুলো থাকতে হবে, কোনোটি একাধিকবার নয়",
+    "联系前提示": "যোগাযোগের আগে বিজ্ঞপ্তি",
+    "启用联系前提示": "যোগাযোগের আগে বিজ্ঞপ্তি চালু করুন",
+    "提示内容": "বিজ্ঞপ্তির লেখা",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "চালু থাকলে, যোগাযোগের মাধ্যম খোলার আগে দর্শকদের প্রতিবার সম্মতি দিতে হবে। সর্বোচ্চ 4000 অক্ষর, সাধারণ পাঠ্য হিসেবে দেখানো হবে; সব ভাষায় একই বিষয়বস্তু ব্যবহার করা হবে।",
+    "联系提示开关不正确": "যোগাযোগের বিজ্ঞপ্তির সেটিং সঠিক নয়",
+    "联系提示请使用不超过 4000 字的纯文本": "যোগাযোগের বিজ্ঞপ্তিতে সর্বোচ্চ 4000 অক্ষরের সাধারণ পাঠ্য ব্যবহার করুন",
+    "启用联系提示前请填写提示内容": "যোগাযোগের বিজ্ঞপ্তি চালু করার আগে লেখাটি লিখুন"
   },
   "pt": {
     "甘文 · 内容管理": "Ganwen · Administração do blog",
@@ -4947,7 +5003,14 @@
     "下移{0}": "Mover {0} para baixo",
     "已将{0}移至第 {1} 位": "{0} movido para a posição {1}",
     "侧栏排序开关不正确": "A configuração da ordem da barra lateral é inválida",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "A ordem da barra lateral deve conter os 7 componentes sem repetições"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "A ordem da barra lateral deve conter os 7 componentes sem repetições",
+    "联系前提示": "Aviso antes do contato",
+    "启用联系前提示": "Ativar aviso antes do contato",
+    "提示内容": "Texto do aviso",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "Quando ativado, os visitantes precisam concordar sempre que abrirem uma opção de contato. Até 4000 caracteres, exibidos como texto simples; o mesmo conteúdo é usado em todos os idiomas.",
+    "联系提示开关不正确": "A configuração do aviso de contato é inválida",
+    "联系提示请使用不超过 4000 字的纯文本": "Use texto simples com no máximo 4000 caracteres para o aviso de contato",
+    "启用联系提示前请填写提示内容": "Preencha o texto do aviso antes de ativá-lo"
   },
   "id": {
     "甘文 · 内容管理": "Ganwen · Pengelolaan blog",
@@ -5497,7 +5560,14 @@
     "下移{0}": "Turunkan {0}",
     "已将{0}移至第 {1} 位": "{0} dipindahkan ke posisi {1}",
     "侧栏排序开关不正确": "Pengaturan urutan bilah sisi tidak valid",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "Urutan bilah sisi harus memuat semua 7 komponen tanpa duplikat"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "Urutan bilah sisi harus memuat semua 7 komponen tanpa duplikat",
+    "联系前提示": "Pemberitahuan sebelum menghubungi",
+    "启用联系前提示": "Aktifkan pemberitahuan sebelum menghubungi",
+    "提示内容": "Teks pemberitahuan",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "Jika diaktifkan, pengunjung harus menyetujui setiap kali membuka opsi kontak. Maksimal 4000 karakter, ditampilkan sebagai teks biasa; isi yang sama digunakan dalam semua bahasa.",
+    "联系提示开关不正确": "Pengaturan pemberitahuan kontak tidak valid",
+    "联系提示请使用不超过 4000 字的纯文本": "Gunakan teks biasa dengan maksimal 4000 karakter untuk pemberitahuan kontak",
+    "启用联系提示前请填写提示内容": "Isi teks pemberitahuan sebelum mengaktifkannya"
   },
   "ur": {
     "甘文 · 内容管理": "Ganwen · بلاگ انتظامیہ",
@@ -6047,6 +6117,13 @@
     "下移{0}": "{0} کو نیچے لے جائیں",
     "已将{0}移至第 {1} 位": "{0} کو مقام {1} پر منتقل کر دیا گیا",
     "侧栏排序开关不正确": "سائیڈبار کی ترتیب کی سیٹنگ درست نہیں",
-    "侧栏排序必须包含全部 7 个组件，且不能重复": "سائیڈبار کی ترتیب میں تمام 7 حصے ہونے چاہئیں اور کوئی حصہ دہرایا نہ جائے"
+    "侧栏排序必须包含全部 7 个组件，且不能重复": "سائیڈبار کی ترتیب میں تمام 7 حصے ہونے چاہئیں اور کوئی حصہ دہرایا نہ جائے",
+    "联系前提示": "رابطے سے پہلے اطلاع",
+    "启用联系前提示": "رابطے سے پہلے اطلاع فعال کریں",
+    "提示内容": "اطلاع کا متن",
+    "开启后，访客每次打开联系方式都需同意。最多 4000 字，按纯文本显示；所有语言使用此内容。": "فعال ہونے پر زائرین کو رابطے کا کوئی بھی ذریعہ کھولنے سے پہلے ہر بار اتفاق کرنا ہوگا۔ زیادہ سے زیادہ 4000 حروف، سادہ متن کے طور پر؛ تمام زبانوں میں یہی مواد دکھایا جائے گا۔",
+    "联系提示开关不正确": "رابطے کی اطلاع کی ترتیب درست نہیں ہے",
+    "联系提示请使用不超过 4000 字的纯文本": "رابطے کی اطلاع کے لیے زیادہ سے زیادہ 4000 حروف کا سادہ متن استعمال کریں",
+    "启用联系提示前请填写提示内容": "رابطے کی اطلاع فعال کرنے سے پہلے اس کا متن درج کریں"
   }
 }

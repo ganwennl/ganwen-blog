@@ -42,6 +42,8 @@ async function browser(options = {}) {
   const beacons = [];
   const messages = [];
   const scrolls = [];
+  const contactOpens = [];
+  const contactConfirms = [];
   const timeouts = [];
   const location = new URL(options.url || 'https://www.ganwen.nl/?p=1447');
   location.reload = () => { location.reloads = (location.reloads || 0) + 1; };
@@ -64,6 +66,15 @@ async function browser(options = {}) {
     const link = new Element(); link.tagName = 'A'; link.href = href; link.hidden = false; return link;
   }) : [];
   const contactLinksGroup = new Element(); contactLinksGroup.classes.add('contact-links'); contactLinksGroup.hidden = false;
+  const contactNotice = options.contactNotice ? new Element() : null;
+  const contactCancel = new Element(); const contactAgree = new Element(); const contactText = new Element();
+  contactCancel.tagName = contactAgree.tagName = 'BUTTON';
+  contactText.textContent = options.noticeText ?? '请先说明来意。\n请勿发送广告。';
+  if (contactNotice) {
+    contactNotice.append(contactText, contactCancel, contactAgree);
+    if (options.legacyDialog) contactNotice.showModal = undefined;
+    for (const link of contactLinks) { link.dataset.contactUrl = link.href; delete link.href; link.tagName = 'BUTTON'; }
+  }
   contactLinksGroup.append(...contactLinks);
   introContacts?.append(contactLinksGroup);
   const picker = new Element(); picker.isLanguagePicker = true;
@@ -79,13 +90,14 @@ async function browser(options = {}) {
   frame.contentWindow = {postMessage: (message, origin) => messages.push({message, origin})};
   const elements = {'[data-public-language]': main, '[data-language-picker]': picker, '.intro-contacts': introContacts, '[data-article-edit]': edit, '[data-public-editor]': dialog, '[data-public-editor-frame]': frame, '[data-article-editor-close]': close, '[data-back-link]': back, '.article-card': options.article === false ? null : new Element(), '.search-toggle': searchToggle, '[data-shortcuts]': help, '[data-layout-picker]': layout, '[data-next]': next, '[data-previous]': previous, '[data-article-toc]': options.headings ? toc : null, '[data-toc-links]': options.headings ? tocLinks : null};
   elements['[data-independent-page]'] = options.independent ? main : null;
+  Object.assign(elements, {'[data-contact-notice]': contactNotice, '[data-contact-cancel]': contactCancel, '[data-contact-agree]': contactAgree});
   const document = {readyState: 'complete', referrer: options.referrer || '', documentElement: new Element({supportedLanguages: languages.join(' ')}), body: new Element(), activeElement: null,
     querySelector: selector => elements[selector] || null,
-    querySelectorAll: selector => selector === '[data-article-edit]' ? edits : selector === '[data-admin-link]' ? [admin] : selector === '[data-back-link]' ? [back] : selector === '.language-links a[lang]' ? languageLinks : selector === '.article-body h2, .article-body h3' ? options.headings || [] : selector === '[id]' ? [...options.headings || [], ...options.idElements || []].filter(element => element.id) : [],
-    getElementById: id => id === 'site-search' ? search : id === 'search-text' ? input : null,
+    querySelectorAll: selector => selector === '[data-contact-url]' ? (contactNotice ? contactLinks : []) : selector === '[data-article-edit]' ? edits : selector === '[data-admin-link]' ? [admin] : selector === '[data-back-link]' ? [back] : selector === '.language-links a[lang]' ? languageLinks : selector === '.article-body h2, .article-body h3' ? options.headings || [] : selector === '[id]' ? [...options.headings || [], ...options.idElements || []].filter(element => element.id) : [],
+    getElementById: id => id === 'contact-notice-text' ? contactText : id === 'site-search' ? search : id === 'search-text' ? input : null,
     createElement: tagName => { const element = new Element(); element.tagName = tagName.toUpperCase(); return element; },
     addEventListener: (type, callback) => { (listeners[type] ??= []).push(callback); }, cookie: ''};
-  for (const element of [summary, ...languageLinks, ...contactLinks, input, searchToggle, helpSummary, layout, ...edits]) element.ownerDocument = document;
+  for (const element of [summary, ...languageLinks, ...contactLinks, contactCancel, contactAgree, input, searchToggle, helpSummary, layout, ...edits]) element.ownerDocument = document;
   const sessionStorage = options.sessionStorage || storage();
   const navigator = {doNotTrack: options.dnt, globalPrivacyControl: options.gpc,
     sendBeacon: (url, body) => { beacons.push({url, body}); return options.beacon !== false; }};
@@ -110,13 +122,89 @@ async function browser(options = {}) {
       return {ok: true};
     }};
   context.window = context;
+  context.open = (...args) => contactOpens.push(args);
+  context.confirm = message => { contactConfirms.push(message); return Boolean(options.confirmContact); };
   vm.runInNewContext(themeSource, context, {filename: 'public-theme.js'});
   vm.runInNewContext(source, context, {filename: 'public.js'});
   await new Promise(resolve => setImmediate(resolve));
-  return {location, document, main, picker, summary, languageLinks, introContacts, contactLinks, edit, edits, dialog, frame, close, admin, back, calls, beacons, messages, sessionStorage, search, searchToggle, input, help, helpSummary, layout, toc, tocLinks, next, previous, scrolls, timeouts,
+  return {location, document, main, picker, summary, languageLinks, introContacts, contactLinks, contactNotice, contactCancel, contactAgree, contactOpens, contactConfirms, edit, edits, dialog, frame, close, admin, back, calls, beacons, messages, sessionStorage, search, searchToggle, input, help, helpSummary, layout, toc, tocLinks, next, previous, scrolls, timeouts,
     emit: (type, event = {}) => { for (const callback of listeners[type] || []) callback(event); },
     payload: async () => JSON.parse(await beacons[0].body.text())};
 }
+
+test('contact notice never navigates before consent and cancel restores focus', async () => {
+  const page = await browser({contactNotice: true});
+  page.contactLinks[0].click();
+  assert.equal(page.contactNotice.open, true);
+  assert.equal(page.document.activeElement, page.contactCancel);
+  assert.equal(page.contactOpens.length, 0);
+  assert.equal(page.location.assigned, undefined);
+  page.contactCancel.click();
+  assert.equal(page.contactNotice.open, false);
+  assert.equal(page.document.activeElement, page.contactLinks[0]);
+  page.contactAgree.click();
+  assert.equal(page.contactOpens.length, 0);
+});
+
+test('contact consent opens only the selected destination and is required again', async () => {
+  const page = await browser({contactNotice: true});
+  page.contactLinks[0].click(); page.contactAgree.click();
+  assert.deepEqual(page.contactOpens, [['https://example.com/', '_blank', 'noopener,noreferrer']]);
+  page.contactAgree.click();
+  assert.equal(page.contactOpens.length, 1);
+  page.contactLinks[1].click();
+  assert.equal(page.contactNotice.open, true);
+  assert.equal(page.location.assigned, undefined);
+  page.contactAgree.click();
+  assert.equal(page.location.assigned, 'mailto:editor@example.com');
+  page.contactLinks[0].click();
+  assert.equal(page.contactNotice.open, true);
+  assert.equal(page.contactOpens.length, 1);
+});
+
+test('contact dialog owns Escape and article navigation shortcuts', async () => {
+  const page = await browser({contactNotice: true});
+  page.contactLinks[0].click();
+  for (const key of ['Escape', 'ArrowLeft', 'ArrowRight', '/', '?']) {
+    page.emit('keydown', {key, target: page.contactNotice, preventDefault() { throw Error('article shortcut ran'); }});
+  }
+  assert.equal(page.back.clicks + page.previous.clicks + page.next.clicks, 0);
+  page.contactNotice.emit('cancel'); page.contactNotice.close();
+  page.contactAgree.click();
+  assert.equal(page.contactOpens.length, 0);
+  assert.equal(page.document.activeElement, page.contactLinks[0]);
+});
+
+test('a delayed close event cannot clear a newly selected contact', async () => {
+  const page = await browser({contactNotice: true});
+  page.contactLinks[0].click(); page.contactCancel.click();
+  page.contactLinks[1].click(); page.contactNotice.emit('close');
+  assert.equal(page.contactNotice.open, true);
+  page.contactAgree.click();
+  assert.equal(page.location.assigned, 'mailto:editor@example.com');
+  assert.equal(page.contactOpens.length, 0);
+});
+
+test('contact notice rejects unsafe destinations and an empty notice', async () => {
+  const page = await browser({contactNotice: true});
+  for (const value of ['javascript:alert(1)', 'data:text/html,x', 'http://example.com', 'https://user:password@example.com', '/relative']) {
+    page.contactLinks[0].dataset.contactUrl = value;
+    page.contactLinks[0].click();
+    assert.equal(page.contactNotice.open, false);
+  }
+  const empty = await browser({contactNotice: true, noticeText: '   '});
+  empty.contactLinks[0].click();
+  assert.equal(empty.contactNotice.open, false);
+});
+
+test('legacy browsers still require explicit confirmation for each contact', async () => {
+  for (const confirmContact of [false, true]) {
+    const page = await browser({contactNotice: true, legacyDialog: true, confirmContact});
+    page.contactLinks[0].click(); page.contactLinks[0].click();
+    assert.equal(page.contactConfirms.length, 2);
+    assert.equal(page.contactOpens.length, confirmContact ? 2 : 0);
+  }
+});
 
 function editorMessage(page, type, session = new URL(page.frame.src, page.location.origin).searchParams.get('editor_session'), id = Number(new URL(page.frame.src, page.location.origin).searchParams.get('edit'))) {
   page.emit('message', {origin: page.location.origin, source: page.frame.contentWindow,

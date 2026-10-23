@@ -25,6 +25,54 @@
     themeMode = ['light', 'dark', 'system'].includes(event.newValue) ? event.newValue : 'system';
     applyTheme();
   });
+  function initializeContactNotice() {
+    const dialog = document.querySelector('[data-contact-notice]');
+    const buttons = document.querySelectorAll('[data-contact-url]');
+    if (!dialog || !buttons.length) return {isOpen: () => false};
+    const cancel = document.querySelector('[data-contact-cancel]');
+    const agree = document.querySelector('[data-contact-agree]');
+    const notice = document.getElementById('contact-notice-text');
+    let pending = null;
+    const destination = button => {
+      try {
+        const raw = button.dataset.contactUrl;
+        const url = new URL(raw);
+        return ['https:', 'mailto:'].includes(url.protocol) && !url.username && !url.password ? {raw, protocol: url.protocol} : null;
+      } catch { return null; }
+    };
+    const navigate = target => {
+      if (target.protocol === 'https:') window.open(target.raw, '_blank', 'noopener,noreferrer');
+      else location.assign(target.raw);
+    };
+    const clear = () => {
+      const trigger = pending;
+      pending = null;
+      trigger?.focus({preventScroll: true});
+    };
+    for (const button of buttons) {
+      button.addEventListener('click', () => {
+        if (!destination(button) || !notice?.textContent.trim() || dialog.open) return;
+        if (typeof dialog.showModal !== 'function') {
+          if (window.confirm(notice.textContent)) navigate(destination(button));
+          return;
+        }
+        pending = button;
+        dialog.showModal();
+        cancel?.focus({preventScroll: true});
+      });
+    }
+    cancel?.addEventListener('click', () => { clear(); dialog.close(); });
+    dialog.addEventListener('cancel', clear);
+    dialog.addEventListener('close', () => { if (!dialog.open) clear(); });
+    agree?.addEventListener('click', () => {
+      if (!dialog.open || !pending) return;
+      const target = destination(pending);
+      clear();
+      dialog.close();
+      if (target) navigate(target);
+    });
+    return {isOpen: () => dialog.open};
+  }
   function supportedLanguages() {
     const configured = (document.documentElement.dataset.supportedLanguages || '').split(/\s+/);
     const linked = Array.from(document.querySelectorAll('.language-links a[lang]'), link => link.getAttribute('lang'));
@@ -585,9 +633,11 @@
     }
   }
   document.querySelector('[data-scroll-top]')?.addEventListener('click', () => scrollTo({top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'}));
+  const contactUI = initializeContactNotice();
   const editorUI = initializePublicSession(archiveURL);
   document.addEventListener('keydown', event => {
     if (event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
+    if (contactUI.isOpen()) return;
     if (editorUI.isOpen()) {
       if (event.key === 'Escape') { event.preventDefault(); editorUI.requestClose(); }
       return;

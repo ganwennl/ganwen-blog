@@ -201,6 +201,15 @@ kbd{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid va
 .contact-link{display:inline-flex;flex:0 1 auto;align-items:center;gap:6px;min-width:0;max-width:100%;min-height:32px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;background:var(--subtle);color:var(--text);font-size:12px;font-weight:650;line-height:1.4}
 .contact-link:hover,.contact-link:focus-visible{background:var(--hover);border-color:var(--blue);color:var(--blue)}
 .contact-link:focus-visible{outline-offset:2px}
+.contact-notice-dialog{width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);padding:clamp(20px,4vw,32px);border:1px solid var(--border);border-radius:16px;background:var(--surface);color:var(--text);box-shadow:0 24px 100px #0005;overflow:auto;overscroll-behavior:contain}
+.contact-notice-dialog::backdrop{background:var(--backdrop);backdrop-filter:blur(4px)}
+.contact-notice-dialog h2{margin:0;font-size:22px;line-height:1.4}
+.contact-notice-intro{margin:10px 0 18px;color:var(--muted);font-size:14px}
+.contact-notice-text{white-space:pre-wrap;overflow-wrap:anywhere;padding:16px;border:1px solid var(--border);border-radius:10px;background:var(--subtle);max-height:50vh;overflow:auto;font-size:15px;line-height:1.8}
+.contact-notice-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;margin-top:22px}
+.contact-notice-actions button{min-height:44px;padding:10px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface)}
+.contact-notice-actions [data-contact-agree]{background:var(--blue);border-color:var(--blue);color:var(--surface);font-weight:650}
+.contact-notice-actions button:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .contact-copy{min-width:0}
 .contact-copy strong{font-size:12px;font-weight:650;overflow-wrap:anywhere}
 .contact-icon{width:18px;height:18px;flex-shrink:0;color:var(--blue)}

@@ -106,7 +106,12 @@
     "RSS 已停用": "RSS बंद है",
     "文章归档": "लेखों का संग्रह",
     "全部日期": "सभी तिथियाँ",
-    "全年": "पूरा वर्ष"
+    "全年": "पूरा वर्ष",
+    "联系前请阅读": "संपर्क करने से पहले पढ़ें",
+    "同意并继续联系": "सहमत हूँ, संपर्क के लिए आगे बढ़ें",
+    "取消": "रद्द करें",
+    "请启用 JavaScript 后查看联系提示。": "संपर्क सूचना देखने के लिए JavaScript चालू करें।",
+    "请先阅读以下提示，同意后继续。": "कृपया नीचे दी गई सूचना पढ़ें और आगे बढ़ने के लिए सहमति दें।"
   },
   "ar": {
     "联系": "تواصل",
@@ -215,7 +220,12 @@
     "RSS 已停用": "تم تعطيل RSS",
     "文章归档": "أرشيف المقالات",
     "全部日期": "كل التواريخ",
-    "全年": "السنة كاملة"
+    "全年": "السنة كاملة",
+    "联系前请阅读": "يرجى القراءة قبل التواصل",
+    "同意并继续联系": "أوافق وأتابع للتواصل",
+    "取消": "إلغاء",
+    "请启用 JavaScript 后查看联系提示。": "فعّل JavaScript لعرض تنبيه التواصل.",
+    "请先阅读以下提示，同意后继续。": "يرجى قراءة التنبيه أدناه والموافقة للمتابعة."
   },
   "fr": {
     "联系": "Contact",
@@ -324,7 +334,12 @@
     "RSS 已停用": "RSS désactivé",
     "文章归档": "Archives des articles",
     "全部日期": "Toutes les dates",
-    "全年": "Toute l’année"
+    "全年": "Toute l’année",
+    "联系前请阅读": "À lire avant de prendre contact",
+    "同意并继续联系": "Accepter et poursuivre le contact",
+    "取消": "Annuler",
+    "请启用 JavaScript 后查看联系提示。": "Activez JavaScript pour consulter l’avertissement de contact.",
+    "请先阅读以下提示，同意后继续。": "Veuillez lire l’avertissement ci-dessous et accepter pour continuer."
   },
   "bn": {
     "联系": "যোগাযোগ",
@@ -433,7 +448,12 @@
     "RSS 已停用": "RSS বন্ধ আছে",
     "文章归档": "লেখার আর্কাইভ",
     "全部日期": "সব তারিখ",
-    "全年": "পুরো বছর"
+    "全年": "পুরো বছর",
+    "联系前请阅读": "যোগাযোগের আগে পড়ুন",
+    "同意并继续联系": "সম্মতি দিয়ে যোগাযোগ চালিয়ে যান",
+    "取消": "বাতিল",
+    "请启用 JavaScript 后查看联系提示。": "যোগাযোগের বিজ্ঞপ্তি দেখতে JavaScript চালু করুন।",
+    "请先阅读以下提示，同意后继续。": "দয়া করে নিচের বিজ্ঞপ্তিটি পড়ুন এবং এগিয়ে যেতে সম্মতি দিন।"
   },
   "pt": {
     "联系": "Contato",
@@ -542,7 +562,12 @@
     "RSS 已停用": "RSS desativado",
     "文章归档": "Arquivo de artigos",
     "全部日期": "Todas as datas",
-    "全年": "Ano inteiro"
+    "全年": "Ano inteiro",
+    "联系前请阅读": "Leia antes de entrar em contato",
+    "同意并继续联系": "Concordar e continuar para o contato",
+    "取消": "Cancelar",
+    "请启用 JavaScript 后查看联系提示。": "Ative o JavaScript para ver o aviso de contato.",
+    "请先阅读以下提示，同意后继续。": "Leia o aviso abaixo e concorde para continuar."
   },
   "id": {
     "联系": "Kontak",
@@ -651,7 +676,12 @@
     "RSS 已停用": "RSS dinonaktifkan",
     "文章归档": "Arsip artikel",
     "全部日期": "Semua tanggal",
-    "全年": "Sepanjang tahun"
+    "全年": "Sepanjang tahun",
+    "联系前请阅读": "Baca sebelum menghubungi",
+    "同意并继续联系": "Setuju dan lanjutkan ke kontak",
+    "取消": "Batal",
+    "请启用 JavaScript 后查看联系提示。": "Aktifkan JavaScript untuk melihat pemberitahuan kontak.",
+    "请先阅读以下提示，同意后继续。": "Baca pemberitahuan di bawah dan setujui untuk melanjutkan."
   },
   "ur": {
     "联系": "رابطہ",
@@ -760,7 +790,12 @@
     "RSS 已停用": "RSS بند ہے",
     "文章归档": "مضامین کا محفوظہ",
     "全部日期": "تمام تاریخیں",
-    "全年": "پورا سال"
+    "全年": "پورا سال",
+    "联系前请阅读": "رابطہ کرنے سے پہلے پڑھیں",
+    "同意并继续联系": "اتفاق کریں اور رابطے کے لیے آگے بڑھیں",
+    "取消": "منسوخ کریں",
+    "请启用 JavaScript 后查看联系提示。": "رابطے کی اطلاع دیکھنے کے لیے JavaScript فعال کریں۔",
+    "请先阅读以下提示，同意后继续。": "براہ کرم نیچے دی گئی اطلاع پڑھیں اور آگے بڑھنے کے لیے اتفاق کریں۔"
   },
   "en": {
     "中国": "China",
@@ -838,7 +873,12 @@
     "页面不存在": "Page not found",
     "请求方法不支持": "Unsupported request method",
     "服务暂时不可用": "Service temporarily unavailable",
-    "RSS 已停用": "RSS is disabled"
+    "RSS 已停用": "RSS is disabled",
+    "联系前请阅读": "Please read before contacting",
+    "同意并继续联系": "Agree and continue to contact",
+    "取消": "Cancel",
+    "请启用 JavaScript 后查看联系提示。": "Enable JavaScript to view the contact notice.",
+    "请先阅读以下提示，同意后继续。": "Please read the notice below and agree to continue."
   },
   "nl": {
     "中国": "China",
@@ -916,7 +956,12 @@
     "页面不存在": "Pagina niet gevonden",
     "请求方法不支持": "Verzoekmethode niet ondersteund",
     "服务暂时不可用": "Dienst tijdelijk niet beschikbaar",
-    "RSS 已停用": "RSS is uitgeschakeld"
+    "RSS 已停用": "RSS is uitgeschakeld",
+    "联系前请阅读": "Lees dit voordat u contact opneemt",
+    "同意并继续联系": "Akkoord en doorgaan naar contact",
+    "取消": "Annuleren",
+    "请启用 JavaScript 后查看联系提示。": "Schakel JavaScript in om de contactmelding te bekijken.",
+    "请先阅读以下提示，同意后继续。": "Lees de onderstaande melding en ga akkoord om verder te gaan."
   },
   "es": {
     "中国": "China",
@@ -994,7 +1039,12 @@
     "页面不存在": "Página no encontrada",
     "请求方法不支持": "Método de solicitud no admitido",
     "服务暂时不可用": "Servicio temporalmente no disponible",
-    "RSS 已停用": "RSS desactivado"
+    "RSS 已停用": "RSS desactivado",
+    "联系前请阅读": "Lee antes de contactar",
+    "同意并继续联系": "Aceptar y continuar al contacto",
+    "取消": "Cancelar",
+    "请启用 JavaScript 后查看联系提示。": "Activa JavaScript para ver el aviso de contacto.",
+    "请先阅读以下提示，同意后继续。": "Lee el siguiente aviso y acepta para continuar."
   },
   "zh": {
     "跳至正文": "跳至正文",
@@ -1066,6 +1116,11 @@
     "页面不存在": "页面不存在",
     "请求方法不支持": "请求方法不支持",
     "服务暂时不可用": "服务暂时不可用",
-    "RSS 已停用": "RSS 已停用"
+    "RSS 已停用": "RSS 已停用",
+    "联系前请阅读": "联系前请阅读",
+    "同意并继续联系": "同意并继续联系",
+    "取消": "取消",
+    "请启用 JavaScript 后查看联系提示。": "请启用 JavaScript 后查看联系提示。",
+    "请先阅读以下提示，同意后继续。": "请先阅读以下提示，同意后继续。"
   }
 }

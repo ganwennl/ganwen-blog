@@ -161,5 +161,61 @@ class PublicationTests(unittest.TestCase):
             self.run_fixture(sitemap_translation=True)
 
 
+class ContactNoticeTests(unittest.TestCase):
+    contacts = (('x', 'https://x.com/ganwen_nl'), ('email', 'mailto:ganwen94@gmail.com'))
+    dialog = '<dialog data-contact-notice><p>请先说明来意。</p></dialog>'
+
+    def check(self, contacts, notice=''):
+        response_headers = Message()
+        response_headers['Content-Type'] = 'text/html; charset=utf-8'
+        body = ('<html lang="zh-Hans"><head><link rel="canonical" href="' + BASE + '/">'
+                '<link rel="alternate" hreflang="zh-Hans" href="' + BASE + '/">'
+                '</head><body>' + contacts + notice + '</body></html>')
+        response = verify.Response(200, response_headers, body.encode('utf-8'))
+        client = SimpleNamespace(fetch=lambda _path: response)
+        return verify.public_document(client, '/', BASE + '/', {'zh-Hans': BASE + '/'}, 'zh-Hans')
+
+    def buttons(self):
+        return ''.join(f'<button type="button" data-contact-kind="{kind}" '
+                       f'data-contact-url="{url}">联系</button>' for kind, url in self.contacts)
+
+    def links(self):
+        return ''.join(f'<a data-contact-kind="{kind}" href="{url}">联系</a>'
+                       for kind, url in self.contacts)
+
+    def test_disabled_notice_preserves_direct_contact_verification(self):
+        self.assertEqual(self.check(self.links()), set())
+
+    def test_enabled_notice_verifies_button_destinations_and_dialog(self):
+        self.assertEqual(self.check(self.buttons(), self.dialog), set())
+        parsed = verify.Document((self.buttons() + self.dialog).encode('utf-8'), '/')
+        self.assertEqual(parsed.contacts, {kind: {url} for kind, url in self.contacts})
+        self.assertEqual(parsed.contact_notice_dialogs, 1)
+        self.assertEqual(parsed.contact_buttons, 2)
+        self.assertEqual(parsed.contact_links, 0)
+
+    def test_enabled_notice_requires_exactly_one_real_dialog(self):
+        for notice in ('', '<div data-contact-notice>提示</div>', '<dialog>提示</dialog>',
+                       self.dialog + self.dialog):
+            with self.subTest(notice=notice):
+                with self.assertRaisesRegex(verify.CheckFailed, 'exactly one notice dialog'):
+                    self.check(self.buttons(), notice)
+
+    def test_enabled_notice_rejects_mixed_direct_contact_links(self):
+        with self.assertRaisesRegex(verify.CheckFailed, 'direct contact link bypasses'):
+            self.check(self.buttons() + self.links(), self.dialog)
+
+    def test_enabled_notice_requires_correct_destinations_and_button_type(self):
+        with self.assertRaisesRegex(verify.CheckFailed, 'original X contact missing'):
+            self.check(self.buttons().replace('https://x.com/ganwen_nl', 'https://x.com/other'), self.dialog)
+        with self.assertRaisesRegex(verify.CheckFailed, 'original email contact missing'):
+            self.check(self.buttons().replace('data-contact-url="mailto:', 'data-wrong="mailto:'), self.dialog)
+        for invalid in (self.buttons().replace('type="button"', 'type="submit"'),
+                        self.buttons().replace('<button ', '<button href="https://example.com/" ')):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(verify.CheckFailed, 'invalid contact consent button'):
+                    self.check(invalid, self.dialog)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -38,6 +38,15 @@ func (s *Store) ImportFile(ctx context.Context, path string) (int, error) {
 	if err = json.Unmarshal(raw, &e); err != nil {
 		return 0, err
 	}
+	var source struct {
+		Settings json.RawMessage `json:"settings"`
+	}
+	if err = json.Unmarshal(raw, &source); err != nil {
+		return 0, err
+	}
+	if err = validateContactNoticeSettingsJSON(source.Settings); err != nil {
+		return 0, err
+	}
 	if len(e.Posts) == 0 {
 		return 0, errors.New("empty WordPress export")
 	}

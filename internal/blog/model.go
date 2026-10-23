@@ -123,6 +123,8 @@ type SiteSettings struct {
 	HeaderImage               string                       `json:"header_image"`
 	AvatarURL                 string                       `json:"avatar_url"`
 	ContactLinks              []ContactLink                `json:"contact_links"`
+	ContactNoticeEnabled      bool                         `json:"contact_notice_enabled,omitempty"`
+	ContactNoticeText         string                       `json:"contact_notice_text,omitempty"`
 	SidebarAds                SidebarAdsConfig             `json:"sidebar_ads,omitzero"`
 	PublicDailyViews          *int64                       `json:"public_daily_views,omitempty"`
 	PublicVirtualViewsEnabled *bool                        `json:"public_virtual_views_enabled,omitempty"`

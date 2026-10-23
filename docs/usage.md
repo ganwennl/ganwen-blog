@@ -53,6 +53,8 @@ chmod +x ganwen start.sh
 
 后台“站点设置”可以修改标题、描述、布局、联系信息和虚拟访问量。新安装默认使用真实访问量；“启用虚拟访问量”开启后才使用展示用计算，可设置每日基数（0–1000000）。关闭该开关会停止主页总数和热门文章的虚拟计算。后台访问报告一直统计真实记录。
 
+“联系小组件”中的“联系前提示”可设置开关和最多 4000 字的纯文本提示。开启并保存后，访客每次点击配置的联系方式都要先阅读提示，点击“同意并继续联系”才打开目标；取消或按 Esc 留在原页。各语言使用同一份提示内容，关闭开关会保留文案。
+
 “侧栏设置”独立管理搜索、热门文章、站点统计、年月归档、分类、标签和广告，也可选择是否在文章页显示侧栏。勾选所需组件并保存，再点击“预览网站”查看效果；全部关闭后正文使用完整宽度。年月归档按文章发布日期生成，展开年份可选择全年或具体月份。已有站点保留原统计开关，并默认显示其他组件。
 
 排序默认使用系统顺序。开启“自定义排序”后，可拖动组件或使用上下移动按钮调整位置；保存后前台按此顺序显示，关闭的组件会跳过。切回默认排序不会清除已保存的自定义顺序。
@@ -111,6 +113,8 @@ Interface translations are included in the program and need no translation servi
 ## Settings, backup and development
 
 Fresh installations display recorded view counts. The admin site settings let you enable virtual counts and set their daily display target (0–1000000). Turning virtual counts off uses real counts for both totals and popular articles. Admin analytics always uses real records.
+
+The contact section includes an optional notice of up to 4,000 Unicode characters. When enabled, every configured contact button asks visitors to read the notice and agree before opening its destination. Cancel or Escape stays on the page. All languages show the same custom notice; disabling it retains the text.
 
 The dedicated sidebar settings page controls search, popular articles, site statistics, date archives, categories, tags and ads, as well as sidebar visibility on article pages. Save your selection and use “Preview website” to check it. Disabling all components gives the content the full width. Date archives use publication dates; expand a year to browse the full year or a particular month. Existing sites retain their statistics visibility setting and show the other components by default.
 

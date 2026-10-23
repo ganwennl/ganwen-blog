@@ -571,6 +571,8 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		SiteSettings
 		AvatarURL                 *string                       `json:"avatar_url"`
+		ContactNoticeEnabled      json.RawMessage               `json:"contact_notice_enabled"`
+		ContactNoticeText         json.RawMessage               `json:"contact_notice_text"`
 		DefaultLayout             json.RawMessage               `json:"default_layout"`
 		ArticleSidebarEnabled     json.RawMessage               `json:"article_sidebar_enabled"`
 		SidebarModules            json.RawMessage               `json:"sidebar_modules"`
@@ -598,6 +600,10 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		current.ContactLinks = links
+	}
+	if err := patchContactNoticeSettings(&current, input.ContactNoticeEnabled, input.ContactNoticeText); err != nil {
+		adminError(w, 400, err.Error())
+		return
 	}
 	if input.AvatarURL != nil {
 		avatar := strings.TrimSpace(*input.AvatarURL)

@@ -87,6 +87,18 @@ func TestAdminUISessionRecovery(t *testing.T) {
 	}
 }
 
+func TestAdminUIContactNoticeSettings(t *testing.T) {
+	node, err := exec.LookPath("node")
+	if err != nil {
+		t.Skip("Node.js unavailable")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if out, err := exec.CommandContext(ctx, node, filepath.Join("..", "..", "tests", "client", "test-admin-contact-notice-client.cjs")).CombinedOutput(); err != nil {
+		t.Fatalf("contact notice settings failed: %v\n%s", err, out)
+	}
+}
+
 func TestAdminUIPastedMedia(t *testing.T) {
 	node, err := exec.LookPath("node")
 	if err != nil {

@@ -51,6 +51,9 @@ func (s *Store) Settings(ctx context.Context) (SiteSettings, error) {
 	return out, err
 }
 func (s *Store) SaveSettings(ctx context.Context, p SiteSettings) error {
+	if err := validateContactNoticeSettings(p); err != nil {
+		return err
+	}
 	if err := validatePublicDailyViews(p.PublicDailyViews); err != nil {
 		return err
 	}

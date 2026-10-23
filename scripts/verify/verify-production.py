@@ -131,6 +131,10 @@ class Document(HTMLParser):
         self.hreflang = {}
         self.robots = []
         self.contacts = {}
+        self.contact_links = 0
+        self.contact_buttons = 0
+        self.contact_notice_dialogs = 0
+        self.invalid_contact_buttons = False
         self.current_taxonomies = []
         self.resources = set()
         try:
@@ -155,9 +159,18 @@ class Document(HTMLParser):
                 self.hreflang.setdefault(key, []).append(values.get('href', ''))
             if 'stylesheet' in relations and values.get('href'):
                 self.resources.add(values['href'])
-        if tag == 'a' and values.get('data-contact-kind'):
+        if tag == 'dialog' and 'data-contact-notice' in values:
+            self.contact_notice_dialogs += 1
+        if tag in ('a', 'button') and values.get('data-contact-kind'):
             kind = values['data-contact-kind']
-            value = values.get('href', '')
+            if tag == 'button':
+                self.contact_buttons += 1
+                value = values.get('data-contact-url', '')
+                if values.get('type') != 'button' or not value or 'href' in values:
+                    self.invalid_contact_buttons = True
+            else:
+                self.contact_links += 1
+                value = values.get('href', '')
             self.contacts.setdefault(kind, set()).add(
                 email_contact_href(value) if kind == 'email' else value)
         if tag == 'a' and values.get('aria-current') == 'page':
@@ -216,6 +229,11 @@ def public_document(client, path, canonical, expected_links, html_lang):
             'original X contact missing')
     require('mailto:ganwen94@gmail.com' in document.contacts.get('email', set()), path,
             'original email contact missing')
+    if document.contact_buttons:
+        require(not document.invalid_contact_buttons, path, 'invalid contact consent button')
+        require(document.contact_notice_dialogs == 1, path,
+                'contact consent buttons require exactly one notice dialog')
+        require(document.contact_links == 0, path, 'direct contact link bypasses contact notice')
     return document.resources
 
 
