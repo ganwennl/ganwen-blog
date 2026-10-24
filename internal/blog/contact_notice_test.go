@@ -188,6 +188,10 @@ func TestContactNoticeImportsPreserveValidAndLegacySettings(t *testing.T) {
 			settings := SiteSettings{Title: "导入设置", BaseURL: "https://www.ganwen.nl", PostsPerPage: 8, ContactNoticeEnabled: enabled}
 			if enabled {
 				settings.ContactNoticeText = "请先说明来意。\n拒绝广告。😀"
+				settings.ContactNoticeTranslations = map[string]ContactNoticeTranslation{
+					"en": {Text: "Please explain why you are contacting me. No advertising.", SourceHash: contactNoticeSourceHash(settings.ContactNoticeText)},
+					"fr": {Text: "Ancien avis", SourceHash: contactNoticeSourceHash("旧提示")},
+				}
 			}
 			var raw []byte
 			if wordpress {

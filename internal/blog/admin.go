@@ -249,6 +249,11 @@ func (a *Admin) serve(w http.ResponseWriter, r *http.Request) {
 			a.translateFooter(w, r)
 			return
 		}
+	case "/admin/api/contact-notice/translate":
+		if r.Method == http.MethodPost {
+			a.translateContactNotice(w, r)
+			return
+		}
 	case "/admin/api/upload":
 		if r.Method == http.MethodPost {
 			a.upload(w, r)
@@ -573,6 +578,7 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 		AvatarURL                 *string                       `json:"avatar_url"`
 		ContactNoticeEnabled      json.RawMessage               `json:"contact_notice_enabled"`
 		ContactNoticeText         json.RawMessage               `json:"contact_notice_text"`
+		ContactNoticeTranslations json.RawMessage               `json:"contact_notice_translations"`
 		DefaultLayout             json.RawMessage               `json:"default_layout"`
 		ArticleSidebarEnabled     json.RawMessage               `json:"article_sidebar_enabled"`
 		SidebarModules            json.RawMessage               `json:"sidebar_modules"`
@@ -601,7 +607,7 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 		}
 		current.ContactLinks = links
 	}
-	if err := patchContactNoticeSettings(&current, input.ContactNoticeEnabled, input.ContactNoticeText); err != nil {
+	if err := patchContactNoticeSettings(&current, input.ContactNoticeEnabled, input.ContactNoticeText, input.ContactNoticeTranslations); err != nil {
 		adminError(w, 400, err.Error())
 		return
 	}

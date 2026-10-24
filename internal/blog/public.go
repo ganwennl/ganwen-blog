@@ -521,7 +521,7 @@ func newPublicView(s SiteSettings, lang string) publicView {
 	v.ContactHeading = publicText(lang, "保持联系", "Stay in touch", "Blijf in contact", "Sigamos en contacto")
 	v.Contacts = publicContactLinks(s.ContactLinks, lang)
 	v.ContactNoticeEnabled = s.ContactNoticeEnabled
-	v.ContactNoticeText = s.ContactNoticeText
+	v.ContactNoticeText = publicContactNoticeText(s, lang)
 	if lang == "zh" {
 		v.HTMLLang = "zh-Hans"
 	}
