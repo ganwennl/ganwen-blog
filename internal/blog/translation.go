@@ -71,6 +71,19 @@ type TranslationJob struct {
 	NextAttemptAt string `json:"next_attempt_at"`
 }
 
+// Counts describe this request, rather than historical completed jobs.
+type TranslationQueueResult struct {
+	OK        bool              `json:"ok"`
+	Queued    int               `json:"queued"`
+	Active    int               `json:"active"`
+	Skipped   int               `json:"skipped"`
+	Protected int               `json:"protected"`
+	UpToDate  int               `json:"up_to_date"`
+	Failed    int               `json:"failed"`
+	Reason    string            `json:"reason,omitempty"`
+	Languages map[string]string `json:"languages"`
+}
+
 type persistedTranslationConfig struct {
 	Provider        string `json:"provider,omitempty"`
 	Endpoint        string `json:"endpoint"`
@@ -515,10 +528,15 @@ func TranslationContentHash(v Translation) string {
 // force is an explicit administrator request to regenerate existing translations.
 // Even force never overwrites an edit made after the job was queued.
 func (t *Translator) Queue(ctx context.Context, p Post, force bool) error {
+	_, err := t.QueueWithResult(ctx, p, force)
+	return err
+}
+
+func (t *Translator) QueueWithResult(ctx context.Context, p Post, force bool) (TranslationQueueResult, error) {
 	t.cfgMu.RLock()
 	defer t.cfgMu.RUnlock()
 	if t.cfg.ExecutionMode == translationModePaused {
-		return errTranslationDisabled
+		return TranslationQueueResult{}, errTranslationDisabled
 	}
 	return t.queue(ctx, p.ID, force, 0)
 }
@@ -531,24 +549,33 @@ func (t *Translator) QueueAutomatic(ctx context.Context, p Post) error {
 	if t.cfg.ExecutionMode != translationModeAutomatic {
 		return nil
 	}
-	return t.queue(ctx, p.ID, false, translationQuietPeriod)
+	_, err := t.queue(ctx, p.ID, false, translationQuietPeriod)
+	return err
 }
 
-func (t *Translator) queue(ctx context.Context, postID int64, force bool, delay time.Duration) error {
+func (t *Translator) queue(ctx context.Context, postID int64, force bool, delay time.Duration) (TranslationQueueResult, error) {
+	result := TranslationQueueResult{Languages: make(map[string]string)}
 	t.store.writeMu.Lock()
 	defer t.store.writeMu.Unlock()
 	p, err := t.store.GetPost(ctx, postID)
 	if err != nil {
-		return err
+		return result, err
 	}
 	hash := SourceHash(p)
 	tooLarge := len(p.Title)+len(p.ContentHTML)+len(p.ExcerptHTML) > translationMaxInput
 	eligible := p.Status == "publish" && (p.Type == "post" || p.Type == "page") && hasChinese(p.Title+p.ContentHTML+p.ExcerptHTML) && !tooLarge
+	if p.Status != "publish" {
+		result.Reason = "not_public"
+	} else if p.Type != "post" && p.Type != "page" {
+		result.Reason = "unsupported_type"
+	} else if !hasChinese(p.Title + p.ContentHTML + p.ExcerptHTML) {
+		result.Reason = "no_chinese"
+	}
 	now := time.Now().UTC()
 	due := now.Add(delay).Format(translationTimeFormat)
 	tx, err := t.store.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return result, err
 	}
 	defer tx.Rollback()
 	obsolete := "UPDATE translation_jobs SET status='cancelled',last_error=? WHERE post_id=? AND status IN ('queued','retry','running')"
@@ -558,7 +585,7 @@ func (t *Translator) queue(ctx context.Context, postID int64, force bool, delay 
 		args = append(args, hash)
 	}
 	if _, err := tx.ExecContext(ctx, obsolete, args...); err != nil {
-		return err
+		return result, err
 	}
 	baselines := make(map[string]string)
 	for _, lang := range translationLanguages() {
@@ -566,36 +593,58 @@ func (t *Translator) queue(ctx context.Context, postID int64, force bool, delay 
 		baseline := translationFingerprint(existing, ok)
 		baselines[lang] = baseline
 		if _, err := tx.ExecContext(ctx, `UPDATE translation_jobs SET status='cancelled',last_error=? WHERE post_id=? AND language=? AND source_hash=? AND baseline_hash<>? AND status IN ('queued','retry','running')`, errTranslationStale.Error(), p.ID, lang, hash, baseline); err != nil {
-			return err
+			return result, err
 		}
 		if !eligible {
+			result.Skipped++
+			result.Languages[lang] = result.Reason
 			continue
 		}
 		if !force && ok {
 			machineUnchanged := existing.MachineHash != "" && existing.MachineHash == TranslationContentHash(existing)
-			if existing.SourceHash == hash || !machineUnchanged {
+			if existing.SourceHash == hash {
+				result.Skipped++
+				result.UpToDate++
+				result.Languages[lang] = "up_to_date"
+				continue
+			}
+			if !machineUnchanged {
+				result.Skipped++
+				result.Protected++
+				result.Languages[lang] = "protected"
 				continue
 			}
 		}
 		var status string
 		err = tx.QueryRowContext(ctx, `SELECT status FROM translation_jobs WHERE post_id=? AND language=? AND source_hash=?`, p.ID, lang, hash).Scan(&status)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			return err
+			return result, err
 		}
 		if delay == 0 && (status == "queued" || status == "retry") {
 			// Repeated clicks preserve attempts and the baseline of an active job.
 			if _, err := tx.ExecContext(ctx, `UPDATE translation_jobs SET next_attempt_at=? WHERE post_id=? AND language=? AND source_hash=? AND status IN ('queued','retry') AND next_attempt_at>?`, due, p.ID, lang, hash, due); err != nil {
-				return err
+				return result, err
 			}
 		}
 		reactivate := force || status == "cancelled" || status == "completed"
 		_, err = tx.ExecContext(ctx, t.store.translationQueueSQL(reactivate), p.ID, lang, hash, due, baseline)
 		if err != nil {
-			return err
+			return result, err
+		}
+		if status == "queued" || status == "retry" || status == "running" {
+			result.Active++
+			result.Languages[lang] = "active"
+		} else if status == "failed" && !reactivate {
+			result.Skipped++
+			result.Failed++
+			result.Languages[lang] = "failed"
+		} else {
+			result.Queued++
+			result.Languages[lang] = "queued"
 		}
 	}
 	if err := tx.Commit(); err != nil {
-		return err
+		return result, err
 	}
 	t.activeMu.Lock()
 	for _, active := range t.active {
@@ -606,9 +655,10 @@ func (t *Translator) queue(ctx context.Context, postID int64, force bool, delay 
 	t.activeMu.Unlock()
 	t.signal()
 	if tooLarge {
-		return errors.New("article exceeds translation size limit")
+		return result, errors.New("article exceeds translation size limit")
 	}
-	return nil
+	result.OK = true
+	return result, nil
 }
 
 func (t *Translator) Status(ctx context.Context) ([]TranslationJob, error) {
@@ -1022,7 +1072,7 @@ func newTranslationDocument(source string, plain bool, prefix string, author str
 	d := &translationDocument{plain: plain}
 	pattern := protectedTranslationText
 	if author != "" {
-		pattern = regexp.MustCompile(regexp.QuoteMeta(author) + "|" + protectedTranslationText.String())
+		pattern = regexp.MustCompile(protectedTranslationText.String() + "|" + regexp.QuoteMeta(author))
 	}
 	addText := func(raw string) {
 		decoded := raw
@@ -1052,9 +1102,23 @@ func newTranslationDocument(source string, plain bool, prefix string, author str
 				protected[token] = value
 				return token
 			}
-			text := pattern.ReplaceAllStringFunc(trimmed, protect)
+			var text strings.Builder
+			last := 0
+			for _, span := range pattern.FindAllStringIndex(trimmed, -1) {
+				value := trimmed[span[0]:span[1]]
+				text.WriteString(trimmed[last:span[0]])
+				// A short author name must not split a longer name (甘文 ->
+				// KEEP + 文), whose remaining character a service may omit.
+				if value == author && protectedTranslationText.FindString(value) != value && !translationAuthorBoundary(trimmed, span[0], span[1]) {
+					text.WriteString(value)
+				} else {
+					text.WriteString(protect(value))
+				}
+				last = span[1]
+			}
+			text.WriteString(trimmed[last:])
 			id := prefix + "_" + strconv.Itoa(len(d.slots))
-			d.slots = append(d.slots, translationSlot{ID: id, Text: text})
+			d.slots = append(d.slots, translationSlot{ID: id, Text: text.String()})
 			d.segments = append(d.segments, translationSegment{slotID: id, prefix: leading, suffix: trailing, protected: protected})
 		}
 	}
@@ -1112,6 +1176,23 @@ func newTranslationDocument(source string, plain bool, prefix string, author str
 		return nil, errors.New("article has too many translation fragments")
 	}
 	return d, nil
+}
+
+func translationAuthorBoundary(text string, start, end int) bool {
+	word := func(r rune) bool { return unicode.IsLetter(r) || unicode.IsNumber(r) || unicode.IsMark(r) || r == '_' }
+	if start > 0 {
+		r, _ := utf8.DecodeLastRuneInString(text[:start])
+		if word(r) {
+			return false
+		}
+	}
+	if end < len(text) {
+		r, _ := utf8.DecodeRuneInString(text[end:])
+		if word(r) {
+			return false
+		}
+	}
+	return true
 }
 
 func splitTranslationText(text string, maxRunes int) []string {

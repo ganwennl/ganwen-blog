@@ -512,7 +512,13 @@ func (a *Admin) queueTranslation(w http.ResponseWriter, r *http.Request) {
 		adminError(w, 503, "翻译服务尚未启用")
 		return
 	}
-	if err = a.app.Translator.Queue(r.Context(), p, v.Force); err != nil {
+	configuration := a.app.Translator.secretConfiguration()
+	if configuration.ExecutionMode != translationModePaused && (configuration.Endpoint == "" || configuration.Model == "" || configuration.APIKey == "") {
+		adminError(w, 400, "翻译服务未配置或当前无法加入队列")
+		return
+	}
+	result, err := a.app.Translator.QueueWithResult(r.Context(), p, v.Force)
+	if err != nil {
 		if errors.Is(err, errTranslationDisabled) {
 			adminError(w, 400, "外部翻译已暂停。当前为仅人工翻译模式；可手动编辑译文，或在翻译设置中配置所需服务并启用手动或自动模式。")
 			return
@@ -520,7 +526,7 @@ func (a *Admin) queueTranslation(w http.ResponseWriter, r *http.Request) {
 		adminError(w, 400, "翻译服务未配置或当前无法加入队列")
 		return
 	}
-	adminJSON(w, 200, map[string]bool{"ok": true})
+	adminJSON(w, 200, result)
 }
 func (a *Admin) translationConfig(w http.ResponseWriter, r *http.Request) {
 	if a.app.Translator == nil {
