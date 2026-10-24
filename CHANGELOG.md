@@ -1,5 +1,17 @@
 # 更新日志 / Changelog
 
+## v1.0.4 — 2026-10-24
+
+- 翻译按钮显示实际排队、已有任务和跳过原因；重新翻译需明确确认覆盖已有译文。
+- 修复短作者名拆断完整姓名、中文万亿数量单位被错误遮蔽，以及图片说明和链接提示漏译。
+- 长文采用较小翻译批次，结构或片段不完整时按批拆分重试，保留取消及并发编辑保护。
+- 更新程序保留文章、已有译文、公开或私密状态、设置与媒体。
+
+- Translation requests report actual queue counts and skipped languages; replacing existing translations requires explicit confirmation.
+- Fixed partial name protection, Chinese numeric magnitude handling, and missing image or link descriptions.
+- Smaller translation batches split on incomplete structured responses while retaining cancellation and concurrent edit protection.
+- Program updates preserve articles, translations, visibility, settings and media.
+
 ## v1.0.3 — 2026-10-24
 
 - 修复旧对齐属性与内联样式冲突造成的编辑器、预览和前台显示不一致。

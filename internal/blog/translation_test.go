@@ -739,7 +739,7 @@ func TestTranslationPreservesHTMLMediaLinksNumbersAndCode(t *testing.T) {
 	if stored.ContentHTML != content {
 		t.Fatal("source HTML changed")
 	}
-	for _, want := range []string{`<!-- 中文评论保留 -->`, `<p class='keep' data-src="原属性">`, `href='https://ganwen.nl/?p=42'`, `<img src='/wp-content/uploads/2026/a.jpg' alt='中文图片' loading='lazy'>`, `<pre><code>中文 code &lt;tag&gt; 123</code></pre>`, `<script>const x = '中文';</script>`, `<style>.中文 { color: red; }</style>`, `2026.50`, `Vic Wong`, `甘`, `&amp;`} {
+	for _, want := range []string{`<!-- 中文评论保留 -->`, `<p class='keep' data-src="原属性">`, `href='https://ganwen.nl/?p=42'`, `<img src='/wp-content/uploads/2026/a.jpg' alt='ChineseImage' loading='lazy'>`, `<pre><code>中文 code &lt;tag&gt; 123</code></pre>`, `<script>const x = '中文';</script>`, `<style>.中文 { color: red; }</style>`, `2026.50`, `Vic Wong`, `甘`, `&amp;`} {
 		if !strings.Contains(translated.ContentHTML, want) {
 			t.Errorf("translation changed protected content: %s", want)
 		}
@@ -971,7 +971,11 @@ func TestTranslationRejectsMalformedSlotsAndLostProtectedValues(t *testing.T) {
 				case "extra":
 					out = append(out, translationSlot{ID: "unrequested", Text: "extra"})
 				case "duplicate":
-					out[len(out)-1] = out[0]
+					if len(out) == 1 {
+						out = append(out, out[0])
+					} else {
+						out[len(out)-1] = out[0]
+					}
 				case "number":
 					for i := range out {
 						out[i].Text = strings.ReplaceAll(out[i].Text, "⟪GW_KEEP_0⟫", "changed")
