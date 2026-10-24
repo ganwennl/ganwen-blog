@@ -565,7 +565,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "联系提示译文版本不正确，请重新编辑或翻译",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改",
-    "联系提示译文格式不正确": "联系提示译文格式不正确"
+    "联系提示译文格式不正确": "联系提示译文格式不正确",
+    "清除全部格式": "清除全部格式",
+    "清除全文文字格式和链接，保留图片和段落": "清除全文文字格式和链接，保留图片和段落",
+    "撤销清除格式": "撤销清除格式",
+    "恢复清理前的正文，保留图片和段落": "恢复清理前的正文，保留图片和段落"
   },
   "nl": {
     "甘文 · 内容管理": "Ganwen · Blogbeheer",
@@ -1133,7 +1137,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "De versie van de vertaalde contactmelding is ongeldig. Bewerk of vertaal deze opnieuw",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "Voer de oorspronkelijke contactmelding in als platte tekst van maximaal 4000 tekens en kies een ondersteunde vertaaltaal",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "Het vertalen van de contactmelding is mislukt. Controleer de instellingen van de vertaaldienst en probeer opnieuw. De oorspronkelijke tekst en bestaande vertalingen zijn niet gewijzigd",
-    "联系提示译文格式不正确": "De indeling van de vertaling van de contactmelding is ongeldig."
+    "联系提示译文格式不正确": "De indeling van de vertaling van de contactmelding is ongeldig.",
+    "清除全部格式": "Alle opmaak verwijderen",
+    "清除全文文字格式和链接，保留图片和段落": "Verwijder tekstopmaak en links uit het hele artikel; behoud afbeeldingen en alinea’s",
+    "撤销清除格式": "Opmaak wissen ongedaan maken",
+    "恢复清理前的正文，保留图片和段落": "Herstel de inhoud van vóór het wissen, inclusief afbeeldingen en alinea’s"
   },
   "en": {
     "甘文 · 内容管理": "Ganwen · Blog admin",
@@ -1701,7 +1709,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "The contact notice translation version is invalid. Edit or translate it again.",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "Enter the original contact notice text, up to 4000 characters, and choose a supported translation language.",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "Contact notice translation failed. Check the translation service settings and try again. The original text and existing translations are unchanged.",
-    "联系提示译文格式不正确": "The contact-notice translation format is invalid."
+    "联系提示译文格式不正确": "The contact-notice translation format is invalid.",
+    "清除全部格式": "Clear all formatting",
+    "清除全文文字格式和链接，保留图片和段落": "Remove text formatting and links throughout the article, keeping images and paragraphs",
+    "撤销清除格式": "Undo formatting cleanup",
+    "恢复清理前的正文，保留图片和段落": "Restore the content from before cleanup, including images and paragraphs"
   },
   "hi": {
     "甘文 · 内容管理": "Ganwen · ब्लॉग प्रशासन",
@@ -2269,7 +2281,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "संपर्क सूचना के अनुवाद का संस्करण मान्य नहीं है। इसे फिर से संपादित करें या अनुवाद करें।",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "अधिकतम 4000 अक्षरों का मूल संपर्क सूचना पाठ लिखें और अनुवाद के लिए समर्थित भाषा चुनें।",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "संपर्क सूचना का अनुवाद नहीं हो सका। अनुवाद सेवा की सेटिंग जाँचकर फिर कोशिश करें। मूल पाठ और पहले से मौजूद अनुवाद नहीं बदले हैं।",
-    "联系提示译文格式不正确": "संपर्क सूचना के अनुवाद का प्रारूप मान्य नहीं है।"
+    "联系提示译文格式不正确": "संपर्क सूचना के अनुवाद का प्रारूप मान्य नहीं है।",
+    "清除全部格式": "सभी स्वरूपण हटाएँ",
+    "清除全文文字格式和链接，保留图片和段落": "पूरे लेख से पाठ का स्वरूपण और लिंक हटाएँ; चित्र और अनुच्छेद बनाए रखें",
+    "撤销清除格式": "स्वरूप हटाना पूर्ववत करें",
+    "恢复清理前的正文，保留图片和段落": "सफाई से पहले की सामग्री, चित्रों और अनुच्छेदों सहित, पुनर्स्थापित करें"
   },
   "es": {
     "甘文 · 内容管理": "Ganwen · Administración del blog",
@@ -2837,7 +2853,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "La versión de la traducción del aviso de contacto no es válida. Vuelve a editarla o traducirla.",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "Escribe el texto original del aviso de contacto, de hasta 4000 caracteres, y elige un idioma de traducción compatible.",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "No se pudo traducir el aviso de contacto. Revisa los ajustes del servicio de traducción e inténtalo de nuevo. El texto original y las traducciones existentes no han cambiado.",
-    "联系提示译文格式不正确": "El formato de la traducción del aviso de contacto no es válido."
+    "联系提示译文格式不正确": "El formato de la traducción del aviso de contacto no es válido.",
+    "清除全部格式": "Borrar todo el formato",
+    "清除全文文字格式和链接，保留图片和段落": "Quitar el formato de texto y los enlaces de todo el artículo, conservando imágenes y párrafos",
+    "撤销清除格式": "Deshacer limpieza de formato",
+    "恢复清理前的正文，保留图片和段落": "Restaurar el contenido anterior a la limpieza, incluidas las imágenes y los párrafos"
   },
   "ar": {
     "甘文 · 内容管理": "Ganwen · لوحة إدارة المدونة",
@@ -3405,7 +3425,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "إصدار ترجمة إشعار التواصل غير صحيح؛ أعد تحريرها أو ترجمتها",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "أدخل نصًا أصليًا للتذييل لا يزيد عن 4000 حرف، واختر لغة ترجمة مدعومة",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "فشلت ترجمة إشعار التواصل؛ تحقق من إعدادات خدمة الترجمة ثم أعد المحاولة؛ لم يتغير النص الأصلي أو الترجمات الحالية",
-    "联系提示译文格式不正确": "تنسيق ترجمة إشعار التواصل غير صحيح."
+    "联系提示译文格式不正确": "تنسيق ترجمة إشعار التواصل غير صحيح.",
+    "清除全部格式": "مسح كل التنسيقات",
+    "清除全文文字格式和链接，保留图片和段落": "إزالة تنسيق النص والروابط من المقال كله مع الاحتفاظ بالصور والفقرات",
+    "撤销清除格式": "التراجع عن إزالة التنسيق",
+    "恢复清理前的正文，保留图片和段落": "استعادة المحتوى السابق للتنظيف، بما في ذلك الصور والفقرات"
   },
   "fr": {
     "甘文 · 内容管理": "Ganwen · Administration du blog",
@@ -3973,7 +3997,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "La version de la traduction du message de contact n’est pas valide. Modifiez-la ou traduisez-la à nouveau.",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "Saisissez le texte d’origine du message de contact, de 4000 caractères maximum, et choisissez une langue de traduction prise en charge.",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "La traduction du message de contact a échoué. Vérifiez les paramètres du service de traduction, puis réessayez. Le texte d’origine et les traductions existantes n’ont pas été modifiés.",
-    "联系提示译文格式不正确": "Le format de la traduction du message de contact n’est pas valide."
+    "联系提示译文格式不正确": "Le format de la traduction du message de contact n’est pas valide.",
+    "清除全部格式": "Effacer toute la mise en forme",
+    "清除全文文字格式和链接，保留图片和段落": "Supprimer la mise en forme du texte et les liens de tout l’article en conservant les images et les paragraphes",
+    "撤销清除格式": "Annuler le nettoyage du formatage",
+    "恢复清理前的正文，保留图片和段落": "Rétablir le contenu avant le nettoyage, y compris les images et les paragraphes"
   },
   "bn": {
     "甘文 · 内容管理": "গানওয়েন · ব্লগের প্রশাসন",
@@ -4541,7 +4569,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "যোগাযোগের বিজ্ঞপ্তির অনুবাদের সংস্করণ সঠিক নয়। আবার সম্পাদনা বা অনুবাদ করুন",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "যোগাযোগের বিজ্ঞপ্তির মূল লেখা সর্বোচ্চ 4000 অক্ষরে লিখুন এবং সমর্থিত অনুবাদের ভাষা বেছে নিন",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "যোগাযোগের বিজ্ঞপ্তি অনুবাদ হয়নি। সেবার সেটিংস পরীক্ষা করে আবার চেষ্টা করুন। মূল লেখা ও আগের অনুবাদ বদলায়নি",
-    "联系提示译文格式不正确": "যোগাযোগের বিজ্ঞপ্তির অনুবাদের বিন্যাস সঠিক নয়।"
+    "联系提示译文格式不正确": "যোগাযোগের বিজ্ঞপ্তির অনুবাদের বিন্যাস সঠিক নয়।",
+    "清除全部格式": "সব বিন্যাস সরান",
+    "清除全文文字格式和链接，保留图片和段落": "পুরো নিবন্ধের লেখার বিন্যাস ও লিঙ্ক সরান; ছবি ও অনুচ্ছেদ রাখুন",
+    "撤销清除格式": "বিন্যাস পরিষ্কার পূর্বাবস্থায় ফেরান",
+    "恢复清理前的正文，保留图片和段落": "ছবি ও অনুচ্ছেদসহ পরিষ্কারের আগের বিষয়বস্তু ফিরিয়ে আনুন"
   },
   "pt": {
     "甘文 · 内容管理": "Ganwen · Administração do blog",
@@ -5109,7 +5141,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "A versão da tradução do aviso de contato é inválida. Edite ou traduza novamente.",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "Digite o texto original do aviso de contato, com até 4000 caracteres, e escolha um idioma de tradução compatível.",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "Não foi possível traduzir o aviso de contato. Confira as configurações do serviço de tradução e tente novamente. O texto original e as traduções existentes não foram alterados.",
-    "联系提示译文格式不正确": "O formato da tradução do aviso de contato é inválido."
+    "联系提示译文格式不正确": "O formato da tradução do aviso de contato é inválido.",
+    "清除全部格式": "Limpar toda a formatação",
+    "清除全文文字格式和链接，保留图片和段落": "Remover a formatação do texto e os links de todo o artigo, mantendo imagens e parágrafos",
+    "撤销清除格式": "Desfazer limpeza de formatação",
+    "恢复清理前的正文，保留图片和段落": "Restaurar o conteúdo anterior à limpeza, incluindo imagens e parágrafos"
   },
   "id": {
     "甘文 · 内容管理": "Ganwen · Pengelolaan blog",
@@ -5677,7 +5713,11 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "Versi terjemahan pemberitahuan kontak tidak valid. Edit atau terjemahkan kembali",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "Masukkan teks asli pemberitahuan kontak maksimal 4000 karakter dan pilih bahasa terjemahan yang didukung",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "Terjemahan pemberitahuan kontak gagal. Periksa pengaturan layanan terjemahan lalu coba lagi. Teks asli dan terjemahan yang sudah ada tidak berubah",
-    "联系提示译文格式不正确": "Format terjemahan pemberitahuan kontak tidak valid."
+    "联系提示译文格式不正确": "Format terjemahan pemberitahuan kontak tidak valid.",
+    "清除全部格式": "Hapus semua pemformatan",
+    "清除全文文字格式和链接，保留图片和段落": "Hapus format teks dan tautan di seluruh artikel, dengan tetap mempertahankan gambar dan paragraf",
+    "撤销清除格式": "Urungkan pembersihan format",
+    "恢复清理前的正文，保留图片和段落": "Pulihkan isi sebelum pembersihan, termasuk gambar dan paragraf"
   },
   "ur": {
     "甘文 · 内容管理": "Ganwen · بلاگ انتظامیہ",
@@ -6245,6 +6285,10 @@
     "联系提示译文版本不正确，请重新编辑或翻译": "رابطے کی اطلاع کے ترجمے کا ورژن درست نہیں۔ دوبارہ ترمیم یا ترجمہ کریں",
     "请填写不超过 4000 字的联系提示原文，并选择支持的翻译语言": "رابطے کی اطلاع کا اصل متن زیادہ سے زیادہ 4000 حروف میں لکھیں اور ترجمے کی معاون زبان منتخب کریں",
     "联系提示翻译失败，请检查翻译服务配置后重试；原文和已有译文未更改": "رابطے کی اطلاع کا ترجمہ نہیں ہوا۔ سروس کی ترتیبات جانچ کر دوبارہ کوشش کریں۔ اصل متن اور موجودہ ترجمے برقرار ہیں",
-    "联系提示译文格式不正确": "رابطے کی اطلاع کے ترجمے کا فارمیٹ درست نہیں۔"
+    "联系提示译文格式不正确": "رابطے کی اطلاع کے ترجمے کا فارمیٹ درست نہیں۔",
+    "清除全部格式": "تمام فارمیٹنگ صاف کریں",
+    "清除全文文字格式和链接，保留图片和段落": "پورے مضمون سے متن کی فارمیٹنگ اور روابط ہٹائیں، تصاویر اور پیراگراف برقرار رکھیں",
+    "撤销清除格式": "فارمیٹنگ کی صفائی واپس لیں",
+    "恢复清理前的正文，保留图片和段落": "صفائی سے پہلے کا مواد، تصاویر اور پیراگراف سمیت، بحال کریں"
   }
 }

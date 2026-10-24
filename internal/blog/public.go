@@ -1244,12 +1244,31 @@ func parsePublicPlainText(input string) string {
 }
 
 func publicTextAlignment(value string) string {
-	value = strings.TrimSpace(strings.TrimSuffix(strings.ToLower(strings.TrimSpace(value)), "!important"))
-	switch value {
-	case "left", "center", "right", "justify":
-		return value
+	value, _ = publicTextAlignmentDeclaration(value)
+	return value
+}
+
+func publicTextAlignmentDeclaration(value string) (string, bool) {
+	value = strings.ToLower(strings.TrimSpace(value))
+	important := false
+	if index := strings.LastIndexByte(value, '!'); index >= 0 && strings.TrimSpace(value[index+1:]) == "important" {
+		value, important = strings.TrimSpace(value[:index]), true
 	}
-	return ""
+	switch value {
+	case "left", "center", "right", "justify", "start", "end":
+		return value, important
+	}
+	return "", false
+}
+
+func publicAlignmentClass(value string) bool {
+	for _, prefix := range []string{"text-align-", "has-text-align-"} {
+		if strings.HasPrefix(value, prefix) {
+			alignment := strings.TrimPrefix(value, prefix)
+			return alignment != "" && publicTextAlignment(alignment) == alignment
+		}
+	}
+	return false
 }
 
 func publicTextFormatting(property, value string) string {
@@ -1299,6 +1318,12 @@ func safePublicHTMLForLanguage(input, base, lang string, preview ...bool) templa
 			if c.Type == html.CommentNode {
 				n.RemoveChild(c)
 			} else if c.Type == html.ElementNode {
+				// Legacy editors use <center> as a block. Keep its alignment while
+				// normalizing to an allowed element; removing the wrapper loses it.
+				legacyCenter := c.Data == "center"
+				if legacyCenter {
+					c.Data, c.DataAtom = "div", atom.Div
+				}
 				if !allowed[c.Data] && c.Data != "html" && c.Data != "head" && c.Data != "body" {
 					if c.Data == "script" || c.Data == "style" || c.Data == "form" || c.Data == "object" || c.Data == "embed" || c.Data == "input" || c.Data == "button" {
 						n.RemoveChild(c)
@@ -1315,7 +1340,11 @@ func safePublicHTMLForLanguage(input, base, lang string, preview ...bool) templa
 				} else {
 					var attrs []html.Attribute
 					var iframeSrc string
-					var alignment string
+					var alignment, legacyAlignment string
+					var alignmentImportant bool
+					if legacyCenter {
+						legacyAlignment = "center"
+					}
 					var formatting []string
 					for _, a := range c.Attr {
 						key := strings.ToLower(a.Key)
@@ -1326,8 +1355,8 @@ func safePublicHTMLForLanguage(input, base, lang string, preview ...bool) templa
 							for _, declaration := range strings.Split(a.Val, ";") {
 								property, value, found := strings.Cut(declaration, ":")
 								if found && strings.EqualFold(strings.TrimSpace(property), "text-align") {
-									if safe := publicTextAlignment(value); safe != "" {
-										alignment = safe
+									if safe, important := publicTextAlignmentDeclaration(value); safe != "" && (!alignmentImportant || important) {
+										alignment, alignmentImportant = safe, important
 									}
 								} else if found {
 									if safe := publicTextFormatting(property, value); safe != "" {
@@ -1339,11 +1368,16 @@ func safePublicHTMLForLanguage(input, base, lang string, preview ...bool) templa
 						}
 						if key == "align" {
 							if safe := publicTextAlignment(a.Val); safe != "" {
-								alignment = safe
+								legacyAlignment = safe
 							}
 							continue
 						}
 						switch key {
+						case "dir":
+							a.Val = strings.ToLower(strings.TrimSpace(a.Val))
+							if a.Val != "ltr" && a.Val != "rtl" && a.Val != "auto" {
+								continue
+							}
 						case "href", "src", "poster":
 							a.Val = reference(a.Val)
 							if a.Val == "" {
@@ -1378,6 +1412,31 @@ func safePublicHTMLForLanguage(input, base, lang string, preview ...bool) templa
 						}
 						attrs = append(attrs, a)
 					}
+					// Inline CSS wins over class rules and legacy align regardless of
+					// attribute order. Avoid leaving a conflicting class whose rule
+					// happens to occur later in the public stylesheet.
+					hasAlignmentClass := false
+					for i := range attrs {
+						if attrs[i].Key != "class" {
+							continue
+						}
+						var classes []string
+						for _, class := range strings.Fields(attrs[i].Val) {
+							if publicAlignmentClass(class) {
+								hasAlignmentClass = true
+								if alignment != "" {
+									continue
+								}
+							}
+							classes = append(classes, class)
+						}
+						if alignment != "" {
+							attrs[i].Val = strings.Join(classes, " ")
+						}
+					}
+					if alignment == "" && !hasAlignmentClass {
+						alignment = legacyAlignment
+					}
 					c.Attr = attrs
 					if alignment != "" {
 						formatting = append(formatting, "text-align-"+alignment)
@@ -1391,7 +1450,7 @@ func safePublicHTMLForLanguage(input, base, lang string, preview ...bool) templa
 							}
 						}
 						if classIndex >= 0 {
-							c.Attr[classIndex].Val += " " + strings.Join(formatting, " ")
+							c.Attr[classIndex].Val = strings.TrimSpace(c.Attr[classIndex].Val + " " + strings.Join(formatting, " "))
 						} else {
 							c.Attr = append(c.Attr, html.Attribute{Key: "class", Val: strings.Join(formatting, " ")})
 						}

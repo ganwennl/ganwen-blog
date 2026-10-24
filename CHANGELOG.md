@@ -1,6 +1,16 @@
 # 更新日志 / Changelog
 
-## 未发布 / Unreleased
+## v1.0.3 — 2026-10-24
+
+- 修复旧对齐属性与内联样式冲突造成的编辑器、预览和前台显示不一致。
+- 新增“清除全部格式”：清理粘贴格式及链接，保留图片、媒体、文字和段落，支持撤销。
+- 修复外部表情图片过大；编辑器、预览和正文统一按文字大小显示，普通图片保持原尺寸。
+- 联系方式可开启联系前确认提示，并为各语言编辑或翻译提示文案。
+
+- Fixed alignment conflicts between legacy attributes and inline styles across editing, preview and public pages.
+- Added Clear all formatting to remove pasted styling and links while retaining text, paragraphs, images and media, with undo support.
+- Fixed oversized external emoji images across the editor, preview and article pages without resizing ordinary images.
+- Added configurable contact confirmation notices with multilingual text and translation controls.
 
 - 侧栏支持自定义排序：默认沿用系统顺序，开启后可拖动组件或使用上下移动按钮调整位置。
 - Sidebar ordering can now be customized by dragging components or using the move buttons; the default mode keeps the system order.

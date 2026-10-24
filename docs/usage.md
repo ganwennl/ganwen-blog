@@ -4,7 +4,7 @@
 
 This is the blog software I use myself. It is written in Go: download, extract and run it. It supports posts, standalone pages, images, videos and visitor statistics. The public pages and admin interface include 11 display languages. SQLite is the default database; MySQL is also supported.
 
-当前版本 / Current version: **v1.0.2** · [更新日志 / Changelog](../CHANGELOG.md)
+当前版本 / Current version: **v1.0.3** · [更新日志 / Changelog](../CHANGELOG.md)
 
 ## 下载运行
 
@@ -12,7 +12,7 @@ This is the blog software I use myself. It is written in Go: download, extract a
 
 ### Windows
 
-1. 解压 `ganwen-blog-v1.0.2-windows-amd64.zip` 到可写的本地目录。
+1. 解压 `ganwen-blog-v1.0.3-windows-amd64.zip` 到可写的本地目录。
 2. 双击 `Start.bat`，保持打开的窗口；关闭窗口就停止服务。
 3. 浏览器打开 `http://127.0.0.1:8097/`，后台是 `http://127.0.0.1:8097/admin/`。
 4. 第一次启动会生成账号 `ganwen` 和随机密码，密码在 `data/admin-access.txt`。请保管好此文件。
@@ -35,8 +35,8 @@ This is the blog software I use myself. It is written in Go: download, extract a
 ### Linux
 
 ```sh
-unzip ganwen-blog-v1.0.2-linux-amd64.zip
-cd ganwen-blog-v1.0.2-linux-amd64
+unzip ganwen-blog-v1.0.3-linux-amd64.zip
+cd ganwen-blog-v1.0.3-linux-amd64
 chmod +x ganwen start.sh
 ./start.sh
 ```
@@ -48,6 +48,10 @@ chmod +x ganwen start.sh
 前台和后台支持中文、荷兰语、英语、印地语、西班牙语、阿拉伯语、法语、孟加拉语、葡萄牙语、印尼语和乌尔都语。后台右上角可以切换“界面语言”，会记住这台浏览器的选择；当前语言排在语言列表第一位。阿拉伯语和乌尔都语使用从右到左的排版。
 
 显示语言自带在程序里，不需要翻译服务或 API Key。它只影响菜单、按钮和操作提示。文章及已有译文仍按原来的内容语言管理，切换界面不会翻译或修改文章。
+
+## 编辑文章
+
+“清除格式”处理当前选区；“清除全部格式”处理整篇正文，去除外部粘贴的字体、颜色、对齐、链接和多余标签，保留文字、图片、媒体和段落。清理后可重新选择居中等排版；内容尚未继续修改时，点击“撤销清除格式”可恢复清理前的内容。HTML 源码模式也可清理全文，保存前可打开预览核对。
 
 ## 设置和自己的站点地址
 
@@ -89,7 +93,7 @@ chmod +x ganwen start.sh
 ```sh
 go test ./cmd/... ./internal/...
 go build -o ganwen ./cmd/ganwen
-python scripts/packaging/build-release.py --output dist/releases/v1.0.2
+python scripts/packaging/build-release.py --output dist/releases/v1.0.3
 ```
 
 构建脚本只打包程序、启动脚本、说明和许可，不复制本地数据库、媒体或配置。
@@ -110,11 +114,15 @@ The public pages and admin interface support Chinese, Dutch, English, Hindi, Spa
 
 Interface translations are included in the program and need no translation service or API key. They cover menus, buttons and messages. Posts and their existing translations keep their own content languages; changing the interface language does not translate or edit articles.
 
+## Editing articles
+
+“Clear formatting” applies to the selection. “Clear all formatting” cleans the entire article: it removes pasted fonts, colors, alignment, links and redundant markup while retaining text, images, media and paragraphs. You can apply alignment again after cleaning. “Undo formatting cleanup” restores the previous content while the cleaned content is unchanged. Whole-article cleanup also works in HTML source mode. Use Preview to check the result before saving.
+
 ## Settings, backup and development
 
 Fresh installations display recorded view counts. The admin site settings let you enable virtual counts and set their daily display target (0–1000000). Turning virtual counts off uses real counts for both totals and popular articles. Admin analytics always uses real records.
 
-The contact section includes an optional notice of up to 4,000 Unicode characters. When enabled, every configured contact button asks visitors to read the notice and agree before opening its destination. Cancel or Escape stays on the page. All languages show the same custom notice; disabling it retains the text.
+The contact section includes an optional notice of up to 4,000 Unicode characters. When enabled, every configured contact button asks visitors to read the notice and agree before opening its destination. Cancel or Escape stays on the page. Edit or translate each language in the notice settings and review the result before saving. Visitors see a translation matching the current source text; missing or outdated translations fall back to the source. Disabling the notice retains its text and translations.
 
 The dedicated sidebar settings page controls search, popular articles, site statistics, date archives, categories, tags and ads, as well as sidebar visibility on article pages. Save your selection and use “Preview website” to check it. Disabling all components gives the content the full width. Date archives use publication dates; expand a year to browse the full year or a particular month. Existing sites retain their statistics visibility setting and show the other components by default.
 

@@ -228,6 +228,8 @@ kbd{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid va
 .article-body .text-align-center,.article-body .has-text-align-center{text-align:center}
 .article-body .text-align-right,.article-body .has-text-align-right{text-align:right}
 .article-body .text-align-justify,.article-body .has-text-align-justify{text-align:justify}
+.article-body .text-align-start,.article-body .has-text-align-start{text-align:start}
+.article-body .text-align-end,.article-body .has-text-align-end{text-align:end}
 .article-body .text-weight-normal{font-weight:400}
 .article-body .text-weight-bold{font-weight:700}
 .article-body .text-style-normal{font-style:normal}
@@ -236,7 +238,7 @@ kbd{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid va
 .article-body .text-decoration-underline{text-decoration:underline}
 .article-body .text-decoration-line-through{text-decoration:line-through}
 .article-body .aligncenter{display:block;margin-left:auto;margin-right:auto}
-.article-body figure.aligncenter{text-align:center}
+.article-body :where(figure.aligncenter){text-align:center}
 :focus-visible{outline:2px solid var(--blue);outline-offset:4px}
 @media(min-width:1180px){.overview-page .post-grid{--desired-columns:3}}
 @media(min-width:1800px){.overview-page .post-grid{--desired-columns:4}.nav-item{font-size:16px}.language-links{font-size:14px}.page-heading p{font-size:16px}.category-tabs a{font-size:16px}.archive-page .post-grid{grid-template-columns:repeat(auto-fit,minmax(440px,1fr))}}

@@ -9,7 +9,8 @@ const html = fs.readFileSync(path.join(__dirname, '../../internal/blog/web/admin
 const helperSource = html.slice(html.indexOf('const editorHelperSelector='), html.indexOf('function stripEditorHelpers('));
 const documentHelperSource = ['independentDocument', 'documentReturnView', 'documentNoun', 'validPublicPath'].map(name => html.match(new RegExp('function ' + name + '\\([^\\r\\n]+'))[0]).join('\n');
 const actionSource = html.slice(html.indexOf('function documentActionLabel('),html.indexOf('function validPublicPath('));
-const mediaSource = documentHelperSource + '\n' + actionSource + '\n' + helperSource + html.slice(html.indexOf('// Keep pasted image bytes'), html.indexOf('// End pasted image handling.'));
+const cleanupMediaSource = html.match(/function updateEditorCleanupMedia\(replace\)\{[^\r\n]+/)[0];
+const mediaSource = documentHelperSource + '\n' + actionSource + '\n' + helperSource + cleanupMediaSource + '\n' + html.slice(html.indexOf('// Keep pasted image bytes'), html.indexOf('// End pasted image handling.'));
 const saveSource = html.match(/async function saveEditor\(\)\{[^\r\n]+/)[0];
 const manualSource = [html.match(/function chooseMedia\(kind\)\{[^\r\n]+/)[0], html.match(/\$\('mediaFile'\)\.onchange=[^\r\n]+/)[0]].join('\n');
 const pixel = 'data:image/png;base64,iVBORw0KGgo=';
@@ -69,6 +70,7 @@ function client(respond = async () => ({url: uploaded, type: 'image/png'})) {
     setTimeout: callback => {timers.push(callback); return timers.length;},
     notify: (message, bad) => notices.push({message, bad}),
     rememberEditorSelection() {},
+    refreshCleanupButtons() {},
     command: (_, markup) => {body.innerHTML += markup; state.dirty = true;},
     fetch: async source => {if (!storedFiles.has(source)) throw Error('Unknown temporary image'); return {ok: true, blob: async () => storedFiles.get(source)};},
     api: async (endpoint, data) => {calls.push({endpoint, data}); return respond(endpoint, data, calls);},

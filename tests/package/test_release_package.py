@@ -24,7 +24,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--package", required=True)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--expected-version", default="1.0.2")
+    parser.add_argument("--expected-version", default="1.0.3")
     args = parser.parse_args()
     check(os.name == "nt", "This startup test requires Windows")
     output = Path(args.output).resolve()
