@@ -166,6 +166,7 @@ kbd{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid va
 .article-body{font-size:clamp(16px,1.15vw,24px);line-height:1.95;overflow-wrap:anywhere}
 .article-body p{margin:0 0 1.35em}
 .article-body img,.article-body video,.article-body iframe{max-width:100%;height:auto}
+.article-body img.emoji,.article-body img.wp-smiley,.article-body img[src^="https://abs.twimg.com/emoji/"],.article-body img[src^="http://abs.twimg.com/emoji/"],.article-body img[src^="//abs.twimg.com/emoji/"],.article-body img[src^="https://s.w.org/images/core/emoji/"],.article-body img[src^="http://s.w.org/images/core/emoji/"],.article-body img[src^="//s.w.org/images/core/emoji/"]{display:inline-block!important;width:1em!important;height:1em!important;min-width:0!important;min-height:0!important;max-width:1em!important;max-height:1em!important;vertical-align:-.125em!important;object-fit:contain!important}
 .article-body video{width:100%;border-radius:8px;background:#000}
 .article-body iframe{width:100%;min-height:360px;border:0}
 .article-body figure{margin:26px 0}
