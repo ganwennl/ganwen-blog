@@ -176,6 +176,11 @@ func OpenDatabase(cfg DatabaseConfig) (*Store, error) {
 			return nil, errors.New("cannot initialize blog analytics schema")
 		}
 	}
+	// Sidebar and report counts filter by kind and date.
+	if err = s.ensureIndex(ctx, "analytics_aggregates", "analytics_kind_date", "kind,date"); err != nil {
+		db.Close()
+		return nil, err
+	}
 	if driver == "sqlite" {
 		_ = os.Chmod(cfg.Path, 0600)
 	}
@@ -254,16 +259,20 @@ func (s *Store) initializeTranslationJobs(ctx context.Context) error {
 }
 
 func (s *Store) initializeTranslationJobsDueIndex(ctx context.Context) error {
-	const name = "translation_jobs_due"
-	const columns = "status,next_attempt_at,id"
+	return s.ensureIndex(ctx, "translation_jobs", "translation_jobs_due", "status,next_attempt_at,id")
+}
+
+// ensureIndex adds an index to an existing table. Table, name and columns are
+// fixed identifiers from code, never user input.
+func (s *Store) ensureIndex(ctx context.Context, table, name, columns string) error {
 	if s.driver != "mysql" {
-		_, err := s.db.ExecContext(ctx, "CREATE INDEX IF NOT EXISTS "+name+" ON translation_jobs("+columns+")")
+		_, err := s.db.ExecContext(ctx, "CREATE INDEX IF NOT EXISTS "+name+" ON "+table+"("+columns+")")
 		return err
 	}
 	// MySQL has no portable CREATE INDEX IF NOT EXISTS. Inspect the exact
 	// columns, and only accept its duplicate-name error after checking again.
 	exists := func() (bool, error) {
-		rows, err := s.db.QueryContext(ctx, "SELECT COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='translation_jobs' AND INDEX_NAME=? ORDER BY SEQ_IN_INDEX", name)
+		rows, err := s.db.QueryContext(ctx, "SELECT COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND INDEX_NAME=? ORDER BY SEQ_IN_INDEX", table, name)
 		if err != nil {
 			return false, err
 		}
@@ -283,14 +292,14 @@ func (s *Store) initializeTranslationJobsDueIndex(ctx context.Context) error {
 			return false, nil
 		}
 		if strings.Join(found, ",") != columns {
-			return false, errors.New("translation due index has unexpected columns")
+			return false, errors.New(name + " index has unexpected columns")
 		}
 		return true, nil
 	}
 	if present, err := exists(); err != nil || present {
 		return err
 	}
-	_, err := s.db.ExecContext(ctx, "CREATE INDEX "+name+" ON translation_jobs("+columns+")")
+	_, err := s.db.ExecContext(ctx, "CREATE INDEX "+name+" ON "+table+"("+columns+")")
 	var mysqlErr *mysql.MySQLError
 	if errors.As(err, &mysqlErr) && mysqlErr.Number == 1061 {
 		if present, checkErr := exists(); checkErr != nil {
