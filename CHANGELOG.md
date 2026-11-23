@@ -1,5 +1,17 @@
 # 更新日志 / Changelog
 
+## v1.0.5 — 2026-11-23
+
+- 后台登录校验改为无状态签名，匿名请求无法再占满登录令牌而阻止管理员登录。
+- 登录限流按 IPv6 /64 计数；限流表已满时新来源共用一个小额度，不再直接拒绝。
+- 访问统计每个来源（IPv4 或 IPv6 /64）每天最多记录 1000 次，防止刷满全站日额度或操纵热门文章。
+- 统计表新增 (kind,date) 索引，侧栏统计不再全表扫描；统计页标题改用缓存摘要，不再逐篇解码全文。
+
+- Admin login challenges are now stateless signed tokens, so anonymous requests can no longer exhaust them and block the owner's login.
+- Login rate limiting groups IPv6 clients by /64; when the table is full, unseen clients share a small bucket instead of being rejected.
+- Analytics accepts at most 1,000 events per source (IPv4 address or IPv6 /64) per day, preventing quota exhaustion and popular-post manipulation.
+- Added a (kind,date) analytics index so sidebar counts avoid full scans; report titles use cached summaries instead of decoding every post.
+
 ## v1.0.4 — 2026-10-24
 
 - 翻译按钮显示实际排队、已有任务和跳过原因；重新翻译需明确确认覆盖已有译文。

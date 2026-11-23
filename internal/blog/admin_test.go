@@ -1064,7 +1064,10 @@ func TestAdminProductionProxyCanonicalizesIPv6ClientAddress(t *testing.T) {
 	if code := adminProxyAttempt(t, admin, "[::1]:9000", []string{"2001:0DB8:0:0:0:0:0:ABCD"}, "wrong"); code != 429 {
 		t.Fatalf("same IPv6 address bypassed limit: %d", code)
 	}
-	if code := adminProxyAttempt(t, admin, "[::1]:9000", []string{"2001:db8::abce"}, "wrong"); code != 401 {
-		t.Fatalf("independent IPv6 address was blocked: %d", code)
+	if code := adminProxyAttempt(t, admin, "[::1]:9000", []string{"2001:db8::abce"}, "wrong"); code != 429 {
+		t.Fatalf("address rotation inside one IPv6 /64 bypassed limit: %d", code)
+	}
+	if code := adminProxyAttempt(t, admin, "[::1]:9000", []string{"2001:db8:0:1::abcd"}, "wrong"); code != 401 {
+		t.Fatalf("independent IPv6 /64 was blocked: %d", code)
 	}
 }

@@ -52,7 +52,7 @@ func blogDatabaseTable(name string) bool {
 func (s *Store) analyticsSchema() []string {
 	if s.driver == "mysql" {
 		return []string{
-			"CREATE TABLE IF NOT EXISTS analytics_aggregates (id_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,date CHAR(10) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,kind VARCHAR(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,label VARCHAR(512) NOT NULL,post_id BIGINT NOT NULL,pv BIGINT NOT NULL,uv BIGINT NOT NULL,KEY analytics_date(date)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
+			"CREATE TABLE IF NOT EXISTS analytics_aggregates (id_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,date CHAR(10) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,kind VARCHAR(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,label VARCHAR(512) NOT NULL,post_id BIGINT NOT NULL,pv BIGINT NOT NULL,uv BIGINT NOT NULL,KEY analytics_date(date),KEY analytics_kind_date(kind,date)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
 			"CREATE TABLE IF NOT EXISTS analytics_visitors (id_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,date CHAR(10) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,KEY analytics_visitor_date(date)) ENGINE=InnoDB",
 			"CREATE TABLE IF NOT EXISTS analytics_events (id_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,date CHAR(10) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,KEY analytics_event_date(date)) ENGINE=InnoDB",
 		}
@@ -60,6 +60,7 @@ func (s *Store) analyticsSchema() []string {
 	return []string{
 		"CREATE TABLE IF NOT EXISTS analytics_aggregates(id_hash TEXT PRIMARY KEY,date TEXT NOT NULL,kind TEXT NOT NULL,label TEXT NOT NULL,post_id INTEGER NOT NULL,pv INTEGER NOT NULL,uv INTEGER NOT NULL)",
 		"CREATE INDEX IF NOT EXISTS analytics_date ON analytics_aggregates(date)",
+		"CREATE INDEX IF NOT EXISTS analytics_kind_date ON analytics_aggregates(kind,date)",
 		"CREATE TABLE IF NOT EXISTS analytics_visitors(id_hash TEXT PRIMARY KEY,date TEXT NOT NULL)",
 		"CREATE INDEX IF NOT EXISTS analytics_visitor_date ON analytics_visitors(date)",
 		"CREATE TABLE IF NOT EXISTS analytics_events(id_hash TEXT PRIMARY KEY,date TEXT NOT NULL)",

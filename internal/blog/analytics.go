@@ -27,6 +27,8 @@ type Analytics struct {
 	limits       map[string]analyticsRate
 	minute       time.Time
 	global       int
+	day          time.Time
+	daily        map[string]int
 	sidebarMu    sync.Mutex
 	sidebarCache publicSidebarCache
 }
@@ -77,6 +79,11 @@ type AnalyticsReport struct {
 	GeoDatabaseV6 GeoDatabaseStatus       `json:"geo_database_v6"`
 }
 
+const (
+	analyticsDailyPerSource = 1000
+	analyticsDailySources   = 65536
+)
+
 var analyticsToken = regexp.MustCompile(`^[A-Za-z0-9_-]{16,128}$`)
 
 func NewAnalytics(app *App) (*Analytics, error) {
@@ -84,17 +91,27 @@ func NewAnalytics(app *App) (*Analytics, error) {
 	if _, err := rand.Read(key); err != nil {
 		return nil, err
 	}
-	return &Analytics{app: app, now: time.Now, rateKey: key, limits: map[string]analyticsRate{}, geo4: NewGeoManager(app.Config.DataDir, false), geo6: NewGeoManager(app.Config.DataDir, true)}, nil
+	return &Analytics{app: app, now: time.Now, rateKey: key, limits: map[string]analyticsRate{}, daily: map[string]int{}, geo4: NewGeoManager(app.Config.DataDir, false), geo6: NewGeoManager(app.Config.DataDir, true)}, nil
 }
 func (a *Analytics) rateAllowed(r *http.Request) bool {
 	ip := a.app.Admin.auth.loginIP(r)
 	if country, client := analyticsCloudflare(r, a.app.Config); country != "unknown" || client != "" {
 		ip = client
 	}
-	key := analyticsHash(a.rateKey, "rate", ip)
+	key := analyticsHash(a.rateKey, "rate", rateLimitKey(ip))
 	now := a.now().UTC().Truncate(time.Minute)
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	if day := now.Truncate(24 * time.Hour); day != a.day {
+		a.day, a.daily = day, map[string]int{}
+	}
+	// Daily cap per source (IPv4 address or IPv6 /64): far above any real
+	// reader, but stops one client from filling the site-wide daily quota or
+	// pushing a chosen post into the public popular list.
+	daily, seen := a.daily[key]
+	if daily >= analyticsDailyPerSource || (!seen && len(a.daily) >= analyticsDailySources) {
+		return false
+	}
 	if now != a.minute {
 		a.minute, a.global = now, 0
 		for hash, value := range a.limits {
@@ -110,6 +127,7 @@ func (a *Analytics) rateAllowed(r *http.Request) bool {
 	value.minute, value.count = now, value.count+1
 	a.limits[key] = value
 	a.global++
+	a.daily[key] = daily + 1
 	return true
 }
 func analyticsBot(ua string) bool {

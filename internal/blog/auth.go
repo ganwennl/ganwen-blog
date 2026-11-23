@@ -1,6 +1,7 @@
 package blog
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
@@ -10,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -26,10 +28,6 @@ type adminSession struct {
 	CSRF    string
 	Expires time.Time
 }
-type loginToken struct {
-	CSRF    string
-	Expires time.Time
-}
 type loginAttempt struct {
 	Count int
 	Until time.Time
@@ -39,13 +37,19 @@ type adminAuth struct {
 	mu                 sync.Mutex
 	store              *Store
 	config             Config
-	logins             map[string]loginToken
+	loginKey           []byte
 	attempts           map[string]loginAttempt
 	trustLoopbackProxy bool
 }
 
 func newAdminAuth(cfg Config) *adminAuth {
-	return &adminAuth{config: cfg, logins: make(map[string]loginToken), attempts: make(map[string]loginAttempt), trustLoopbackProxy: !cfg.Preview}
+	// Login challenges are stateless (HMAC-signed), so anonymous requests
+	// cannot exhaust server-side storage and block the owner's login.
+	key := make([]byte, 32)
+	if _, err := rand.Read(key); err != nil {
+		panic(err)
+	}
+	return &adminAuth{config: cfg, loginKey: key, attempts: make(map[string]loginAttempt), trustLoopbackProxy: !cfg.Preview}
 }
 func randomToken() (string, error) {
 	b := make([]byte, 32)
@@ -87,11 +91,6 @@ func adminOriginHash(r *http.Request, cfg Config) string {
 	return adminHash(scheme + "://" + strings.ToLower(r.Host))
 }
 func (a *adminAuth) cleanup(now time.Time) {
-	for k, v := range a.logins {
-		if !now.Before(v.Expires) {
-			delete(a.logins, k)
-		}
-	}
 	for k, v := range a.attempts {
 		if !now.Before(v.Until) {
 			delete(a.attempts, k)
@@ -139,51 +138,73 @@ func (a *adminAuth) loginIP(r *http.Request) string {
 	}
 	return h
 }
+
+// rateLimitKey groups IPv6 clients by /64: one subscriber normally owns a
+// whole /64, so per-address keys would let it rotate addresses freely.
+func rateLimitKey(ip string) string {
+	if p := net.ParseIP(ip); p != nil && p.To4() == nil {
+		return p.Mask(net.CIDRMask(64, 128)).String() + "/64"
+	}
+	return ip
+}
+
+const loginOverflowKey = "*overflow"
+
 func (a *adminAuth) rateAllowed(r *http.Request) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	now := time.Now()
 	a.cleanup(now)
-	ip := a.loginIP(r)
-	v := a.attempts[ip]
-	if v.Count >= 6 {
-		return false
+	key, limit := rateLimitKey(a.loginIP(r)), 6
+	if _, seen := a.attempts[key]; !seen && len(a.attempts) >= 4096 {
+		// A full table must not lock out unseen clients outright; they share
+		// one small bucket instead, which still bounds password guessing.
+		key, limit = loginOverflowKey, 30
 	}
-	if len(a.attempts) >= 4096 && v.Count == 0 {
+	v := a.attempts[key]
+	if v.Count >= limit {
 		return false
 	}
 	if v.Count == 0 {
 		v.Until = now.Add(15 * time.Minute)
 	}
 	v.Count++
-	a.attempts[ip] = v
+	a.attempts[key] = v
 	return true
 }
 func (a *adminAuth) failedLogin(r *http.Request) {
 	// Attempts are reserved before password hashing, including concurrent requests.
 }
+
+// loginChallengeCSRF validates a "<nonce>.<unix expiry>" login cookie and
+// returns the CSRF token derived from it.
+func (a *adminAuth) loginChallengeCSRF(value string, now time.Time) (string, bool) {
+	nonce, rawExpiry, ok := strings.Cut(value, ".")
+	if !ok || len(nonce) != 43 || len(rawExpiry) > 20 {
+		return "", false
+	}
+	expiry, err := strconv.ParseInt(rawExpiry, 10, 64)
+	if err != nil || now.Unix() >= expiry || expiry > now.Add(16*time.Minute).Unix() {
+		return "", false
+	}
+	mac := hmac.New(sha256.New, a.loginKey)
+	mac.Write([]byte("login\x00" + value))
+	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil)), true
+}
 func (a *adminAuth) issueLogin(w http.ResponseWriter, r *http.Request, cfg Config) (string, error) {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.cleanup(time.Now())
+	now := time.Now()
 	if c, err := r.Cookie(adminCookieName(loginCookie, r, cfg)); err == nil {
-		if v, ok := a.logins[c.Value]; ok {
-			return v.CSRF, nil
+		if csrf, ok := a.loginChallengeCSRF(c.Value, now); ok {
+			return csrf, nil
 		}
 	}
-	if len(a.logins) >= 4096 {
-		return "", errBusy
-	}
-	token, err := randomToken()
+	nonce, err := randomToken()
 	if err != nil {
 		return "", err
 	}
-	csrf, err := randomToken()
-	if err != nil {
-		return "", err
-	}
-	a.logins[token] = loginToken{CSRF: csrf, Expires: time.Now().Add(15 * time.Minute)}
-	setAdminCookie(w, r, cfg, loginCookie, token, 900)
+	value := nonce + "." + strconv.FormatInt(now.Add(15*time.Minute).Unix(), 10)
+	csrf, _ := a.loginChallengeCSRF(value, now)
+	setAdminCookie(w, r, cfg, loginCookie, value, 900)
 	return csrf, nil
 }
 func (a *adminAuth) loginCSRF(r *http.Request) bool {
@@ -191,10 +212,8 @@ func (a *adminAuth) loginCSRF(r *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	v, ok := a.logins[c.Value]
-	return ok && time.Now().Before(v.Expires) && sameToken(r.Header.Get("X-CSRF-Token"), v.CSRF)
+	csrf, ok := a.loginChallengeCSRF(c.Value, time.Now())
+	return ok && sameToken(r.Header.Get("X-CSRF-Token"), csrf)
 }
 func configuredAdmin(cfg Config) bool {
 	if strings.TrimSpace(cfg.AdminUser) == "" || cfg.AdminPasswordHash == "" {
@@ -238,10 +257,7 @@ func (a *adminAuth) authenticate(w http.ResponseWriter, r *http.Request, cfg Con
 	if err := a.store.createAdminSession(r.Context(), adminHash(token), previousHash, adminOriginHash(r, cfg), adminCredentialHash(cfg), session); err != nil {
 		return "", err
 	}
-	if c, e := r.Cookie(adminCookieName(loginCookie, r, cfg)); e == nil {
-		delete(a.logins, c.Value)
-	}
-	delete(a.attempts, a.loginIP(r))
+	delete(a.attempts, rateLimitKey(a.loginIP(r)))
 	setAdminCookie(w, r, cfg, sessionCookie, token, int(lifetime/time.Second))
 	setAdminCookie(w, r, cfg, loginCookie, "", -1)
 	return csrf, nil

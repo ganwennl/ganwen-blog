@@ -67,11 +67,23 @@ func (s *Store) AnalyticsReport(ctx context.Context, from, to time.Time) (Analyt
 		return out.TopPages[i].PV > out.TopPages[j].PV
 	})
 	out.TopPages = out.TopPages[:min(len(out.TopPages), 50)]
+	// Titles come from the cached summaries instead of decoding each full
+	// post document (body and every translation) once per row.
+	titles := map[int64]string{}
+	if summaries, err := s.ListPostSummaries(ctx); err == nil {
+		for _, post := range summaries {
+			if post.Status == "publish" {
+				titles[post.ID] = post.Title
+			}
+		}
+	}
 	for i := range out.TopPages {
 		p := &out.TopPages[i]
 		p.Title = "文章列表"
 		if p.Path == "other" {
 			p.Title = "其他页面"
+		} else if title, ok := titles[p.PostID]; ok && p.PostID > 0 {
+			p.Title = title
 		} else if p.PostID > 0 {
 			post, err := s.GetPost(ctx, p.PostID)
 			if err == nil && post.Status == "publish" {
