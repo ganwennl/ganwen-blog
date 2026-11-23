@@ -3,6 +3,7 @@ package blog
 import (
 	"bytes"
 	"container/heap"
+	"context"
 	_ "embed"
 	"encoding/binary"
 	"encoding/json"
@@ -22,6 +23,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -36,6 +38,19 @@ var errBusy = errors.New("请求过多，请稍后重试")
 type Admin struct {
 	app  *App
 	auth *adminAuth
+	// Media picker listing, cached briefly and dropped after each upload so
+	// reopening the picker does not walk the whole uploads tree every time.
+	mediaMu      sync.Mutex
+	mediaItems   []mediaItem
+	mediaExpires time.Time
+}
+
+const adminMediaCacheTTL = time.Minute
+
+func (a *Admin) invalidateMediaCache() {
+	a.mediaMu.Lock()
+	a.mediaItems, a.mediaExpires = nil, time.Time{}
+	a.mediaMu.Unlock()
 }
 
 func NewAdmin(a *App) *Admin {
@@ -1162,6 +1177,7 @@ func (a *Admin) upload(w http.ResponseWriter, r *http.Request) {
 		adminError(w, 500, "媒体文件未完整写入")
 		return
 	}
+	a.invalidateMediaCache()
 	mediaURL := "/" + filepath.ToSlash(filepath.Join(sub, name))
 	adminJSON(w, 201, map[string]any{"url": mediaURL, "name": header.Filename, "bytes": len(data), "type": http.DetectContentType(data)})
 }
@@ -1203,18 +1219,41 @@ func (h *recentMediaHeap) Pop() any {
 }
 
 func (a *Admin) media(w http.ResponseWriter, r *http.Request) {
-	items := []mediaItem{}
 	if r.Context().Err() != nil {
 		return
 	}
-	root := filepath.Join(a.app.Config.MediaDir, "wp-content", "uploads")
 	if strings.TrimSpace(a.app.Config.MediaDir) == "" {
+		adminJSON(w, 200, []mediaItem{})
+		return
+	}
+	a.mediaMu.Lock()
+	if a.mediaItems != nil && time.Now().Before(a.mediaExpires) {
+		items := a.mediaItems
+		a.mediaMu.Unlock()
 		adminJSON(w, 200, items)
 		return
 	}
+	a.mediaMu.Unlock()
+	items, err := a.scanMedia(r.Context())
+	if r.Context().Err() != nil {
+		return
+	}
+	if err != nil {
+		adminError(w, 500, "无法读取媒体目录")
+		return
+	}
+	a.mediaMu.Lock()
+	a.mediaItems, a.mediaExpires = items, time.Now().Add(adminMediaCacheTTL)
+	a.mediaMu.Unlock()
+	adminJSON(w, 200, items)
+}
+
+func (a *Admin) scanMedia(ctx context.Context) ([]mediaItem, error) {
+	items := []mediaItem{}
+	root := filepath.Join(a.app.Config.MediaDir, "wp-content", "uploads")
 	recent := make(recentMediaHeap, 0, 1000)
 	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
-		if err := r.Context().Err(); err != nil {
+		if err := ctx.Err(); err != nil {
 			return err
 		}
 		if err != nil {
@@ -1269,18 +1308,17 @@ func (a *Admin) media(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
-	if r.Context().Err() != nil {
-		return
+	if err := ctx.Err(); err != nil {
+		return nil, err
 	}
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		adminError(w, 500, "无法读取媒体目录")
-		return
+		return nil, err
 	}
 	sort.Slice(recent, func(i, j int) bool { return mediaNewer(recent[i], recent[j]) })
 	for _, candidate := range recent {
 		items = append(items, candidate.item)
 	}
-	adminJSON(w, 200, items)
+	return items, nil
 }
 
 // The origin used by tests and command-line clients must match the request host.

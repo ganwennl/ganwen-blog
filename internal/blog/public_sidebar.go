@@ -79,13 +79,24 @@ func (a *Analytics) publicSidebarCountsAt(ctx context.Context, now time.Time) pu
 	now = now.UTC()
 	day := now.Format("2006-01-02")
 	a.sidebarMu.Lock()
-	defer a.sidebarMu.Unlock()
-	if a.sidebarCache.day == day && now.Before(a.sidebarCache.expires) {
-		return a.sidebarCache
+	cached := a.sidebarCache
+	if cached.day == day && (now.Before(cached.expires) || a.sidebarRefreshing) {
+		// Fresh, or another request is already refreshing: serve the cached
+		// counts instead of making every page wait on the database.
+		a.sidebarMu.Unlock()
+		return cached
 	}
+	a.sidebarRefreshing = true
+	a.sidebarMu.Unlock()
 	counts, err := a.app.Store.publicSidebarAnalytics(ctx, now)
+	a.sidebarMu.Lock()
+	defer a.sidebarMu.Unlock()
+	a.sidebarRefreshing = false
 	if err != nil {
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			if cached.day == day {
+				return cached
+			}
 			return publicSidebarCache{}
 		}
 		log.Printf("public sidebar analytics unavailable: %v", err)

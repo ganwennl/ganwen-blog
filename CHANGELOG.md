@@ -1,5 +1,13 @@
 # 更新日志 / Changelog
 
+## v1.0.6 — 2026-11-23
+
+- 后台媒体选择器的文件列表缓存 1 分钟，上传后立即刷新，不再每次打开都扫描整个上传目录。
+- 侧栏统计刷新时不再让其他页面排队等待数据库，期间先显示上一次的统计。
+
+- The media picker listing is cached for one minute and refreshed after each upload instead of walking the whole uploads tree on every open.
+- Sidebar statistics refresh without making other page requests wait on the database; the previous counts are shown meanwhile.
+
 ## v1.0.5 — 2026-11-23
 
 - 后台登录校验改为无状态签名，匿名请求无法再占满登录令牌而阻止管理员登录。

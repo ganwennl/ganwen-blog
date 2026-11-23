@@ -31,6 +31,8 @@ type Analytics struct {
 	daily        map[string]int
 	sidebarMu    sync.Mutex
 	sidebarCache publicSidebarCache
+	// sidebarRefreshing is guarded by sidebarMu.
+	sidebarRefreshing bool
 }
 type analyticsRate struct {
 	minute time.Time
