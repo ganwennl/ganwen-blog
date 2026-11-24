@@ -215,6 +215,11 @@ func (a *Admin) serve(w http.ResponseWriter, r *http.Request) {
 			a.savePost(w, r, false)
 			return
 		}
+	case "/admin/api/post/action":
+		if r.Method == http.MethodPost {
+			a.postAction(w, r)
+			return
+		}
 	case "/admin/api/create":
 		if r.Method == http.MethodPost {
 			a.savePost(w, r, true)
@@ -403,6 +408,10 @@ func (a *Admin) savePost(w http.ResponseWriter, r *http.Request, create bool) {
 		old, err := a.app.Store.GetPost(r.Context(), input.ID)
 		if err != nil {
 			storeError(w, err)
+			return
+		}
+		if old.Status == "trash" {
+			adminError(w, 409, "内容在回收站中，请先恢复再编辑")
 			return
 		}
 		p = old

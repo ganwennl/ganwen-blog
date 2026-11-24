@@ -283,3 +283,41 @@ test('translated embedded editing locks shared settings and preserves its sessio
   assert.equal(saved.message.publicPath, '/bewijs.html');
   assert.equal(saved.origin, c.context.location.origin);
 });
+
+test('list rows offer one-click visibility, group moves and trash without opening the editor', async () => {
+  const calls = [];
+  const page = {id: 40, version: 3, type: 'page', title: '误发文章', status: 'publish'};
+  const c = openFixture(call => {
+    if (call.path === 'post/action') {calls.push(JSON.parse(call.options.body)); return {data: {post: page, warning: ''}};}
+    throw Error('unexpected ' + call.path);
+  });
+  c.state.posts = [page, {id: 41, version: 1, type: 'post', title: '已删', status: 'trash'}, {id: 42, version: 1, type: 'post', title: '草稿', status: 'draft'}];
+  c.run('renderPosts()');
+  assert.equal(c.get('navPostsCount').textContent, '1', 'trash must not count as a live article');
+  const pageButtons = c.get('pageRows').children[0].children[4].children[0].children.map(b => b.textContent);
+  assert.deepEqual(pageButtons, ['编辑', '隐藏', '移到文章', '删除']);
+  assert.equal(c.get('postRows').children.length, 1);
+  assert.deepEqual(c.get('postRows').children[0].children[4].children[0].children.map(b => b.textContent), ['编辑', '公开', '移到页面', '删除']);
+  c.get('statusFilter').value = 'trash';
+  c.run("renderDocumentList('post')");
+  assert.deepEqual(c.get('postRows').children[0].children[4].children[0].children.map(b => b.textContent), ['恢复', '彻底删除']);
+  let asked = 0;
+  c.context.window.confirm = () => {asked++; return false;};
+  await c.run('documentAction(state.posts[0],"to_post")');
+  assert.equal(asked, 1);
+  assert.equal(calls.length, 0, 'cancelled confirmation must not move content');
+  await c.run('documentAction(state.posts[0],"hide")');
+  assert.equal(asked, 1, 'hiding is a direct toggle');
+  assert.deepEqual(calls[0], {id: 40, version: 3, action: 'hide'});
+});
+
+test('saving a brand-new ordinary page asks first so articles are not filed as pages', async () => {
+  const c = openFixture(() => {throw Error('cancelled page creation must not save');}, '?view=pages');
+  c.run("newDocument('page')");
+  c.get('postTitle').value = '新文章';
+  let asked = 0;
+  c.context.window.confirm = () => {asked++; return false;};
+  await c.run('saveEditor()');
+  assert.equal(asked, 1);
+  assert.equal(c.state.post.id, 0);
+});

@@ -1,5 +1,15 @@
 # 更新日志 / Changelog
 
+## v1.0.7 — 2026-11-25
+
+- 后台文章/页面列表可一键公开或隐藏，并可把页面移到文章（或反向），误发到页面的文章可直接挪出。
+- 新增删除：先移到回收站，可恢复；回收站内才能彻底删除，均需确认。
+- 新建普通页面保存前会提示“这是页面不是文章”，避免把文章写进页面。
+
+- Admin lists can publish or hide content in one click and move pages to posts (or back), so a post filed as a page can be moved out.
+- Added deletion: items go to a recoverable trash first and can only be permanently deleted from there, with confirmation.
+- Saving a new ordinary page now asks for confirmation that it is a page, not a post.
+
 ## v1.0.6 — 2026-11-23
 
 - 后台媒体选择器的文件列表缓存 1 分钟，上传后立即刷新，不再每次打开都扫描整个上传目录。
