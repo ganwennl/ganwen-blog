@@ -10,6 +10,7 @@ import (
 )
 
 var errPostActionInvalid = errors.New("此内容当前不能执行该操作")
+var errIndependentPageMove = errors.New("独立页面不能直接移动，请先在编辑中清空访问地址")
 
 // Quick list actions. Every action carries the list's version so a stale
 // click cannot overwrite a newer edit; deleting is two-step via the trash.
@@ -67,7 +68,7 @@ func (a *Admin) postAction(w http.ResponseWriter, r *http.Request) {
 }
 
 func postActionError(w http.ResponseWriter, err error) {
-	if errors.Is(err, errPostActionInvalid) {
+	if errors.Is(err, errPostActionInvalid) || errors.Is(err, errIndependentPageMove) {
 		adminError(w, 409, err.Error())
 		return
 	}
@@ -119,6 +120,10 @@ func (s *Store) ApplyPostAction(ctx context.Context, id, version int64, action s
 		if trashed || p.Type == target {
 			return Post{}, errPostActionInvalid
 		}
+		if p.PublicPath != "" || p.Unlisted {
+			// Moving would drop the custom address and list an address-only page publicly.
+			return Post{}, errIndependentPageMove
+		}
 		if err = s.convertPostType(ctx, &p, target); err != nil {
 			return Post{}, err
 		}
@@ -149,13 +154,9 @@ func (s *Store) convertPostType(ctx context.Context, p *Post, target string) err
 		oldKey, newKey = "p", "page_id"
 	}
 	generated := p.CanonicalURL == "" || p.CanonicalURL == fmt.Sprintf("%s/?%s=%d", base, oldKey, p.ID)
-	if p.PublicPath != "" {
-		// An independent page's custom address does not apply to articles.
-		generated = generated || p.CanonicalURL == base+p.PublicPath
-		p.PublicPath = ""
-	}
-	p.Unlisted = false
 	p.Type = target
+	// Old ?page_id= links of a moved page redirect to its article address.
+	p.MovedFromPage = target == "post"
 	if generated {
 		p.CanonicalURL = fmt.Sprintf("%s/?%s=%d", base, newKey, p.ID)
 	}

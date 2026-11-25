@@ -276,6 +276,13 @@ func (a *App) handlePublic(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		p, err := a.Store.GetPost(r.Context(), id)
+		if err == nil && p.Status == "publish" && idName == "page_id" && p.Type == "post" && p.MovedFromPage {
+			// A page moved to the articles group keeps its old ?page_id= links working.
+			if _, ok := localizedPost(p, lang); ok {
+				http.Redirect(w, r, publicPostURL(p, settings, lang), http.StatusMovedPermanently)
+				return
+			}
+		}
 		if err != nil || p.Status != "publish" || (idName == "page_id" && p.Type != "page") || (idName == "attachment_id" && p.Type != "attachment") {
 			publicNotFound(w, publicRequestLanguage(r))
 			return

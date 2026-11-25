@@ -298,6 +298,9 @@ test('list rows offer one-click visibility, group moves and trash without openin
   assert.deepEqual(pageButtons, ['编辑', '隐藏', '移到文章', '删除']);
   assert.equal(c.get('postRows').children.length, 1);
   assert.deepEqual(c.get('postRows').children[0].children[4].children[0].children.map(b => b.textContent), ['编辑', '公开', '移到页面', '删除']);
+  c.state.posts.push({...independent, id: 43, version: 1});
+  c.run('renderPosts()');
+  assert.deepEqual(c.get('independentRows').children[0].children[4].children[0].children.map(b => b.textContent), ['编辑', '隐藏', '删除'], 'independent pages keep their address and are not moved');
   c.get('statusFilter').value = 'trash';
   c.run("renderDocumentList('post')");
   assert.deepEqual(c.get('postRows').children[0].children[4].children[0].children.map(b => b.textContent), ['恢复', '彻底删除']);

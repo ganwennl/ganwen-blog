@@ -1,5 +1,13 @@
 # 更新日志 / Changelog
 
+## v1.0.8 — 2026-11-25
+
+- 页面移到文章后，旧的 `?page_id=` 链接 301 跳转到新的文章地址；其他文章仍不接受 `?page_id=`。
+- 独立页面（自定义地址/仅地址访问）不再提供“移到文章”，避免丢失地址并被公开列出。
+
+- After a page is moved to posts, its old `?page_id=` link redirects (301) to the new post address; other posts still reject `?page_id=`.
+- Independent pages (custom address / address-only) can no longer be moved to posts, so their address is not lost and they are not listed publicly.
+
 ## v1.0.7 — 2026-11-25
 
 - 后台文章/页面列表可一键公开或隐藏，并可把页面移到文章（或反向），误发到页面的文章可直接挪出。

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"testing"
 )
 
@@ -44,6 +45,17 @@ func TestAdminPostActionsMovePageToPostAndBack(t *testing.T) {
 	if len(posts) != 1 || posts[0].Type != "post" {
 		t.Fatal("moved article missing from public post list")
 	}
+	req, _ := http.NewRequest(http.MethodGet, c.server.URL+"/?page_id=10000", nil)
+	req.AddCookie(&http.Cookie{Name: visitorLanguageCookieName, Value: "zh"})
+	noFollow := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	res, err := noFollow.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.StatusCode != http.StatusMovedPermanently || res.Header.Get("Location") != "https://www.ganwen.nl/?p=10000" {
+		t.Fatalf("old page link: %d %q", res.StatusCode, res.Header.Get("Location"))
+	}
 	if code, _ := postActionCall(t, c, page.ID, page.Version, postActionToPage); code != 409 {
 		t.Fatal("stale version accepted")
 	}
@@ -64,15 +76,17 @@ func TestAdminPostActionsIndependentPageAndImportedPermalink(t *testing.T) {
 	if err := c.app.Store.NewPost(ctx, &independent); err != nil {
 		t.Fatal(err)
 	}
-	code, moved := postActionCall(t, c, independent.ID, independent.Version, postActionToPost)
-	if code != 200 || moved.PublicPath != "" || moved.Unlisted || moved.CanonicalURL != "https://www.ganwen.nl/?p=10000" {
-		t.Fatalf("independent to post: %d %#v", code, moved)
+	if code, _ := postActionCall(t, c, independent.ID, independent.Version, postActionToPost); code != 409 {
+		t.Fatal("independent page moved without clearing its address")
+	}
+	if stored, _ := c.app.Store.GetPost(ctx, independent.ID); stored.Type != "page" || stored.PublicPath != "/proof" || !stored.Unlisted {
+		t.Fatal("rejected move changed the independent page")
 	}
 	imported := Post{ID: 77, Version: 1, Type: "page", Status: "publish", Title: "旧页面", ContentHTML: "<p>x</p>", CanonicalURL: "https://www.ganwen.nl/old-page/"}
 	if err := c.app.Store.saveLocked(ctx, &imported); err != nil {
 		t.Fatal(err)
 	}
-	code, moved = postActionCall(t, c, 77, 1, postActionToPost)
+	code, moved := postActionCall(t, c, 77, 1, postActionToPost)
 	if code != 200 || moved.CanonicalURL != "https://www.ganwen.nl/old-page/" {
 		t.Fatalf("imported permalink changed: %d %#v", code, moved)
 	}

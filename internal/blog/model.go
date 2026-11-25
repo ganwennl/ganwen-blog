@@ -44,6 +44,7 @@ type Post struct {
 	CanonicalURL  string                 `json:"canonical_url"`
 	PublicPath    string                 `json:"public_path,omitempty"`
 	Unlisted      bool                   `json:"unlisted,omitempty"`
+	MovedFromPage bool                   `json:"moved_from_page,omitempty"`
 	PublishedAt   string                 `json:"published_at"`
 	ModifiedAt    string                 `json:"modified_at"`
 	Author        string                 `json:"author"`
