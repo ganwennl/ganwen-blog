@@ -1466,7 +1466,17 @@ func safePublicHTMLForLanguage(input, base, lang string, preview ...bool) templa
 						c.Attr = append(c.Attr, html.Attribute{Key: "rel", Val: "noopener noreferrer"})
 					}
 					if c.Data == "img" {
-						c.Attr = append(c.Attr, html.Attribute{Key: "loading", Val: "lazy"})
+						replaced := false
+						for i := range c.Attr {
+							if strings.EqualFold(c.Attr[i].Key, "loading") {
+								c.Attr[i].Key, c.Attr[i].Val = "loading", "lazy"
+								replaced = true
+								break
+							}
+						}
+						if !replaced {
+							c.Attr = append(c.Attr, html.Attribute{Key: "loading", Val: "lazy"})
+						}
 					}
 					if c.Data == "iframe" {
 						u, e := url.Parse(iframeSrc)

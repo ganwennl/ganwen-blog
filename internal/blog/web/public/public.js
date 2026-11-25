@@ -105,7 +105,7 @@
       }
       if (url.searchParams.has('m')) {
         const month = url.searchParams.getAll('m');
-        if (month.length !== 1 || !/^\d{4}(?:0[1-9]|1[0-2])$/.test(month[0])) return null;
+        if (month.length !== 1 || !/^\d{4}(?:0[1-9]|1[0-2])?$/.test(month[0])) return null;
         query.set('m', month[0]);
       }
       // Keep the search page category, never transmit the visitor's words.

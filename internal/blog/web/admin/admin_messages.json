@@ -587,7 +587,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "确定删除“{0}”？删除后会移到回收站，可以恢复。",
     "确定彻底删除“{0}”？此操作无法恢复。": "确定彻底删除“{0}”？此操作无法恢复。",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？",
+    "站点统计开关不正确": "站点统计开关不正确",
+    "页头图片地址不正确": "页头图片地址不正确",
+    "特色图片地址不正确": "特色图片地址不正确"
   },
   "nl": {
     "甘文 · 内容管理": "Ganwen · Blogbeheer",
@@ -1177,7 +1180,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "“{0}” naar pagina's verplaatsen? Het verschijnt dan niet meer in de berichtenlijst en op de startpagina.",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "“{0}” verwijderen? Het gaat naar de prullenbak en kan worden hersteld.",
     "确定彻底删除“{0}”？此操作无法恢复。": "“{0}” definitief verwijderen? Dit kan niet ongedaan worden gemaakt.",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Je maakt een pagina, geen bericht. Pagina's verschijnen niet in de berichtenlijst of op de startpagina. Opslaan als pagina?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Je maakt een pagina, geen bericht. Pagina's verschijnen niet in de berichtenlijst of op de startpagina. Opslaan als pagina?",
+    "站点统计开关不正确": "De instelling voor sitestatistieken is ongeldig",
+    "页头图片地址不正确": "De URL van de kopafbeelding is ongeldig",
+    "特色图片地址不正确": "De URL van de uitgelichte afbeelding is ongeldig"
   },
   "en": {
     "甘文 · 内容管理": "Ganwen · Blog admin",
@@ -1767,7 +1773,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "Move “{0}” to pages? It will no longer appear in the post list or on the home page.",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "Delete “{0}”? It will be moved to the trash and can be restored.",
     "确定彻底删除“{0}”？此操作无法恢复。": "Permanently delete “{0}”? This cannot be undone.",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "You are creating a page, not a post. Pages do not appear in the post list or on the home page. Save as a page?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "You are creating a page, not a post. Pages do not appear in the post list or on the home page. Save as a page?",
+    "站点统计开关不正确": "The site statistics toggle is invalid",
+    "页头图片地址不正确": "The header image URL is invalid",
+    "特色图片地址不正确": "The featured image URL is invalid"
   },
   "hi": {
     "甘文 · 内容管理": "Ganwen · ब्लॉग प्रशासन",
@@ -2357,7 +2366,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "“{0}” को पेज में ले जाएँ? इसके बाद यह पोस्ट सूची और होम पेज पर नहीं दिखेगा।",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "“{0}” हटाएँ? यह कचरे में जाएगा और पुनर्स्थापित किया जा सकता है।",
     "确定彻底删除“{0}”？此操作无法恢复。": "“{0}” को स्थायी रूप से हटाएँ? इसे पूर्ववत नहीं किया जा सकता।",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "आप पोस्ट नहीं, पेज बना रहे हैं। पेज पोस्ट सूची या होम पेज पर नहीं दिखते। पेज के रूप में सहेजें?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "आप पोस्ट नहीं, पेज बना रहे हैं। पेज पोस्ट सूची या होम पेज पर नहीं दिखते। पेज के रूप में सहेजें?",
+    "站点统计开关不正确": "साइट आँकड़े का स्विच अमान्य है",
+    "页头图片地址不正确": "हेडर छवि का पता अमान्य है",
+    "特色图片地址不正确": "फ़ीचर्ड छवि का पता अमान्य है"
   },
   "es": {
     "甘文 · 内容管理": "Ganwen · Administración del blog",
@@ -2947,7 +2959,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "¿Mover «{0}» a páginas? Ya no aparecerá en la lista de entradas ni en la página de inicio.",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "¿Eliminar «{0}»? Se moverá a la papelera y se podrá restaurar.",
     "确定彻底删除“{0}”？此操作无法恢复。": "¿Eliminar definitivamente «{0}»? Esta acción no se puede deshacer.",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Estás creando una página, no una entrada. Las páginas no aparecen en la lista de entradas ni en la página de inicio. ¿Guardar como página?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Estás creando una página, no una entrada. Las páginas no aparecen en la lista de entradas ni en la página de inicio. ¿Guardar como página?",
+    "站点统计开关不正确": "El interruptor de estadísticas del sitio no es válido",
+    "页头图片地址不正确": "La URL de la imagen de cabecera no es válida",
+    "特色图片地址不正确": "La URL de la imagen destacada no es válida"
   },
   "ar": {
     "甘文 · 内容管理": "Ganwen · لوحة إدارة المدونة",
@@ -3537,7 +3552,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "هل تريد نقل «{0}» إلى الصفحات؟ لن يظهر بعدها في قائمة المقالات أو الصفحة الرئيسية.",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "هل تريد حذف «{0}»؟ سيُنقل إلى سلة المهملات ويمكن استعادته.",
     "确定彻底删除“{0}”？此操作无法恢复。": "هل تريد حذف «{0}» نهائيًا؟ لا يمكن التراجع عن ذلك.",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "أنت تنشئ صفحة وليس مقالة. لا تظهر الصفحات في قائمة المقالات أو الصفحة الرئيسية. هل تريد الحفظ كصفحة؟"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "أنت تنشئ صفحة وليس مقالة. لا تظهر الصفحات في قائمة المقالات أو الصفحة الرئيسية. هل تريد الحفظ كصفحة؟",
+    "站点统计开关不正确": "مفتاح إحصاءات الموقع غير صالح",
+    "页头图片地址不正确": "عنوان صورة الترويسة غير صالح",
+    "特色图片地址不正确": "عنوان الصورة البارزة غير صالح"
   },
   "fr": {
     "甘文 · 内容管理": "Ganwen · Administration du blog",
@@ -4127,7 +4145,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "Déplacer « {0} » vers les pages ? Il n’apparaîtra plus dans la liste des articles ni sur la page d’accueil.",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "Supprimer « {0} » ? Il sera déplacé dans la corbeille et pourra être restauré.",
     "确定彻底删除“{0}”？此操作无法恢复。": "Supprimer définitivement « {0} » ? Cette action est irréversible.",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Vous créez une page, pas un article. Les pages n’apparaissent ni dans la liste des articles ni sur la page d’accueil. Enregistrer comme page ?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Vous créez une page, pas un article. Les pages n’apparaissent ni dans la liste des articles ni sur la page d’accueil. Enregistrer comme page ?",
+    "站点统计开关不正确": "Le réglage des statistiques du site n'est pas valide",
+    "页头图片地址不正确": "L'adresse de l'image d'en-tête n'est pas valide",
+    "特色图片地址不正确": "L'adresse de l'image à la une n'est pas valide"
   },
   "bn": {
     "甘文 · 内容管理": "গানওয়েন · ব্লগের প্রশাসন",
@@ -4717,7 +4738,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "“{0}” পেজে সরাবেন? এরপর এটি পোস্ট তালিকা ও হোম পেজে আর দেখাবে না।",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "“{0}” মুছবেন? এটি ট্র্যাশে যাবে এবং পুনরুদ্ধার করা যাবে।",
     "确定彻底删除“{0}”？此操作无法恢复。": "“{0}” স্থায়ীভাবে মুছবেন? এটি আর ফেরানো যাবে না।",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "আপনি পোস্ট নয়, পেজ তৈরি করছেন। পেজ পোস্ট তালিকা বা হোম পেজে দেখায় না। পেজ হিসেবে সংরক্ষণ করবেন?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "আপনি পোস্ট নয়, পেজ তৈরি করছেন। পেজ পোস্ট তালিকা বা হোম পেজে দেখায় না। পেজ হিসেবে সংরক্ষণ করবেন?",
+    "站点统计开关不正确": "সাইট পরিসংখ্যানের সুইচটি সঠিক নয়",
+    "页头图片地址不正确": "হেডার ছবির ঠিকানা সঠিক নয়",
+    "特色图片地址不正确": "ফিচার্ড ছবির ঠিকানা সঠিক নয়"
   },
   "pt": {
     "甘文 · 内容管理": "Ganwen · Administração do blog",
@@ -5307,7 +5331,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "Mover “{0}” para páginas? Ele deixará de aparecer na lista de posts e na página inicial.",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "Excluir “{0}”? Ele irá para a lixeira e poderá ser restaurado.",
     "确定彻底删除“{0}”？此操作无法恢复。": "Excluir “{0}” permanentemente? Esta ação não pode ser desfeita.",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Você está criando uma página, não um post. Páginas não aparecem na lista de posts nem na página inicial. Salvar como página?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Você está criando uma página, não um post. Páginas não aparecem na lista de posts nem na página inicial. Salvar como página?",
+    "站点统计开关不正确": "A opção de estatísticas do site é inválida",
+    "页头图片地址不正确": "O endereço da imagem de cabeçalho é inválido",
+    "特色图片地址不正确": "O endereço da imagem em destaque é inválido"
   },
   "id": {
     "甘文 · 内容管理": "Ganwen · Pengelolaan blog",
@@ -5897,7 +5924,10 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "Pindahkan “{0}” ke halaman? Setelah itu tidak lagi muncul di daftar artikel dan beranda.",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "Hapus “{0}”? Akan dipindahkan ke sampah dan dapat dipulihkan.",
     "确定彻底删除“{0}”？此操作无法恢复。": "Hapus “{0}” secara permanen? Tindakan ini tidak dapat dibatalkan.",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Anda sedang membuat halaman, bukan artikel. Halaman tidak muncul di daftar artikel atau beranda. Simpan sebagai halaman?"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "Anda sedang membuat halaman, bukan artikel. Halaman tidak muncul di daftar artikel atau beranda. Simpan sebagai halaman?",
+    "站点统计开关不正确": "Pengaturan statistik situs tidak valid",
+    "页头图片地址不正确": "Alamat gambar tajuk tidak valid",
+    "特色图片地址不正确": "Alamat gambar unggulan tidak valid"
   },
   "ur": {
     "甘文 · 内容管理": "Ganwen · بلاگ انتظامیہ",
@@ -6487,6 +6517,9 @@
     "确定把“{0}”移到页面？移动后它不再出现在文章列表和首页。": "“{0}” کو صفحات میں منتقل کریں؟ اس کے بعد یہ پوسٹ فہرست اور ہوم پیج پر نظر نہیں آئے گا۔",
     "确定删除“{0}”？删除后会移到回收站，可以恢复。": "“{0}” حذف کریں؟ یہ ردی کی ٹوکری میں جائے گا اور بحال کیا جا سکتا ہے۔",
     "确定彻底删除“{0}”？此操作无法恢复。": "“{0}” کو مستقل طور پر حذف کریں؟ یہ عمل واپس نہیں ہو سکتا۔",
-    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "آپ پوسٹ نہیں، صفحہ بنا رہے ہیں۔ صفحات پوسٹ فہرست یا ہوم پیج پر نظر نہیں آتے۔ صفحے کے طور پر محفوظ کریں؟"
+    "正在新建的是页面，不是文章。页面不会出现在文章列表和首页。确定保存为页面？": "آپ پوسٹ نہیں، صفحہ بنا رہے ہیں۔ صفحات پوسٹ فہرست یا ہوم پیج پر نظر نہیں آتے۔ صفحے کے طور پر محفوظ کریں؟",
+    "站点统计开关不正确": "سائٹ کے اعدادوشمار کا سوئچ درست نہیں ہے",
+    "页头图片地址不正确": "ہیڈر تصویر کا پتا درست نہیں ہے",
+    "特色图片地址不正确": "نمایاں تصویر کا پتا درست نہیں ہے"
   }
 }

@@ -793,6 +793,7 @@ test('event query contract matches publicPage and real WordPress archive filters
     ['/?page_id=2&lang=en', '/?page_id=2'],
     ['/nl/index.php?cat=13&category_name=reflections&tag=%E6%A0%87%E7%AD%BE&author=1&m=202501&post_format=video&paged=2&s=PRIVATE&year=2025',
       '/nl/index.php?cat=13&paged=2&author=1&category_name=reflections&tag=%E6%A0%87%E7%AD%BE&post_format=video&m=202501&s='],
+    ['/?m=2025', '/?m=2025'],
     ['/?year=2025&monthnum=1&day=3&tag_id=23&author_name=SECRET&lang=nl', '/'],
   ];
   for (const [route, expected] of cases) {
@@ -801,7 +802,7 @@ test('event query contract matches publicPage and real WordPress archive filters
     for (const key of new URL(payload.path, 'https://www.ganwen.nl').searchParams.keys()) assert.equal(allowed.has(key), true, key);
     assert.equal(JSON.stringify(payload).includes('PRIVATE'), false); assert.equal(JSON.stringify(payload).includes('SECRET'), false);
   }
-  for (const route of ['/?attachment_id=200', '/en/?attachment_id=200&cat=13', '/?p=1447&page_id=2', '/?m=202513', '/?m=2025', '/?post_format=unsupported']) {
+  for (const route of ['/?attachment_id=200', '/en/?attachment_id=200&cat=13', '/?p=1447&page_id=2', '/?m=202513', '/?m=202500', '/?m=20251', '/?post_format=unsupported']) {
     assert.equal((await browser({url: 'https://www.ganwen.nl' + route})).beacons.length, 0, route);
   }
 });

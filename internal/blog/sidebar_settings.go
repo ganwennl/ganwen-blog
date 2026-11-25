@@ -158,11 +158,10 @@ type sidebarSettingsResponse struct {
 }
 
 func (a *Admin) sidebar(w http.ResponseWriter, r *http.Request) {
-	current, err := a.app.Store.Settings(r.Context())
-	if err != nil {
-		storeError(w, err)
-		return
-	}
+	var (
+		current SiteSettings
+		err     error
+	)
 	if r.Method == http.MethodPut {
 		var input *struct {
 			Modules               json.RawMessage `json:"modules"`
@@ -183,21 +182,33 @@ func (a *Admin) sidebar(w http.ResponseWriter, r *http.Request) {
 			adminError(w, 400, err.Error())
 			return
 		}
-		ads, err := patchedSidebarAds(current.SidebarAds, input.SidebarAds)
+		current, err = a.app.Store.UpdateSettings(r.Context(), func(s *SiteSettings) error {
+			ads, err := patchedSidebarAds(s.SidebarAds, input.SidebarAds)
+			if err != nil {
+				return adminInputError{err.Error()}
+			}
+			s.SidebarModules = &modules
+			if err := patchSidebarOrdering(s, input.CustomOrderEnabled, input.Order); err != nil {
+				return adminInputError{err.Error()}
+			}
+			s.ArticleSidebarEnabled = *input.ArticleSidebarEnabled
+			s.SidebarAds = ads
+			showStats := sidebarModuleSelected(modules, "stats")
+			s.PublicStatsEnabled = &showStats
+			return nil
+		})
+		var inputErr adminInputError
+		if errors.As(err, &inputErr) {
+			adminError(w, 400, inputErr.Error())
+			return
+		}
 		if err != nil {
-			adminError(w, 400, err.Error())
+			storeError(w, err)
 			return
 		}
-		current.SidebarModules = &modules
-		if err := patchSidebarOrdering(&current, input.CustomOrderEnabled, input.Order); err != nil {
-			adminError(w, 400, err.Error())
-			return
-		}
-		current.ArticleSidebarEnabled = *input.ArticleSidebarEnabled
-		current.SidebarAds = ads
-		showStats := sidebarModuleSelected(modules, "stats")
-		current.PublicStatsEnabled = &showStats
-		if err := a.app.Store.SaveSettings(r.Context(), current); err != nil {
+	} else {
+		current, err = a.app.Store.Settings(r.Context())
+		if err != nil {
 			storeError(w, err)
 			return
 		}

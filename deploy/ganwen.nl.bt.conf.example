@@ -35,8 +35,8 @@ server
     #HTTP_TO_HTTPS_END
     ssl_certificate /www/server/panel/vhost/cert/ganwen.nl/fullchain.pem;
     ssl_certificate_key /www/server/panel/vhost/cert/ganwen.nl/privkey.pem;
-    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
-    ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:!MD5;
     ssl_prefer_server_ciphers on;
     ssl_session_tickets on;
     ssl_session_cache shared:SSL:10m;
@@ -84,6 +84,9 @@ server
     location ^~ /assets/ {
         proxy_pass http://127.0.0.1:8097;
     }
+    location ^~ /admin/ {
+        proxy_pass http://127.0.0.1:8097;
+    }
 
     # Hide old scripts/configuration and private/new application paths.
     location ~* \.(php[0-9]*|phtml)(?:/|$) { return 404; }
@@ -94,7 +97,7 @@ server
     # Blog media, including migrated evidence, takes priority. Unmigrated
     # original files remain available as a fallback on an actual Go 404.
     # Do not alias the entire private data directory into the public root.
-    location ~* \.(jpg|jpeg|png|gif|webp|avif|heic|heif|ico|bmp|swf|mp4|m4v|mov|webm|mp3|m4a|ogg|wav|pdf|txt)$ {
+    location ~* \.(jpg|jpeg|png|gif|webp|avif|heic|heif|ico|bmp|mp4|m4v|mov|webm|mp3|m4a|ogg|wav|pdf|txt)$ {
         proxy_pass http://127.0.0.1:8097;
         proxy_intercept_errors on;
         error_page 404 = @legacy_media;

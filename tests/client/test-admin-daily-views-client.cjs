@@ -163,3 +163,23 @@ test('accepted logout resets the target to 1000 while cancelled logout keeps its
   assert.equal(c.state.settings, null);
   assert.equal(c.state.authenticated, false);
 });
+
+test('disabling virtual views allows saving even if the disabled target input was cleared', async () => {
+  let submitted = null;
+  const c = client(call => {
+    if (call.path === 'session') return {data: session};
+    assert.equal(call.path, 'settings');
+    submitted = JSON.parse(call.options.body);
+    return {data: submitted};
+  });
+  applySettings(c, 1500, true);
+  setDailyViews(c, '');
+  c.get('publicVirtualViewsEnabled').checked = false;
+  c.get('publicVirtualViewsEnabled').onchange();
+  assert.equal(c.get('publicDailyViews').disabled, true);
+  await c.get('settingsForm').onsubmit({preventDefault() {}});
+  assert.equal(submitted.public_virtual_views_enabled, false);
+  assert.equal(submitted.public_daily_views, 1500);
+  assert.equal(c.get('publicDailyViews').value, '1500');
+  assert.equal(c.state.settingsDirty, false);
+});

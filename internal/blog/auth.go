@@ -129,6 +129,11 @@ func (a *adminAuth) loginIP(r *http.Request) string {
 	// Production Nginx overwrites X-Real-IP. Only a loopback peer is trusted;
 	// previews, direct remote clients, repeated headers, lists and IP:port fail closed.
 	if a.trustLoopbackProxy && peer != nil && peer.IsLoopback() {
+		cfg := a.config
+		cfg.Preview = false
+		if _, client := analyticsCloudflare(r, cfg); client != "" {
+			return client
+		}
 		values := r.Header.Values("X-Real-IP")
 		if len(values) == 1 {
 			if client := net.ParseIP(strings.TrimSpace(values[0])); client != nil {

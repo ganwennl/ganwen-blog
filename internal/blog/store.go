@@ -51,6 +51,26 @@ func (s *Store) Settings(ctx context.Context) (SiteSettings, error) {
 	return out, err
 }
 func (s *Store) SaveSettings(ctx context.Context, p SiteSettings) error {
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	return s.saveSettingsLocked(ctx, p)
+}
+func (s *Store) UpdateSettings(ctx context.Context, fn func(*SiteSettings) error) (SiteSettings, error) {
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	current, err := s.Settings(ctx)
+	if err != nil {
+		return SiteSettings{}, err
+	}
+	if err := fn(&current); err != nil {
+		return SiteSettings{}, err
+	}
+	if err := s.saveSettingsLocked(ctx, current); err != nil {
+		return SiteSettings{}, err
+	}
+	return current, nil
+}
+func (s *Store) saveSettingsLocked(ctx context.Context, p SiteSettings) error {
 	if err := validateContactNoticeSettings(p); err != nil {
 		return err
 	}
@@ -250,9 +270,10 @@ func (s *Store) NewPost(ctx context.Context, p *Post) error {
 	if p.Type == "page" {
 		key = "page_id"
 	}
-	p.CanonicalURL = fmt.Sprintf("%s/?%s=%d", settings.BaseURL, key, id)
+	baseURL := strings.TrimRight(settings.BaseURL, "/")
+	p.CanonicalURL = fmt.Sprintf("%s/?%s=%d", baseURL, key, id)
 	if p.PublicPath != "" {
-		p.CanonicalURL = strings.TrimRight(settings.BaseURL, "/") + p.PublicPath
+		p.CanonicalURL = baseURL + p.PublicPath
 	}
 	now := time.Now().UTC().Format(time.RFC3339)
 	if p.PublishedAt == "" {

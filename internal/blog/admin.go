@@ -360,6 +360,10 @@ func (a *Admin) getPost(w http.ResponseWriter, r *http.Request) {
 	}
 	adminJSON(w, 200, adminPostResponse(p))
 }
+type adminInputError struct{ msg string }
+
+func (e adminInputError) Error() string { return e.msg }
+
 func validAdminPost(p Post) error {
 	if strings.TrimSpace(p.Title) == "" || len(p.Title) > 2000 {
 		return errors.New("请填写标题，最多 2000 字节")
@@ -371,6 +375,9 @@ func validAdminPost(p Post) error {
 	}
 	if len(p.ContentHTML) > 4<<20 || len(p.ExcerptHTML) > 1<<20 {
 		return errors.New("正文或摘要过大")
+	}
+	if !validOptionalImageURL(strings.TrimSpace(p.FeaturedImage)) {
+		return errors.New("特色图片地址不正确")
 	}
 	if len(p.Categories) > 100 || len(p.Tags) > 100 {
 		return errors.New("分类或标签过多")
@@ -429,7 +436,7 @@ func (a *Admin) savePost(w http.ResponseWriter, r *http.Request, create bool) {
 		}
 		p.Categories = input.Categories
 		p.Tags = input.Tags
-		p.FeaturedImage = input.FeaturedImage
+		p.FeaturedImage = strings.TrimSpace(input.FeaturedImage)
 		p.Sticky = input.Sticky
 		p.SEO = input.SEO
 		p.ModifiedAt = time.Now().UTC().Format(time.RFC3339)
@@ -446,6 +453,7 @@ func (a *Admin) savePost(w http.ResponseWriter, r *http.Request, create bool) {
 		if input.Type == "page" {
 			p.Type = "page"
 		}
+		p.FeaturedImage = strings.TrimSpace(input.FeaturedImage)
 		p.Translations = nil
 		p.SourceHTML = p.ContentHTML
 		p.Author = a.app.Config.AdminUser
@@ -582,12 +590,12 @@ func (a *Admin) translationConfig(w http.ResponseWriter, r *http.Request) {
 	adminJSON(w, 200, map[string]bool{"ok": true})
 }
 func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
-	current, err := a.app.Store.Settings(r.Context())
-	if err != nil {
-		storeError(w, err)
-		return
-	}
 	if r.Method == http.MethodGet {
+		current, err := a.app.Store.Settings(r.Context())
+		if err != nil {
+			storeError(w, err)
+			return
+		}
 		dailyViews := publicDailyDisplayTarget(current)
 		current.PublicDailyViews = &dailyViews
 		virtualViews := publicVirtualViewsEnabled(current)
@@ -629,120 +637,150 @@ func (a *Admin) settings(w http.ResponseWriter, r *http.Request) {
 		adminError(w, 400, "站点标题、描述或分页设置不正确")
 		return
 	}
+	headerImage := strings.TrimSpace(s.HeaderImage)
+	if !validOptionalImageURL(headerImage) {
+		adminError(w, 400, "页头图片地址不正确")
+		return
+	}
+	var contactLinks []ContactLink
 	if s.ContactLinks != nil {
 		links, err := validateContactLinks(s.ContactLinks)
 		if err != nil {
 			adminError(w, 400, err.Error())
 			return
 		}
-		current.ContactLinks = links
+		contactLinks = links
 	}
-	if err := patchContactNoticeSettings(&current, input.ContactNoticeEnabled, input.ContactNoticeText, input.ContactNoticeTranslations); err != nil {
-		adminError(w, 400, err.Error())
-		return
-	}
+	var avatar string
 	if input.AvatarURL != nil {
-		avatar := strings.TrimSpace(*input.AvatarURL)
+		avatar = strings.TrimSpace(*input.AvatarURL)
 		if avatar != "" && !validAvatarURL(avatar) {
 			adminError(w, 400, "头像请使用上传目录内的图片，或完整 HTTPS 图片地址")
 			return
 		}
-		current.AvatarURL = avatar
 	}
-	current.Title = s.Title
-	current.Description = s.Description
-	current.PostsPerPage = s.PostsPerPage
-	current.HeaderImage = s.HeaderImage
-	if err := patchSidebarOrdering(&current, input.SidebarCustomOrderEnabled, input.SidebarOrder); err != nil {
-		adminError(w, 400, err.Error())
+	updated, err := a.app.Store.UpdateSettings(r.Context(), func(current *SiteSettings) error {
+		if s.ContactLinks != nil {
+			current.ContactLinks = contactLinks
+		}
+		if err := patchContactNoticeSettings(current, input.ContactNoticeEnabled, input.ContactNoticeText, input.ContactNoticeTranslations); err != nil {
+			return adminInputError{err.Error()}
+		}
+		if input.AvatarURL != nil {
+			current.AvatarURL = avatar
+		}
+		current.Title = s.Title
+		current.Description = s.Description
+		current.PostsPerPage = s.PostsPerPage
+		current.HeaderImage = headerImage
+		if err := patchSidebarOrdering(current, input.SidebarCustomOrderEnabled, input.SidebarOrder); err != nil {
+			return adminInputError{err.Error()}
+		}
+		if len(input.ArticleSidebarEnabled) > 0 {
+			var enabled *bool
+			if err := json.Unmarshal(input.ArticleSidebarEnabled, &enabled); err != nil || enabled == nil {
+				return adminInputError{"文章侧栏开关不正确"}
+			}
+			current.ArticleSidebarEnabled = *enabled
+		}
+		if len(input.PublicVirtualViewsEnabled) > 0 {
+			enabled, err := parsedPublicVirtualViewsEnabled(input.PublicVirtualViewsEnabled)
+			if err != nil {
+				return adminInputError{err.Error()}
+			}
+			current.PublicVirtualViewsEnabled = enabled
+		}
+		if len(input.PublicStatsEnabled) > 0 {
+			enabled, err := parsedPublicStatsEnabled(input.PublicStatsEnabled)
+			if err != nil {
+				return adminInputError{err.Error()}
+			}
+			current.PublicStatsEnabled = enabled
+			if current.SidebarModules != nil {
+				modules := sidebarModulesWithStats(*current.SidebarModules, *enabled)
+				current.SidebarModules = &modules
+			}
+		}
+		if len(input.SidebarModules) > 0 {
+			modules, err := parsedSidebarModules(input.SidebarModules)
+			if err != nil {
+				return adminInputError{err.Error()}
+			}
+			current.SidebarModules = &modules
+			showStats := sidebarModuleSelected(modules, "stats")
+			current.PublicStatsEnabled = &showStats
+		}
+		if len(input.PublicDailyViews) > 0 {
+			dailyViews, err := parsedPublicDailyViews(input.PublicDailyViews)
+			if err != nil {
+				return adminInputError{err.Error()}
+			}
+			current.PublicDailyViews = dailyViews
+		}
+		if len(input.SidebarAds) > 0 {
+			ads, err := patchedSidebarAds(current.SidebarAds, input.SidebarAds)
+			if err != nil {
+				return adminInputError{err.Error()}
+			}
+			current.SidebarAds = ads
+		}
+		if len(input.DefaultLayout) > 0 {
+			var layout *string
+			if err := json.Unmarshal(input.DefaultLayout, &layout); err != nil || layout == nil || (*layout != "" && *layout != "journal" && *layout != "classic") {
+				return adminInputError{"请选择日志阅读或经典卡片作为默认版式"}
+			}
+			current.DefaultLayout = *layout
+			if current.DefaultLayout == "" {
+				current.DefaultLayout = "journal"
+			}
+		}
+		if len(input.FooterText) > 0 {
+			var footer *string
+			if err := json.Unmarshal(input.FooterText, &footer); err != nil || (footer != nil && !validFooterText(*footer)) {
+				return adminInputError{"页脚请使用不超过 4000 字的纯文本"}
+			}
+			current.FooterText = footer
+		}
+		if input.FooterTranslations != nil {
+			translations, err := validatedFooterTranslations(*input.FooterTranslations, *current)
+			if err != nil {
+				return adminInputError{err.Error()}
+			}
+			current.FooterTranslations = translations
+		}
+		return nil
+	})
+	var inputErr adminInputError
+	if errors.As(err, &inputErr) {
+		adminError(w, 400, inputErr.Error())
 		return
 	}
-	if len(input.ArticleSidebarEnabled) > 0 {
-		var enabled *bool
-		if err := json.Unmarshal(input.ArticleSidebarEnabled, &enabled); err != nil || enabled == nil {
-			adminError(w, 400, "文章侧栏开关不正确")
-			return
-		}
-		current.ArticleSidebarEnabled = *enabled
-	}
-	if len(input.PublicVirtualViewsEnabled) > 0 {
-		enabled, err := parsedPublicVirtualViewsEnabled(input.PublicVirtualViewsEnabled)
-		if err != nil {
-			adminError(w, 400, err.Error())
-			return
-		}
-		current.PublicVirtualViewsEnabled = enabled
-	}
-	if len(input.PublicStatsEnabled) > 0 {
-		enabled, err := parsedPublicVirtualViewsEnabled(input.PublicStatsEnabled)
-		if err != nil {
-			adminError(w, 400, err.Error())
-			return
-		}
-		current.PublicStatsEnabled = enabled
-		if current.SidebarModules != nil {
-			modules := sidebarModulesWithStats(*current.SidebarModules, *enabled)
-			current.SidebarModules = &modules
-		}
-	}
-	if len(input.SidebarModules) > 0 {
-		modules, err := parsedSidebarModules(input.SidebarModules)
-		if err != nil {
-			adminError(w, 400, err.Error())
-			return
-		}
-		current.SidebarModules = &modules
-		showStats := sidebarModuleSelected(modules, "stats")
-		current.PublicStatsEnabled = &showStats
-	}
-	if len(input.PublicDailyViews) > 0 {
-		dailyViews, err := parsedPublicDailyViews(input.PublicDailyViews)
-		if err != nil {
-			adminError(w, 400, err.Error())
-			return
-		}
-		current.PublicDailyViews = dailyViews
-	}
-	if len(input.SidebarAds) > 0 {
-		ads, err := patchedSidebarAds(current.SidebarAds, input.SidebarAds)
-		if err != nil {
-			adminError(w, 400, err.Error())
-			return
-		}
-		current.SidebarAds = ads
-	}
-	if len(input.DefaultLayout) > 0 {
-		var layout *string
-		if err := json.Unmarshal(input.DefaultLayout, &layout); err != nil || layout == nil || (*layout != "" && *layout != "journal" && *layout != "classic") {
-			adminError(w, 400, "请选择日志阅读或经典卡片作为默认版式")
-			return
-		}
-		current.DefaultLayout = *layout
-		if current.DefaultLayout == "" {
-			current.DefaultLayout = "journal"
-		}
-	}
-	if len(input.FooterText) > 0 {
-		var footer *string
-		if err := json.Unmarshal(input.FooterText, &footer); err != nil || (footer != nil && !validFooterText(*footer)) {
-			adminError(w, 400, "页脚请使用不超过 4000 字的纯文本")
-			return
-		}
-		current.FooterText = footer
-	}
-	if input.FooterTranslations != nil {
-		translations, err := validatedFooterTranslations(*input.FooterTranslations, current)
-		if err != nil {
-			adminError(w, 400, err.Error())
-			return
-		}
-		current.FooterTranslations = translations
-	}
-	if err = a.app.Store.SaveSettings(r.Context(), current); err != nil {
+	if err != nil {
 		storeError(w, err)
 		return
 	}
-	adminJSON(w, 200, current)
+	adminJSON(w, 200, updated)
+}
+
+func validOptionalImageURL(raw string) bool {
+	if raw == "" {
+		return true
+	}
+	if len(raw) > 2048 || strings.IndexFunc(raw, func(r rune) bool { return unicode.IsControl(r) || unicode.IsSpace(r) }) >= 0 || strings.Contains(raw, "\\") {
+		return false
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.User != nil || u.Opaque != "" {
+		return false
+	}
+	decoded, err := url.PathUnescape(raw)
+	if err != nil || strings.IndexFunc(decoded, unicode.IsControl) >= 0 || strings.Contains(decoded, "\\") {
+		return false
+	}
+	if u.Scheme == "" {
+		return u.Host == "" && strings.HasPrefix(raw, "/") && !strings.HasPrefix(raw, "//")
+	}
+	return (u.Scheme == "http" || u.Scheme == "https") && u.Hostname() != ""
 }
 
 func validAvatarURL(raw string) bool {
@@ -1002,49 +1040,59 @@ func validWebPDepth(b []byte, depth int) bool {
 	}
 	return imageChunk
 }
+func mp4Box(b []byte, off int) (kind string, payload []byte, next int, ok bool) {
+	if off < 0 || off+8 > len(b) {
+		return "", nil, 0, false
+	}
+	n := uint64(binary.BigEndian.Uint32(b[off : off+4]))
+	header := uint64(8)
+	if n == 1 {
+		if off+16 > len(b) {
+			return "", nil, 0, false
+		}
+		n = binary.BigEndian.Uint64(b[off+8 : off+16])
+		header = 16
+	}
+	if n == 0 {
+		n = uint64(len(b) - off)
+	}
+	if n < header || n > uint64(len(b)-off) {
+		return "", nil, 0, false
+	}
+	return string(b[off+4 : off+8]), b[off+int(header) : off+int(n)], off + int(n), true
+}
+
 func validMP4(b []byte) bool {
 	ftyp, moov, mdat := false, false, false
 	for off := 0; off < len(b); {
-		if off+8 > len(b) {
+		kind, payload, next, ok := mp4Box(b, off)
+		if !ok {
 			return false
 		}
-		n := uint64(binary.BigEndian.Uint32(b[off : off+4]))
-		header := uint64(8)
-		if n == 1 {
-			if off+16 > len(b) {
-				return false
-			}
-			n = binary.BigEndian.Uint64(b[off+8 : off+16])
-			header = 16
-		}
-		if n == 0 {
-			n = uint64(len(b) - off)
-		}
-		if n < header || n > uint64(len(b)-off) {
-			return false
-		}
-		kind := string(b[off+4 : off+8])
 		switch kind {
 		case "ftyp":
-			if off != 0 || n < header+8 {
+			if off != 0 || len(payload) < 8 {
 				return false
 			}
-			brands := b[off+int(header) : off+int(n)]
-			for k := 0; k+4 <= len(brands); k += 4 {
+			for k := 0; k+4 <= len(payload); k += 4 {
 				if k == 4 {
 					continue
 				}
-				brand := string(brands[k : k+4])
+				brand := string(payload[k : k+4])
 				if brand == "isom" || brand == "iso2" || brand == "iso5" || brand == "iso6" || brand == "mp41" || brand == "mp42" || brand == "avc1" || brand == "M4V " || brand == "dash" {
 					ftyp = true
 				}
 			}
 		case "moov":
-			moov = validMP4Movie(b[off+int(header) : off+int(n)])
+			if validMP4Movie(payload) {
+				moov = true
+			}
 		case "mdat":
-			mdat = n > header
+			if len(payload) > 0 {
+				mdat = true
+			}
 		}
-		off += int(n)
+		off = next
 	}
 	return ftyp && moov && mdat
 }
@@ -1052,15 +1100,10 @@ func validMP4(b []byte) bool {
 func validMP4Movie(b []byte) bool {
 	movie, track := false, false
 	for off := 0; off < len(b); {
-		if off+8 > len(b) {
+		kind, payload, next, ok := mp4Box(b, off)
+		if !ok {
 			return false
 		}
-		n := int(binary.BigEndian.Uint32(b[off : off+4]))
-		if n < 8 || n > len(b)-off {
-			return false
-		}
-		kind := string(b[off+4 : off+8])
-		payload := b[off+8 : off+n]
 		if kind == "mvhd" {
 			if len(payload) < 100 || (payload[0] != 0 && payload[0] != 1) {
 				return false
@@ -1083,25 +1126,23 @@ func validMP4Movie(b []byte) bool {
 			}
 			tkhd, mdia := false, false
 			for at := 0; at < len(payload); {
-				if at+8 > len(payload) {
+				box, boxPayload, atNext, ok := mp4Box(payload, at)
+				if !ok {
 					return false
 				}
-				size := int(binary.BigEndian.Uint32(payload[at : at+4]))
-				if size < 8 || size > len(payload)-at {
-					return false
-				}
-				box := string(payload[at+4 : at+8])
 				if box == "tkhd" {
-					tkhd = size >= 92
+					tkhd = len(boxPayload) >= 84
 				}
 				if box == "mdia" {
-					mdia = size >= 16
+					mdia = len(boxPayload) >= 8
 				}
-				at += size
+				at = atNext
 			}
-			track = tkhd && mdia
+			if tkhd && mdia {
+				track = true
+			}
 		}
-		off += n
+		off = next
 	}
 	return movie && track
 }
@@ -1152,7 +1193,8 @@ func (a *Admin) upload(w http.ResponseWriter, r *http.Request) {
 		adminError(w, 500, "无法解析媒体目录")
 		return
 	}
-	sub := filepath.Join("wp-content", "uploads", time.Now().UTC().Format("2006"), time.Now().UTC().Format("01"))
+	now := time.Now().UTC()
+	sub := filepath.Join("wp-content", "uploads", now.Format("2006"), now.Format("01"))
 	dir := filepath.Join(root, sub)
 	if err = os.MkdirAll(dir, 0755); err != nil {
 		adminError(w, 500, "无法创建上传目录")

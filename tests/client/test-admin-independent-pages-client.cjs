@@ -324,3 +324,25 @@ test('saving a brand-new ordinary page asks first so articles are not filed as p
   assert.equal(asked, 1);
   assert.equal(c.state.post.id, 0);
 });
+
+test('existing independent page can clear public_path after unchecking unlisted to become a regular page', async () => {
+  let payload = null;
+  const c = openFixture(call => {
+    assert.equal(call.path, 'post');
+    payload = JSON.parse(call.options.body);
+    return {data: {post: {...payload, version: 8}, source_hash: 'converted-hash'}};
+  });
+  await c.run('openPost(29)');
+  // Keeping unlisted checked with empty path must still be rejected.
+  c.get('publicPath').value = '';
+  await c.run('saveEditor()');
+  assert.equal(payload, null);
+  assert.match(c.get('toast').textContent, /请填写以 \/ 开头/);
+  // Unchecking unlisted allows clearing public_path to convert back to an ordinary page.
+  c.get('unlistedPage').checked = false;
+  await c.run('saveEditor()');
+  assert.equal(payload.public_path, '');
+  assert.equal(payload.unlisted, false);
+  assert.equal(c.state.returnView, 'pages');
+  assert.equal(c.state.dirty, false);
+});

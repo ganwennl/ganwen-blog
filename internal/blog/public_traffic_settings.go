@@ -25,6 +25,14 @@ func parsedPublicVirtualViewsEnabled(raw json.RawMessage) (*bool, error) {
 	return enabled, nil
 }
 
+func parsedPublicStatsEnabled(raw json.RawMessage) (*bool, error) {
+	var enabled *bool
+	if err := json.Unmarshal(raw, &enabled); err != nil || enabled == nil {
+		return nil, errors.New("站点统计开关不正确")
+	}
+	return enabled, nil
+}
+
 func validatePublicDailyViews(value *int64) error {
 	if value != nil && (*value < 0 || *value > publicDailyViewsMax) {
 		return errors.New("每日展示浏览量请填写 0 至 1000000 的整数")
@@ -75,7 +83,7 @@ func validatePublicTrafficSettingsJSON(raw []byte) error {
 		}
 	}
 	if len(settings.PublicStatsEnabled) > 0 {
-		_, err := parsedPublicVirtualViewsEnabled(settings.PublicStatsEnabled)
+		_, err := parsedPublicStatsEnabled(settings.PublicStatsEnabled)
 		return err
 	}
 	return nil

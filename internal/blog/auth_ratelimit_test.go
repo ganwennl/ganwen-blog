@@ -92,6 +92,55 @@ func TestAdminLoginRateGroupsIPv6AndSurvivesFullTable(t *testing.T) {
 	}
 }
 
+func TestAdminLoginRateUsesCloudflareClientIP(t *testing.T) {
+	auth := newAdminAuth(Config{Preview: false})
+	cfAttempt := func(edgeIP, cfIP, cfIPv6 string) bool {
+		r := httptest.NewRequest("POST", "https://example.test/admin/api/login", nil)
+		r.RemoteAddr = "127.0.0.1:41234"
+		r.Header.Set("X-Real-IP", edgeIP)
+		if cfIP != "" {
+			r.Header.Set("CF-Connecting-IP", cfIP)
+		}
+		if cfIPv6 != "" {
+			r.Header.Set("CF-Connecting-IPv6", cfIPv6)
+		}
+		return auth.rateAllowed(r)
+	}
+	edges := []string{"173.245.48.10", "104.16.0.10", "108.162.192.10", "162.158.10.10", "172.64.10.10", "131.0.72.10", "190.93.240.10"}
+	allowed := 0
+	for _, edge := range edges {
+		if cfAttempt(edge, "203.0.113.42", "") {
+			allowed++
+		}
+	}
+	if allowed != 6 {
+		t.Fatalf("rotating Cloudflare edge IPs admitted %d attempts for one visitor, want 6", allowed)
+	}
+	if !cfAttempt("173.245.48.10", "203.0.113.43", "") {
+		t.Fatal("different visitor behind same Cloudflare edge IP was blocked")
+	}
+	// IPv6 visitor via CF-Connecting-IPv6 groups by /64.
+	v6Allowed := 0
+	for i := 1; i <= 8; i++ {
+		if cfAttempt("104.16.0.10", "", "2001:db8:42:1::"+strconv.Itoa(i)) {
+			v6Allowed++
+		}
+	}
+	if v6Allowed != 6 {
+		t.Fatalf("Cloudflare IPv6 /64 admitted %d attempts, want 6", v6Allowed)
+	}
+	// Spoofed CF-Connecting-IP from a non-Cloudflare X-Real-IP must be ignored.
+	spoofAllowed := 0
+	for i := 1; i <= 8; i++ {
+		if cfAttempt("198.51.100.5", "203.0.113."+strconv.Itoa(100+i), "") {
+			spoofAllowed++
+		}
+	}
+	if spoofAllowed != 6 {
+		t.Fatalf("non-Cloudflare proxy spoofed CF-Connecting-IP admitted %d attempts, want 6", spoofAllowed)
+	}
+}
+
 func TestAnalyticsDailyCapPerSource(t *testing.T) {
 	app, _ := analyticsFixture(t)
 	base := analyticsTestDate.Truncate(24 * time.Hour)

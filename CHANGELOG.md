@@ -1,5 +1,21 @@
 # 更新日志 / Changelog
 
+## v1.0.9 — 2026-11-25
+
+- 后台登录限流在 Cloudflare 反向代理下按真实访客 IP（`CF-Connecting-IP` / `CF-Connecting-IPv6`）计数，避免同一访客随边缘节点轮换绕过限流或误伤同节点正常登录。
+- 站点设置与侧栏设置并发保存改为加锁原位更新，避免同时修改时互相覆盖；修正 `public_stats_enabled` 校验错误提示。
+- 后台页头图片与文章特色图片新增安全 URL 校验，拒绝 `javascript:`、协议相对地址及超长/控制字符路径。
+- 修复已有独立页面取消“仅地址访问”后无法清空自定义访问地址恢复为普通页面、以及关闭虚拟浏览开关时禁用输入框被误拦的问题。
+- 前台访问统计支持按年份归档（`/?m=YYYY`）；修复多轨及 64 位长度 MP4 上传误判、`<img loading>` 重复属性与带尾斜杠 `BaseURL` 规范链接问题。
+- 清理 Nginx 示例模板中已过时的 TLSv1.1 / 3DES 与 `swf` 规则，并为 `/admin/` 静态资源增加显式反代前缀；移除测试代码中的服务器源站 IP。
+
+- Admin login rate limiting behind Cloudflare now keys on the verified visitor IP (`CF-Connecting-IP` / `CF-Connecting-IPv6`), preventing edge-IP rotation bypass and shared-edge lockouts.
+- Serialized site-settings and sidebar-settings updates under the store write lock to prevent concurrent lost updates, and fixed the `public_stats_enabled` validation message.
+- Added URL validation for site header images and post featured images to reject `javascript:`, protocol-relative, and malformed URLs.
+- Fixed clearing `public_path` when converting an existing independent page back to an ordinary page, and stopped disabled daily-view inputs from blocking settings saves.
+- Enabled analytics tracking for 4-digit yearly archives (`/?m=YYYY`); fixed multi-track / 64-bit box MP4 validation, duplicate `loading` attributes on `<img>`, and double-slash canonicals when `BaseURL` ends with `/`.
+- Hardened Nginx example templates (TLS 1.2+, removed 3DES and `swf`, added `/admin/` proxy prefix) and removed a real server IP from unit test fixtures.
+
 ## v1.0.8 — 2026-11-25
 
 - 页面移到文章后，旧的 `?page_id=` 链接 301 跳转到新的文章地址；其他文章仍不接受 `?page_id=`。

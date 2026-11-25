@@ -139,7 +139,7 @@ func TestQQWryRealLocalDatabase(t *testing.T) {
 	if q.Records() < 100000 {
 		t.Fatal("unexpected real database record count")
 	}
-	for _, ip := range []string{"1.1.1.1", "8.8.8.8", "114.114.114.114", "66.42.81.91"} {
+	for _, ip := range []string{"1.1.1.1", "8.8.8.8", "114.114.114.114", "9.9.9.9"} {
 		result, ok := q.Lookup(netip.MustParseAddr(ip))
 		if !ok || result.Location == "" {
 			t.Fatalf("lookup %s failed", ip)
