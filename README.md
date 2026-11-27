@@ -1,31 +1,35 @@
 # 甘文博客 / Ganwen Blog
 
-自己在用的 Go 博客程序，支持文章、独立页面、媒体、多语言和访问统计。默认使用 SQLite，也支持 MySQL。
+自己日常使用的个人博客程序，基于 Go 编写，单二进制内嵌前后台资源，解压即可运行。支持文章、普通页面、独立地址页面、图片与 MP4 视频上传、十种目标译文管理以及本地访问统计。默认使用 SQLite，也支持独立 MySQL 数据库。
 
-[下载成品](https://github.com/ganwennl/ganwen-blog/releases/latest) · [使用说明 / User guide](docs/usage.md) · [开发说明](docs/development.md) · [更新日志](CHANGELOG.md)
+[下载版本](https://github.com/ganwennl/ganwen-blog/releases/latest) · [使用说明 / User Guide](docs/usage.md) · [开发说明](docs/development.md) · [更新日志](CHANGELOG.md)
 
-## 运行
+## 快速运行
 
-Windows 解压后运行 `Start.bat`；Linux 运行 `./start.sh`。打开 `http://127.0.0.1:8097/`，后台为 `/admin/`。首次启动的随机管理员密码保存在私有的 `data/admin-access.txt`。
+下载对应平台的压缩包并解压：
+- Windows：运行 `Start.bat`（或 `Start.ps1`）
+- Linux：运行 `./start.sh`
 
-## 项目目录
+浏览器访问 `http://127.0.0.1:8097/`，管理后台为 `http://127.0.0.1:8097/admin/`。首次运行会在本地 `data/admin-access.txt` 生成随机管理员密码。
 
-| 目录 | 内容 |
+## 目录结构
+
+| 目录 | 说明 |
 | --- | --- |
-| `cmd/` | 博客程序和维护命令入口 |
-| `internal/blog/` | Go 业务逻辑及相邻单元测试 |
-| `internal/blog/web/` | 按 `admin/`、`public/` 分开的嵌入式页面、脚本和翻译 |
-| `scripts/packaging/` | 构建、打包及受控更新工具 |
-| `scripts/backup/` | 宝塔备份、异地备份与加密工具 |
-| `scripts/migration/` | WordPress、媒体、译文和独立页面迁移 |
-| `scripts/verify/` | 线上只读验证 |
-| `tests/` | `scripts/` Python 回归、`client/` 前端测试、`package/` 成品验证 |
-| `deploy/` | Nginx、systemd 等部署模板 |
-| `packaging/` | 按 `windows/`、`linux/` 分类的成品启动脚本 |
-| `docs/` | 用户、开发和 `deployment/` 部署文档 |
-| `data/`、`migration/`、`dist/` | 私有运行数据、迁移材料和本地成品；不提交 Git |
+| `cmd/ganwen/` | 命令行与 HTTP 服务入口 |
+| `internal/blog/` | 文章存储、权限校验、翻译队列、访问统计及单元测试 |
+| `internal/blog/web/` | 内嵌的前台模板（`public/`）与管理后台（`admin/`） |
+| `scripts/packaging/` | 发布包与站点打包脚本 |
+| `scripts/backup/` | 站点备份与加密上传脚本 |
+| `scripts/migration/` | WordPress 内容、媒体与独立页面导入脚本 |
+| `scripts/verify/` | 站点只读验收脚本 |
+| `tests/` | Python 脚本测试、Node.js 前端测试与打包冒烟测试 |
+| `deploy/`、`packaging/` | Nginx / systemd 配置模板与启动脚本 |
+| `docs/` | 使用说明、开发说明与部署参考 |
 
-## 开发
+`data/`、`migration/`、`dist/` 为本地运行或构建目录，已在 `.gitignore` 中忽略。
+
+## 本地开发
 
 ```powershell
 .\scripts\test.ps1
@@ -33,10 +37,12 @@ go build -o dist/ganwen.exe ./cmd/ganwen
 python scripts/packaging/build-release.py --output dist/releases/local
 ```
 
-具体依赖和测试分类见[开发说明](docs/development.md)。数据与配置保持在自己的本地磁盘，升级与备份方法见[使用说明](docs/usage.md)。
+依赖环境与测试说明见[开发说明](docs/development.md)，配置、备份和升级方式见[使用说明](docs/usage.md)。
 
 ## English
 
-A personal Go blog with posts, standalone pages, media, translations and visitor statistics. Download a Windows x64 or Linux amd64 package, then follow the bilingual [user guide](docs/usage.md). Backend code, embedded web assets, operational scripts and tests are separated by purpose.
+A self-hosted personal blog written in Go, bundling public templates and the admin interface into a single executable. It supports posts, pages, custom-path standalone pages, image/video uploads, multilingual translations (11 UI display languages and 10 article target languages), and privacy-preserving visitor analytics on SQLite or MySQL.
 
-[MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+Download a Windows x64 or Linux amd64 archive from [Releases](https://github.com/ganwennl/ganwen-blog/releases/latest) and see the bilingual [user guide](docs/usage.md) for setup, backup, and upgrades.
+
+[MIT License](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)

@@ -131,15 +131,14 @@ func run() error {
 	if err = os.MkdirAll(mediaDir, 0700); err != nil {
 		return err
 	}
-	settings, err := store.Settings(ctx)
-	if err != nil {
-		return err
-	}
+	var settings blog.SiteSettings
 	if command == "serve" {
 		settings, err = configureSite(ctx, store, *siteURL)
-		if err != nil {
-			return err
-		}
+	} else {
+		settings, err = store.Settings(ctx)
+	}
+	if err != nil {
+		return err
 	}
 	cfg := blog.Config{DataDir: dataDir, MediaDir: mediaDir, BaseURL: settings.BaseURL, ListenAddr: *listen, Preview: *preview, AdminUser: os.Getenv("GBLOG_ADMIN_USER"), AdminPasswordHash: os.Getenv("GBLOG_ADMIN_PASSWORD_HASH"), TranslationEndpoint: os.Getenv("GBLOG_TRANSLATION_ENDPOINT"), TranslationKey: os.Getenv("GBLOG_TRANSLATION_KEY"), TranslationModel: os.Getenv("GBLOG_TRANSLATION_MODEL"), AutoPublishTranslation: os.Getenv("GBLOG_TRANSLATION_AUTOPUBLISH") == "true"}
 	app, err := blog.NewApp(store, cfg)
@@ -193,7 +192,7 @@ func run() error {
 	return err
 }
 
-var version = "1.0.9"
+var version = "1.0.10"
 
 func configureSite(ctx context.Context, store *blog.Store, siteURL string) (blog.SiteSettings, error) {
 	settings, err := store.Settings(ctx)
@@ -229,12 +228,26 @@ func loadEnv(path string) error {
 	}
 	defer f.Close()
 	sc := bufio.NewScanner(f)
+	first := true
 	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
+		raw := sc.Text()
+		if first {
+			raw = strings.TrimPrefix(raw, "\ufeff")
+			first = false
+		}
+		line := strings.TrimSpace(raw)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
+		if strings.HasPrefix(line, "export ") {
+			line = strings.TrimSpace(strings.TrimPrefix(line, "export "))
+		}
 		key, value, ok := strings.Cut(line, "=")
+		key = strings.TrimSpace(key)
+		value = strings.TrimSpace(value)
+		if len(value) >= 2 && ((value[0] == '"' && value[len(value)-1] == '"') || (value[0] == '\'' && value[len(value)-1] == '\'')) {
+			value = value[1 : len(value)-1]
+		}
 		if !ok || !strings.HasPrefix(key, "GBLOG_") {
 			return errors.New("invalid runtime environment file")
 		}
@@ -267,7 +280,7 @@ func initAdmin(dir string) error {
 	if err != nil {
 		return err
 	}
-	access := "后台账号：ganwen\n后台密码：" + password + "\n此文件仅用于本地领取管理员密码，请私密保存；无需粘贴到聊天。\n"
+	access := "后台账号：ganwen\n后台密码：" + password + "\n请妥善保管此文件，首次登录后可在备份后删除。\n"
 	f, err := os.OpenFile(accessPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {
 		return err
@@ -275,22 +288,29 @@ func initAdmin(dir string) error {
 	_, err = f.WriteString(access)
 	closeErr := f.Close()
 	if err != nil {
+		_ = os.Remove(accessPath)
 		return err
 	}
 	if closeErr != nil {
+		_ = os.Remove(accessPath)
 		return closeErr
 	}
 	env := "GBLOG_ADMIN_USER=ganwen\nGBLOG_ADMIN_PASSWORD_HASH=" + string(hash) + "\n"
 	f, err = os.OpenFile(envPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {
+		_ = os.Remove(accessPath)
 		return err
 	}
 	_, err = f.WriteString(env)
 	closeErr = f.Close()
 	if err != nil {
+		_ = os.Remove(envPath)
+		_ = os.Remove(accessPath)
 		return err
 	}
 	if closeErr != nil {
+		_ = os.Remove(envPath)
+		_ = os.Remove(accessPath)
 		return closeErr
 	}
 	fmt.Printf("管理员凭据已生成：%s\n", accessPath)

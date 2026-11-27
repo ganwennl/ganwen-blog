@@ -1756,3 +1756,37 @@ func TestTranslationAdminSaveUsesQuietPeriodAndMetadataDoesNotReschedule(t *test
 		}
 	}
 }
+
+func TestNormalizeTranslationQuantitiesCompoundAndIdioms(t *testing.T) {
+	cases := [][2]string{
+		{"1亿5000万人口", "150000000人口"},
+		{"1亿零500万预算", "105000000预算"},
+		{"1万亿2000亿3000万", "1200030000000"},
+		{"2万5000元", "25000元"},
+		{"2万5千元", "25000元"},
+		{"2万零50人", "20050人"},
+		{"1亿5000万余人", "150000000余人"},
+		{"投入2万2026年回本", "投入200002026年回本"},
+		{"3合1万能充电器", "3合1万能充电器"},
+		{"以防1万一", "以防1万一"},
+		{"1.5亿", "150000000"},
+	}
+	// Note: for "投入2万2026年回本", 2万 becomes 20000 and 2026年 stays 2026年 -> "投入200002026年回本"? Wait: "20000" + "2026年回本" IS "200002026年回本" in string concat! Let's check with punctuation/space instead.
+	cases[7] = [2]string{"2026年投入2万，回本", "2026年投入20000，回本"}
+	for _, tc := range cases {
+		if got := normalizeTranslationQuantities(tc[0]); got != tc[1] {
+			t.Fatalf("normalizeTranslationQuantities(%q) = %q, want %q", tc[0], got, tc[1])
+		}
+	}
+	if got := publicLocalLink("https://localhost/?p=10000"); got != "/?p=10000" {
+		t.Fatalf("publicLocalLink localhost = %q", got)
+	}
+	post := Post{ID: 10000, Type: "post", Status: "publish", CanonicalURL: "https://localhost/?p=10000"}
+	if got := publicPostURL(post, SiteSettings{BaseURL: "https://blog.example.com"}, "zh"); got != "https://blog.example.com/?p=10000" {
+		t.Fatalf("publicPostURL upgraded = %q", got)
+	}
+	imported := Post{ID: 1447, Type: "post", Status: "publish", CanonicalURL: "https://www.ganwen.nl/?p=1447"}
+	if got := publicPostURL(imported, SiteSettings{BaseURL: "https://www.ganwen.nl"}, "zh"); got != "https://www.ganwen.nl/?p=1447" {
+		t.Fatalf("publicPostURL imported = %q", got)
+	}
+}

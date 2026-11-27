@@ -153,7 +153,7 @@ func (s *Store) convertPostType(ctx context.Context, p *Post, target string) err
 	if target == "page" {
 		oldKey, newKey = "p", "page_id"
 	}
-	generated := p.CanonicalURL == "" || p.CanonicalURL == fmt.Sprintf("%s/?%s=%d", base, oldKey, p.ID)
+	generated := p.CanonicalURL == "" || p.CanonicalURL == fmt.Sprintf("%s/?%s=%d", base, oldKey, p.ID) || isLocalhostGeneratedCanonical(p.CanonicalURL, p.ID, oldKey)
 	p.Type = target
 	// Old ?page_id= links of a moved page redirect to its article address.
 	p.MovedFromPage = target == "post"

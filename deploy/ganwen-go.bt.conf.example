@@ -1,7 +1,5 @@
-# Complete replacement for /www/server/panel/vhost/nginx/go_ganwen_blog.conf.
-# BaoTa Go project ganwen_blog; verified migration configuration.
-# Keep the old document root as a fallback for unmigrated static media.
-# Ganwen data/secrets belong ONLY in /www/wwwroot/ganwen-go/data.
+# Example Nginx configuration for a BaoTa Go project (/www/server/panel/vhost/nginx/go_ganwen_blog.conf).
+# Keeps the legacy document root only as a 404 media fallback; private data stays in /www/wwwroot/ganwen-go/data.
 server
 {
     listen 80;
@@ -13,10 +11,8 @@ server
     autoindex off;
 
     #CERT-APPLY-CHECK--START
-    # BaoTa certificate renewal include; retain this file and its path.
     include /www/server/panel/vhost/nginx/well-known/ganwen_blog.conf;
     #CERT-APPLY-CHECK--END
-    # Currently this directory contains only the site_total access log include.
     include /www/server/panel/vhost/nginx/extension/ganwen_blog/*.conf;
 
     #SSL-START
@@ -47,8 +43,6 @@ server
     error_page 497 https://$host$request_uri;
     #SSL-END
 
-    # No PHP include, WordPress rewrite, index.php filesystem fallback,
-    # or 404 HTML rewrite: Go must return its actual status and canonical.
     client_max_body_size 34m;
     proxy_http_version 1.1;
     proxy_set_header Connection "";
@@ -61,9 +55,8 @@ server
     proxy_read_timeout 100s;
     proxy_intercept_errors off;
 
-    # Certificate checks remain static, including HTTP requests.
+    # ACME HTTP-01 challenge files remain static.
     location ^~ /.well-known/acme-challenge/ {
-        root /www/wwwroot/java_node_ssl;
         allow all;
         default_type text/plain;
         try_files $uri =404;

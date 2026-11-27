@@ -24,11 +24,12 @@ import tempfile
 import time
 import uuid
 
-OWNER = "bt-project-supplement-66.42.81.91-v1"
+OWNER = os.environ.get("GBLOG_BACKUP_OWNER_TAG", "bt-project-supplement-v1")
+EXPECTED_OWNER = os.environ.get("GBLOG_BACKUP_OWNER_EMAIL", "backup-owner@example.invalid")
 PREFIX = "bt-project-supplement-"
-NATIVE_WEB_PARENT = "1jWsFZUzoXgiCQlDrWuTdPgiKzg1L7uA8"
-NATIVE_DATABASE_PARENT = "1D6RQFgEyeIoVuplqZltXfefBb1fWyJiD"
-GANWEN_FOLDER = "1tNW8vhlZx5HB3ecV4fx1WxnHn26o4JX0"
+NATIVE_WEB_PARENT = os.environ.get("GBLOG_BACKUP_WEB_ROOT", "placeholder-web-root-id")
+NATIVE_DATABASE_PARENT = os.environ.get("GBLOG_BACKUP_DB_ROOT", "placeholder-db-root-id")
+GANWEN_FOLDER = os.environ.get("GBLOG_BACKUP_SITE_FOLDER", "placeholder-site-folder-id")
 DRIVE_ATTEMPTS = 7
 ENCRYPTED_MAGIC = b"BTBACKUP1\n"
 
@@ -147,7 +148,7 @@ def verify_parent(service, folder):
         fields="id,mimeType,trashed,shared,owners(emailAddress),capabilities(canAddChildren)"), "verify_folder")
     if (meta.get("mimeType") != "application/vnd.google-apps.folder" or meta.get("trashed")
             or meta.get("shared") is not False
-            or [x.get("emailAddress") for x in meta.get("owners", [])] != ["ganwen33@gmail.com"]
+            or [x.get("emailAddress") for x in meta.get("owners", [])] != [EXPECTED_OWNER]
             or not meta.get("capabilities", {}).get("canAddChildren")):
         raise BackupFailure("drive_folder_identity_failed", "Backup folder must be private, owned by the intended account and writable")
     return meta["id"]
@@ -440,7 +441,7 @@ def run(args):
             service = drive_service(Path(args.panel))
             phase = "verify_folder"
             parent = verify_parent(service, args.folder)
-            timestamp = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+            timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
             name = PREFIX + timestamp + "-" + uuid.uuid4().hex[:12] + ".tar.gz"
             phase = "prepare_stage"
             stage = Path(tempfile.mkdtemp(prefix=".project-run-", dir=str(directory)))
@@ -470,7 +471,7 @@ def run(args):
             print("BACKUP_UPLOAD_VERIFIED " + json.dumps({"id": receipt["id"],
                 "parent": receipt["parent"], "size": receipt["size"]}), flush=True)
             receipt.update({"backup_owner": OWNER,
-                            "completed_utc": datetime.datetime.utcnow().isoformat() + "Z",
+                            "completed_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                             "cloud_keep": args.cloud_keep, "local_keep": args.local_keep})
             phase = "publish_receipt"
             receipt = publish_receipt(directory, stage, receipt)

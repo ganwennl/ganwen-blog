@@ -1,6 +1,8 @@
-# 开发与目录约定
+# 开发与目录说明
 
-需要 Go 1.26 或更新版本、Python 3 和 Node.js。Python 测试依赖见 `tests/requirements.txt`，可用 `python -m pip install -r tests/requirements.txt` 安装到自己的虚拟环境；`scripts/test.ps1 -Python <解释器路径>` 可选择已有环境。以下命令在项目根目录运行：
+本地开发需要 Go 1.26+、Python 3 和 Node.js。Python 测试依赖列在 `tests/requirements.txt`，可在虚拟环境中执行 `python -m pip install -r tests/requirements.txt` 安装。
+
+在项目根目录运行测试、构建与打包：
 
 ```powershell
 .\scripts\test.ps1
@@ -8,7 +10,7 @@ go build -o dist/ganwen.exe ./cmd/ganwen
 python scripts/packaging/build-release.py --output dist/releases/local
 ```
 
-分项检查：
+分项执行测试：
 
 ```powershell
 go test ./cmd/... ./internal/...
@@ -17,11 +19,13 @@ python -m unittest discover -s tests/scripts -p 'test_*.py'
 Get-ChildItem tests/client/test-*.cjs | ForEach-Object { node $_.FullName; if ($LASTEXITCODE) { throw $_.Name } }
 ```
 
-- Go 测试与实现同包放置；嵌入前端文件在 `internal/blog/web/admin` 和 `web/public`，HTTP 地址保持不变。
-- `scripts/packaging` 负责打包与更新；`scripts/backup` 负责备份；`scripts/migration` 处理导入；`scripts/verify` 做线上检查。生产脚本不属于普通测试入口，运行前须明确目标和参数。
-- `tests/scripts` 是不接触真实生产数据的 Python 回归；`tests/client` 是 Node.js 前端回归。
-- `tests/package/test_release_package.py --package <Windows包> --output <新的临时目录>` 使用隔离数据验证成品启动。
-- `packaging/windows`、`packaging/linux` 是发布包的启动脚本模板；`deploy` 只放配置模板，部署说明在 [deployment](deployment/)。
-- `data`、`migration`、`dist` 是被 Git 忽略的本地目录，数据库、账号、媒体和恢复材料保留原位置。
+## 目录约定
 
-构建发布包不会复制本地数据或真实配置。程序使用、升级和恢复见[使用说明](usage.md)。
+- `cmd/ganwen`：程序与维护子命令入口；`internal/blog`：核心实现与同包 Go 测试。
+- `internal/blog/web/admin` 与 `internal/blog/web/public`：通过 `embed` 打包进二进制的前后台静态资源与多语言词典。
+- `scripts/packaging`：构建与打包脚本；`scripts/backup`：服务器备份脚本；`scripts/migration`：历史数据导入工具；`scripts/verify`：站点只读检查工具。
+- `tests/scripts`：Python 离线单元测试；`tests/client`：Node.js 前端逻辑测试；`tests/package`：Windows 发行包隔离启动验证。
+- `packaging/windows`、`packaging/linux`：发行包内的启动脚本；`deploy`：Nginx 与 systemd 配置示例，配套说明见 [deployment](deployment/)。
+- `data`、`migration`、`dist`：本地运行数据、迁移材料与构建输出目录，不纳入版本控制，也不会被 `build-release.py` 打入公开压缩包。
+
+日常安装、升级与备份说明见[使用说明](usage.md)。

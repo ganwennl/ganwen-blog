@@ -325,11 +325,11 @@ func TestGeoVisitorTrustAndPseudoIPv4(t *testing.T) {
 		{"unused v6 header", "127.0.0.1:8000", "104.16.0.1", "8.8.8.8", "2606:4700:4700::1111", "NL", "8.8.8.8", "NL", false},
 		{"spoof CF direct", "1.1.1.1:8000", "104.16.0.1", "240.1.2.3", "2606:4700:4700::1111", "US", "1.1.1.1", "unknown", false},
 		{"direct IPv6", "[2606:4700:4700::1111]:8000", "", "8.8.8.8", "", "US", "2606:4700:4700::1111", "unknown", false},
-		{"local Nginx direct", "127.0.0.1:8000", "66.42.81.91", "1.1.1.1", "", "US", "66.42.81.91", "unknown", false},
+		{"local Nginx direct", "127.0.0.1:8000", "8.8.4.4", "1.1.1.1", "", "US", "8.8.4.4", "unknown", false},
 		{"bad CF visitor", "127.0.0.1:8000", "104.16.0.1", "invalid", "", "US", "", "unknown", false},
 		{"bad pseudo private", "127.0.0.1:8000", "104.16.0.1", "240.1.2.3", "::1", "US", "", "unknown", false},
 		{"pseudo without IPv6", "127.0.0.1:8000", "104.16.0.1", "240.1.2.3", "", "US", "", "unknown", false},
-		{"preview spoof", "127.0.0.1:8000", "66.42.81.91", "1.1.1.1", "", "US", "", "unknown", true},
+		{"preview spoof", "127.0.0.1:8000", "8.8.4.4", "1.1.1.1", "", "US", "", "unknown", true},
 		{"private direct", "192.168.1.1:8000", "", "", "", "", "", "unknown", false},
 	} {
 		t.Run(test.name, func(t *testing.T) {

@@ -24,7 +24,7 @@ ARCHIVE_ROOT = "ganwen-independent-page"
 STATE_NAME = "independent-release-state.json"
 EXPECTED_PACKAGE = "200b46028b1b235f715ad214012592b296c4b4af113b6e6a5c9bc421bab8480e"
 EXPECTED_OLD_BINARY = "ea63350988fb0b43f48ff0f21ccf8f9bc40fe0d07e73c53aa502c069ceed2dc1"
-MEDIA_EXTENSIONS = set("jpg jpeg png gif webp avif heic heif ico bmp swf mp4 m4v mov webm mp3 m4a ogg wav pdf txt".split())
+MEDIA_EXTENSIONS = set("jpg jpeg png gif webp avif heic heif ico bmp mp4 m4v mov webm mp3 m4a ogg wav pdf txt".split())
 
 
 class ReleaseError(Exception):
@@ -85,7 +85,7 @@ def media_owner(state):
 
 def atomic_copy(source, destination, attributes=None):
     destination = Path(destination)
-    temporary = destination.with_name(destination.name + ".codex-next-" + uuid.uuid4().hex)
+    temporary = destination.with_name(destination.name + ".tmp-next-" + uuid.uuid4().hex)
     require(temporary.parent.resolve() == destination.parent.resolve(), "atomic_target_invalid")
     with regular(source).open("rb") as incoming, temporary.open("xb") as outgoing:
         shutil.copyfileobj(incoming, outgoing)

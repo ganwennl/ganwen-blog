@@ -16,6 +16,7 @@ import (
 	"html"
 	"io"
 	"log"
+	"math/big"
 	"net"
 	"net/http"
 	"net/url"
@@ -1059,6 +1060,8 @@ var protectedTranslationText = regexp.MustCompile(protectedTranslationAtoms.Stri
 var translationKeepToken = regexp.MustCompile(`⟪GW_KEEP_[0-9]+⟫`)
 var untranslatedURL = regexp.MustCompile(`^(?:https?://|mailto:|www\.)\S+$`)
 var chineseTranslationQuantity = regexp.MustCompile(`([+-]?(?:(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\.[0-9]+)?|\.[0-9]+))[\s\x{00A0}\x{3000}]*([余多]?)[\s\x{00A0}\x{3000}]*(万亿|亿|万)[\s\x{00A0}\x{3000}]*([余多]?)`)
+var chineseSubUnitPart = regexp.MustCompile(`^[零〇]?([0-9]{1,4})(亿|万)([\s\x{00A0}\x{3000}]*[余多]?)`)
+var chineseTailDigitsPart = regexp.MustCompile(`^(?:[零〇]([0-9]{1,3})|([0-9]{4})|([1-9])千)`)
 
 // Expand quantities before hiding numbers behind KEEP tokens. The model must
 // receive base units, rather than a hidden 50 followed by the ambiguous 万.
@@ -1075,26 +1078,111 @@ func normalizeTranslationQuantities(text string) string {
 	return out.String()
 }
 
+func scaleTenPower(power int) *big.Int {
+	return new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(power)), nil)
+}
+
 func normalizeTranslationQuantityPart(text string) string {
 	var out strings.Builder
 	last := 0
+	powers := map[string]int{"万": 4, "亿": 8, "万亿": 12}
 	for _, match := range chineseTranslationQuantity.FindAllStringSubmatchIndex(text, -1) {
 		start, end := match[0], match[1]
+		if start < last {
+			continue
+		}
 		// Do not normalize the tail of a malformed number or compound scale.
 		if start > 0 && strings.ContainsRune("0123456789,.", rune(text[start-1])) {
 			continue
 		}
+		unit := text[match[6]:match[7]]
+		approxMid := text[match[4]:match[5]]
+		approxPost := text[match[8]:match[9]]
 		if end < len(text) {
 			r, _ := utf8.DecodeRuneInString(text[end:])
 			if r == '万' || r == '亿' {
 				continue
 			}
+			// Do not turn common non-numeric idioms after a digit (e.g. 3合1万能, 1万一) into 10000.
+			if unit == "万" && approxMid == "" && approxPost == "" && strings.ContainsRune("一能全幸分岁象物事状千古般端籁", r) {
+				continue
+			}
 		}
-		power := map[string]int{"万": 4, "亿": 8, "万亿": 12}[text[match[6]:match[7]]]
+		power := powers[unit]
 		value := strings.ReplaceAll(text[match[2]:match[3]], ",", "")
 		sign := ""
 		if strings.HasPrefix(value, "-") || strings.HasPrefix(value, "+") {
 			sign, value = value[:1], value[1:]
+		}
+		// Combine compound integer Chinese quantities such as 1亿5000万, 2万5000, or 2万零50.
+		if !strings.Contains(value, ".") && approxMid == "" && approxPost == "" {
+			if leadInt, ok := new(big.Int).SetString(value, 10); ok {
+				total := new(big.Int).Mul(leadInt, scaleTenPower(power))
+				curPower := power
+				curEnd := end
+				compoundApprox := ""
+				combined := false
+				for curEnd < len(text) && compoundApprox == "" {
+					if sub := chineseSubUnitPart.FindStringSubmatchIndex(text[curEnd:]); sub != nil {
+						subDigits := text[curEnd+sub[2] : curEnd+sub[3]]
+						subUnit := text[curEnd+sub[4] : curEnd+sub[5]]
+						subApprox := strings.TrimSpace(text[curEnd+sub[6] : curEnd+sub[7]])
+						subPower := powers[subUnit]
+						afterSub := curEnd + sub[1]
+						nextRune := rune(0)
+						if afterSub < len(text) {
+							nextRune, _ = utf8.DecodeRuneInString(text[afterSub:])
+						}
+						if subPower < curPower && nextRune != '万' && nextRune != '亿' {
+							if partInt, ok := new(big.Int).SetString(subDigits, 10); ok {
+								total.Add(total, new(big.Int).Mul(partInt, scaleTenPower(subPower)))
+								curPower = subPower
+								curEnd = afterSub
+								compoundApprox = subApprox
+								combined = true
+								continue
+							}
+						}
+					}
+					if curPower == 4 {
+						if tail := chineseTailDigitsPart.FindStringSubmatchIndex(text[curEnd:]); tail != nil {
+							afterTail := curEnd + tail[1]
+							nextRune := rune(0)
+							if afterTail < len(text) {
+								nextRune, _ = utf8.DecodeRuneInString(text[afterTail:])
+							}
+							if !strings.ContainsRune("0123456789.,万亿年月日号", nextRune) {
+								var add int64
+								switch {
+								case tail[2] >= 0:
+									v, _ := strconv.ParseInt(text[curEnd+tail[2]:curEnd+tail[3]], 10, 64)
+									add = v
+								case tail[4] >= 0:
+									v, _ := strconv.ParseInt(text[curEnd+tail[4]:curEnd+tail[5]], 10, 64)
+									add = v
+								case tail[6] >= 0:
+									v, _ := strconv.ParseInt(text[curEnd+tail[6]:curEnd+tail[7]], 10, 64)
+									add = v * 1000
+								}
+								total.Add(total, big.NewInt(add))
+								curEnd = afterTail
+								combined = true
+							}
+						}
+					}
+					break
+				}
+				if combined {
+					rendered := total.String()
+					if rendered == "0" {
+						sign = ""
+					}
+					out.WriteString(text[last:start])
+					out.WriteString(sign + rendered + compoundApprox)
+					last = curEnd
+					continue
+				}
+			}
 		}
 		decimal := strings.IndexByte(value, '.')
 		if decimal < 0 {
@@ -1119,8 +1207,8 @@ func normalizeTranslationQuantityPart(text string) string {
 		}
 		out.WriteString(text[last:start])
 		out.WriteString(sign + value)
-		out.WriteString(text[match[4]:match[5]])
-		out.WriteString(text[match[8]:match[9]])
+		out.WriteString(approxMid)
+		out.WriteString(approxPost)
 		last = end
 	}
 	out.WriteString(text[last:])

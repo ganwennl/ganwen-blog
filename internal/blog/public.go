@@ -475,7 +475,8 @@ func publicLocalLink(value string) string {
 	if err != nil {
 		return value
 	}
-	if u.Hostname() == "www.ganwen.nl" || u.Hostname() == "ganwen.nl" {
+	switch strings.ToLower(u.Hostname()) {
+	case "www.ganwen.nl", "ganwen.nl", "localhost", "127.0.0.1", "::1":
 		s := u.RequestURI()
 		if u.Fragment != "" {
 			s += "#" + u.Fragment
@@ -483,6 +484,29 @@ func publicLocalLink(value string) string {
 		return s
 	}
 	return value
+}
+
+func isLocalhostGeneratedCanonical(raw string, id int64, keys ...string) bool {
+	u, err := url.Parse(raw)
+	if err != nil || u.RawFragment != "" || (u.Path != "/" && u.Path != "") {
+		return false
+	}
+	switch strings.ToLower(u.Hostname()) {
+	case "localhost", "127.0.0.1", "::1":
+	default:
+		return false
+	}
+	q := u.Query()
+	if len(q) != 1 {
+		return false
+	}
+	want := strconv.FormatInt(id, 10)
+	for _, key := range keys {
+		if q.Get(key) == want {
+			return true
+		}
+	}
+	return false
 }
 
 func publicLanguagePath(p string) (lang, route string, ok bool) {
@@ -819,7 +843,7 @@ func publicPostURL(p Post, s SiteSettings, lang string) string {
 	if route := publicIndependentPagePath(p, lang); route != "" {
 		return s.BaseURL + route
 	}
-	if lang == "zh" && p.CanonicalURL != "" {
+	if lang == "zh" && p.CanonicalURL != "" && !(s.BaseURL != "https://localhost" && isLocalhostGeneratedCanonical(p.CanonicalURL, p.ID, "p", "page_id", "attachment_id")) {
 		return p.CanonicalURL
 	}
 	key := "p"

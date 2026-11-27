@@ -491,7 +491,7 @@ func (a *Admin) saveTranslation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !isTranslationLanguage(input.Language) {
-		adminError(w, 400, "译文支持英语、荷兰语和西班牙语")
+		adminError(w, 400, "不支持该语言")
 		return
 	}
 	t := input.Translation
@@ -510,6 +510,10 @@ func (a *Admin) saveTranslation(w http.ResponseWriter, r *http.Request) {
 	}
 	if p.Version != input.Version {
 		storeError(w, ErrConflict)
+		return
+	}
+	if p.Status == "trash" {
+		adminError(w, 409, errPostActionInvalid.Error())
 		return
 	}
 	if t.Status == "publish" && t.SourceHash != SourceHash(p) {

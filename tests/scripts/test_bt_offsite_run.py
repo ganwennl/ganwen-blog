@@ -35,7 +35,7 @@ with mock.patch.dict(sys.modules, {"fcntl": fcntl_stub}):
 def private_folder():
     return {"id": "private-folder", "mimeType": "application/vnd.google-apps.folder",
             "trashed": False, "shared": False,
-            "owners": [{"emailAddress": "ganwen33@gmail.com"}],
+            "owners": [{"emailAddress": backup.EXPECTED_OWNER}],
             "capabilities": {"canAddChildren": True}}
 
 
@@ -262,7 +262,7 @@ class BackupContracts(unittest.TestCase):
         drive = FakeDrive()
         self.assertEqual(backup.verify_parent(drive, "private-folder"), "private-folder")
         for change in [{"owners": []}, {"owners": [{"emailAddress": "someone@example.invalid"}]},
-                       {"owners": [{"emailAddress": "ganwen33@gmail.com"}, {"emailAddress": "someone@example.invalid"}]},
+                       {"owners": [{"emailAddress": backup.EXPECTED_OWNER}, {"emailAddress": "someone@example.invalid"}]},
                        {"shared": True}, {"shared": None}, {"trashed": True},
                        {"capabilities": {"canAddChildren": False}}, {"mimeType": "application/octet-stream"}]:
             with self.subTest(change=change):

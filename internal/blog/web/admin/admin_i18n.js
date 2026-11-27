@@ -23,6 +23,8 @@
     // Keep the legacy API message contract while showing accurate UI guidance
     // for the ten supported translation targets.
     if(message==='译文支持英语、荷兰语和西班牙语')return t('不支持该语言');
+    const httpMatch=typeof message==='string'&&message.match(/^translation service returned HTTP (\d+)$/);
+    if(httpMatch)return t('翻译服务返回 HTTP {0}',[httpMatch[1]]);
     if(typeof message==='string'&&Object.hasOwn(messages.zh||{},message))return t(message);
     return t('请求失败，请稍后重试');
   }

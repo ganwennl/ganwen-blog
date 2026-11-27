@@ -16,12 +16,12 @@ import sys
 import time
 from types import SimpleNamespace
 
-SOURCE_SITE = "ganwen_blog"
-TARGET_FOLDER = "1tNW8vhlZx5HB3ecV4fx1WxnHn26o4JX0"
-WEB_ROOT = "1jWsFZUzoXgiCQlDrWuTdPgiKzg1L7uA8"
-EXPECTED_OWNER = "ganwen33@gmail.com"
-DATABASE_ROOT = "1D6RQFgEyeIoVuplqZltXfefBb1fWyJiD"
-MYSQL_ROOT = "1J7BTUaefIPGZvAXlhS_POVAN5-uAu5Z8"
+SOURCE_SITE = os.environ.get("GBLOG_BACKUP_SITE", "ganwen_blog")
+TARGET_FOLDER = os.environ.get("GBLOG_BACKUP_SITE_FOLDER", "placeholder-site-folder-id")
+WEB_ROOT = os.environ.get("GBLOG_BACKUP_WEB_ROOT", "placeholder-web-root-id")
+EXPECTED_OWNER = os.environ.get("GBLOG_BACKUP_OWNER_EMAIL", "backup-owner@example.invalid")
+DATABASE_ROOT = os.environ.get("GBLOG_BACKUP_DB_ROOT", "placeholder-db-root-id")
+MYSQL_ROOT = os.environ.get("GBLOG_BACKUP_MYSQL_ROOT", "placeholder-mysql-root-id")
 DRIVE_ATTEMPTS = 7
 MIN_DRIVE_INTERVAL = 1.1
 _last_drive_request = 0.0

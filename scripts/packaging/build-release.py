@@ -10,7 +10,7 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "1.0.9"
+VERSION = "1.0.10"
 
 
 def go_output(go, *args, env=None):
@@ -81,7 +81,10 @@ def main():
                        cwd=ROOT, env=env, check=True)
         for filename in ["README.md", "CHANGELOG.md", "LICENSE"]:
             shutil.copyfile(ROOT / filename, stage / filename)
-        shutil.copytree(ROOT / "docs", stage / "docs")
+        docs_stage = stage / "docs"
+        docs_stage.mkdir()
+        for doc_name in ["usage.md", "development.md"]:
+            shutil.copyfile(ROOT / "docs" / doc_name, docs_stage / doc_name)
         launchers = ["Start.ps1", "Start.bat"] if system == "windows" else ["start.sh"]
         for filename in launchers:
             shutil.copyfile(ROOT / "packaging" / ("windows" if system == "windows" else "linux") / filename, stage / filename)

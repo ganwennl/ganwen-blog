@@ -1,120 +1,111 @@
 # 更新日志 / Changelog
 
+## v1.0.10 — 2026-11-27
+
+- 修复新安装默认 `https://localhost` 站点下，前台站内链接未转为相对路径导致本地 HTTP 预览跳转失败的问题；配置自定义 `--site-url` 后自动更新本地生成的默认文章/页面 canonical 链接。
+- 修复翻译预处理中复合中文数词（如 `1亿5000万`、`2万5000`、`2万零50`）展开错位及常见词组（如 `万能`、`万一`）误展开的问题。
+- 回收站内的文章或页面禁止直接保存译文；补齐后台快捷操作与翻译队列状态的多语言提示，清理界面文案。
+- 改进 `runtime.env` 解析（兼容 UTF-8 BOM、`export` 前缀与引号包裹值），并在首次生成管理员凭据中途出错时清理残留文件。
+- 发布构建脚本仅打包用户与开发文档，清理部署示例及备份脚本中的硬编码环境常量，并在打包结束时自动清理临时目录。
+
+- Fixed local preview navigation on fresh `https://localhost` installs by converting localhost links to relative paths, and updated auto-generated localhost canonicals when `--site-url` is configured.
+- Fixed Chinese compound number expansion (such as `1亿5000万`, `2万5000`, `2万零50`) and prevented false matches on common idioms (`万能`, `万一`) during translation preprocessing.
+- Blocked saving translations onto trashed posts, added missing localized admin messages for list actions and queue statuses, and cleaned up UI tooltips.
+- Improved `runtime.env` parsing (UTF-8 BOM, `export` prefix, and quoted values) and cleaned up partial files if `init-admin` fails mid-write.
+- Excluded server-specific deployment notes from public release ZIPs, parameterized backup script constants via environment variables, and ensured temporary staging directories are cleaned up.
+
 ## v1.0.9 — 2026-11-25
 
-- 后台登录限流在 Cloudflare 反向代理下按真实访客 IP（`CF-Connecting-IP` / `CF-Connecting-IPv6`）计数，避免同一访客随边缘节点轮换绕过限流或误伤同节点正常登录。
-- 站点设置与侧栏设置并发保存改为加锁原位更新，避免同时修改时互相覆盖；修正 `public_stats_enabled` 校验错误提示。
-- 后台页头图片与文章特色图片新增安全 URL 校验，拒绝 `javascript:`、协议相对地址及超长/控制字符路径。
-- 修复已有独立页面取消“仅地址访问”后无法清空自定义访问地址恢复为普通页面、以及关闭虚拟浏览开关时禁用输入框被误拦的问题。
-- 前台访问统计支持按年份归档（`/?m=YYYY`）；修复多轨及 64 位长度 MP4 上传误判、`<img loading>` 重复属性与带尾斜杠 `BaseURL` 规范链接问题。
-- 清理 Nginx 示例模板中已过时的 TLSv1.1 / 3DES 与 `swf` 规则，并为 `/admin/` 静态资源增加显式反代前缀；移除测试代码中的服务器源站 IP。
+- 后台登录限流在 Cloudflare 反向代理下按真实访客 IP（`CF-Connecting-IP` / `CF-Connecting-IPv6`）计数，避免边缘节点轮换绕过限流或误伤同节点正常登录。
+- 站点设置与侧栏设置改为加锁更新，避免并发保存互相覆盖；修正 `public_stats_enabled` 校验提示。
+- 后台页头图片与文章特色图片增加 URL 校验，拒绝 `javascript:`、协议相对地址及异常路径。
+- 修复独立页面取消“仅地址访问”后无法清空访问地址恢复为普通页面的问题，以及关闭虚拟浏览开关时禁用输入框阻碍保存的问题。
+- 前台访问统计支持按年份归档（`/?m=YYYY`）；修复多轨及 64 位长度 MP4 上传校验、`<img loading>` 重复属性与带尾斜杠 `BaseURL` 的 canonical 拼接问题。
+- 清理 Nginx 配置模板中过时的 TLSv1.1 / 3DES 与 `swf` 规则，并为 `/admin/` 增加显式反代前缀。
 
-- Admin login rate limiting behind Cloudflare now keys on the verified visitor IP (`CF-Connecting-IP` / `CF-Connecting-IPv6`), preventing edge-IP rotation bypass and shared-edge lockouts.
-- Serialized site-settings and sidebar-settings updates under the store write lock to prevent concurrent lost updates, and fixed the `public_stats_enabled` validation message.
-- Added URL validation for site header images and post featured images to reject `javascript:`, protocol-relative, and malformed URLs.
-- Fixed clearing `public_path` when converting an existing independent page back to an ordinary page, and stopped disabled daily-view inputs from blocking settings saves.
-- Enabled analytics tracking for 4-digit yearly archives (`/?m=YYYY`); fixed multi-track / 64-bit box MP4 validation, duplicate `loading` attributes on `<img>`, and double-slash canonicals when `BaseURL` ends with `/`.
-- Hardened Nginx example templates (TLS 1.2+, removed 3DES and `swf`, added `/admin/` proxy prefix) and removed a real server IP from unit test fixtures.
+- Keyed admin login rate limiting behind Cloudflare on verified visitor IPs (`CF-Connecting-IP` / `CF-Connecting-IPv6`).
+- Serialized site-settings and sidebar-settings updates under the store write lock and fixed `public_stats_enabled` validation text.
+- Added URL validation for header and featured images to reject `javascript:`, protocol-relative, and malformed URLs.
+- Fixed clearing `public_path` when converting an independent page back to an ordinary page, and stopped disabled daily-view inputs from blocking saves.
+- Enabled analytics for yearly archives (`/?m=YYYY`); fixed multi-track / 64-bit MP4 box validation, duplicate `<img loading>` attributes, and trailing-slash `BaseURL` canonicals.
+- Updated Nginx templates to TLS 1.2+, removed 3DES and `swf`, and added an explicit `/admin/` proxy location.
 
 ## v1.0.8 — 2026-11-25
 
-- 页面移到文章后，旧的 `?page_id=` 链接 301 跳转到新的文章地址；其他文章仍不接受 `?page_id=`。
-- 独立页面（自定义地址/仅地址访问）不再提供“移到文章”，避免丢失地址并被公开列出。
+- 页面移到文章后，原 `?page_id=` 链接自动 301 跳转到新文章地址；普通文章仍拒绝 `?page_id=`。
+- 独立页面（设置了自定义访问地址或仅地址访问）禁止直接移到文章，避免丢失路径或意外公开列出。
 
-- After a page is moved to posts, its old `?page_id=` link redirects (301) to the new post address; other posts still reject `?page_id=`.
-- Independent pages (custom address / address-only) can no longer be moved to posts, so their address is not lost and they are not listed publicly.
+- Redirected (`301`) old `?page_id=` URLs after moving a page to posts while keeping `?page_id=` rejected for other posts.
+- Prevented moving custom-path or address-only standalone pages directly to posts.
 
 ## v1.0.7 — 2026-11-25
 
-- 后台文章/页面列表可一键公开或隐藏，并可把页面移到文章（或反向），误发到页面的文章可直接挪出。
-- 新增删除：先移到回收站，可恢复；回收站内才能彻底删除，均需确认。
-- 新建普通页面保存前会提示“这是页面不是文章”，避免把文章写进页面。
+- 后台文章与页面列表支持一键公开、隐藏，以及在文章与普通页面之间互转。
+- 新增两步删除：删除先移入回收站，支持恢复为草稿，仅在回收站内可彻底删除。
+- 新建普通页面首次保存时增加确认提示，避免误把文章发成页面。
 
-- Admin lists can publish or hide content in one click and move pages to posts (or back), so a post filed as a page can be moved out.
-- Added deletion: items go to a recoverable trash first and can only be permanently deleted from there, with confirmation.
-- Saving a new ordinary page now asks for confirmation that it is a page, not a post.
+- Added one-click publish, hide, and post/page conversion actions in admin lists.
+- Added two-step deletion via a recoverable trash view before permanent removal.
+- Added a confirmation prompt when saving a new ordinary page.
 
 ## v1.0.6 — 2026-11-23
 
-- 后台媒体选择器的文件列表缓存 1 分钟，上传后立即刷新，不再每次打开都扫描整个上传目录。
-- 侧栏统计刷新时不再让其他页面排队等待数据库，期间先显示上一次的统计。
+- 后台媒体列表缓存 1 分钟并在新上传后立即刷新，减少重复扫描上传目录。
+- 侧栏统计异步刷新期间先行返回上一次缓存结果，避免页面请求等待数据库查询。
 
-- The media picker listing is cached for one minute and refreshed after each upload instead of walking the whole uploads tree on every open.
-- Sidebar statistics refresh without making other page requests wait on the database; the previous counts are shown meanwhile.
+- Cached the admin media listing for one minute with immediate invalidation on upload.
+- Served the previous cached sidebar statistics while refreshing counts in the background.
 
 ## v1.0.5 — 2026-11-23
 
-- 后台登录校验改为无状态签名，匿名请求无法再占满登录令牌而阻止管理员登录。
-- 登录限流按 IPv6 /64 计数；限流表已满时新来源共用一个小额度，不再直接拒绝。
-- 访问统计每个来源（IPv4 或 IPv6 /64）每天最多记录 1000 次，防止刷满全站日额度或操纵热门文章。
-- 统计表新增 (kind,date) 索引，侧栏统计不再全表扫描；统计页标题改用缓存摘要，不再逐篇解码全文。
+- 后台登录令牌改为无状态签名校验，避免匿名请求占满挑战池影响正常登录。
+- 登录限流按 IPv6 `/64` 聚合；限流表满载时新来源共享小配额而非直接拒绝。
+- 访问统计单来源（IPv4 或 IPv6 `/64`）每日上限 1000 次，并为统计表补充 `(kind,date)` 索引。
 
-- Admin login challenges are now stateless signed tokens, so anonymous requests can no longer exhaust them and block the owner's login.
-- Login rate limiting groups IPv6 clients by /64; when the table is full, unseen clients share a small bucket instead of being rejected.
-- Analytics accepts at most 1,000 events per source (IPv4 address or IPv6 /64) per day, preventing quota exhaustion and popular-post manipulation.
-- Added a (kind,date) analytics index so sidebar counts avoid full scans; report titles use cached summaries instead of decoding every post.
+- Switched admin login challenges to stateless signed tokens.
+- Grouped IPv6 login rate limits by `/64` with a bounded overflow bucket.
+- Capped analytics at 1,000 daily events per source and added a `(kind,date)` index.
 
 ## v1.0.4 — 2026-10-24
 
-- 翻译按钮显示实际排队、已有任务和跳过原因；重新翻译需明确确认覆盖已有译文。
-- 修复短作者名拆断完整姓名、中文万亿数量单位被错误遮蔽，以及图片说明和链接提示漏译。
-- 长文采用较小翻译批次，结构或片段不完整时按批拆分重试，保留取消及并发编辑保护。
-- 更新程序保留文章、已有译文、公开或私密状态、设置与媒体。
+- 手动翻译返回实际新增排队、进行中和跳过数量；强制重译需确认后才覆盖已有译文。
+- 改进姓名保护边界、中文数量单位展开，以及图片 `alt` 和链接 `title` 翻译。
+- 长文拆分为小批次请求并在响应不完整时二分重试，保留取消与并发编辑保护。
 
-- Translation requests report actual queue counts and skipped languages; replacing existing translations requires explicit confirmation.
-- Fixed partial name protection, Chinese numeric magnitude handling, and missing image or link descriptions.
-- Smaller translation batches split on incomplete structured responses while retaining cancellation and concurrent edit protection.
-- Program updates preserve articles, translations, visibility, settings and media.
+- Reported exact queued, active, and skipped language counts on translation requests, requiring confirmation before overwriting existing translations.
+- Improved author-name boundary matching, Chinese numeric unit expansion, and image `alt` / link `title` translation.
+- Split long articles into smaller batches with recursive retry on truncated structured responses.
 
 ## v1.0.3 — 2026-10-24
 
-- 修复旧对齐属性与内联样式冲突造成的编辑器、预览和前台显示不一致。
-- 新增“清除全部格式”：清理粘贴格式及链接，保留图片、媒体、文字和段落，支持撤销。
-- 修复外部表情图片过大；编辑器、预览和正文统一按文字大小显示，普通图片保持原尺寸。
-- 联系方式可开启联系前确认提示，并为各语言编辑或翻译提示文案。
+- 统一编辑器、预览和前台页面的文本对齐表现，新增“清除全部格式”及单步撤销。
+- 修正外部表情图片尺寸显示，普通正文图片保持原比例。
+- 联系方式支持开启联系前确认提示及多语言文案；新增独立“侧栏设置”页面与组件拖拽排序，支持按年/月归档浏览。
+- 修复全部 11 种显示语言下的访问统计导出与恢复。
 
-- Fixed alignment conflicts between legacy attributes and inline styles across editing, preview and public pages.
-- Added Clear all formatting to remove pasted styling and links while retaining text, paragraphs, images and media, with undo support.
-- Fixed oversized external emoji images across the editor, preview and article pages without resizing ordinary images.
-- Added configurable contact confirmation notices with multilingual text and translation controls.
-
-- 侧栏支持自定义排序：默认沿用系统顺序，开启后可拖动组件或使用上下移动按钮调整位置。
-- Sidebar ordering can now be customized by dragging components or using the move buttons; the default mode keeps the system order.
-- 新增独立“侧栏设置”页面，可选择搜索、热门文章、统计、年月归档、分类、标签和广告；归档支持按年或月浏览文章。
-- Added a dedicated sidebar settings page for search, popular articles, statistics, date archives, categories, tags and ads. Archives support browsing posts by year or month.
-- 修复新增显示语言的访问统计无法完整导出和恢复的问题，保留全部 11 种语言的统计记录。
-- Fixed analytics export and restore for all 11 supported languages, preserving records for the newer display languages.
+- Unified alignment handling across editor, preview, and public pages, and added whole-article formatting cleanup with undo.
+- Sized inline external emoji images to text height without affecting regular images.
+- Added optional pre-contact notices, a dedicated sidebar settings page with custom ordering, and year/month date archives.
+- Fixed analytics export and import across all 11 display languages.
 
 ## v1.0.2 — 2026-10-15
 
-- 修复后台一直停在“正在打开编辑后台…”的问题。
-- 界面语言资源直接包含在后台页面里，启动不再依赖额外的语言脚本请求。
-- 保留已有文章、设置和登录状态，不需要重新安装或重置账号。
+- 修复后台偶发停留在启动加载页的问题，将界面语言词条内联到后台页面。
 
-- Fixed the admin interface getting stuck on its opening screen.
-- Included interface language resources directly in the admin page, removing the extra script request from startup.
-- Existing articles, settings and sign-in sessions are preserved; no reinstall or account reset is needed.
+- Fixed the admin page getting stuck on its loading screen by inlining UI language resources.
 
 ## v1.0.1 — 2026-10-15
 
-- 前台和后台补齐 11 种显示语言，菜单、按钮和操作提示都跟随选择。
-- 当前语言排在语言列表第一位，后台记住这台浏览器的选择；阿拉伯语和乌尔都语使用从右到左排版。
-- 调整了一些生硬的中文用语，修好英文按钮拼词和小屏幕下的界面遮挡。
-- 界面翻译直接打包，不需要配置翻译服务。文章和已有译文保持原样。
+- 前台与后台支持 11 种界面显示语言，自动记忆选择，阿拉伯语和乌尔都语支持 RTL 从右到左排版。
+- 优化中英文按钮文案与小屏布局。
 
-- Completed the public and admin interface in 11 display languages, including menus, buttons and messages.
-- The selected language comes first. The admin interface remembers the browser's choice and supports right-to-left layouts for Arabic and Urdu.
-- Made Chinese labels more natural and fixed joined English labels and overlapping controls on small screens.
-- Interface translations are built in and need no translation service. Existing articles and translations are unchanged.
+- Added 11 built-in UI display languages across public and admin pages, including RTL layout for Arabic and Urdu.
+- Refined button labels and small-screen responsiveness.
 
 ## v1.0.0 — 2026-10-14
 
-- 首次公开发布，提供独立运行的 Windows x64 和 Linux x64 程序包。
-- 增加虚拟访问量开关；关闭后主页总数和热门文章显示真实浏览量。每日展示基数可在后台调整。
-- 增加显示站点统计开关。新安装默认真实统计，已有配置保留原展示方式。
-- 首次启动自动生成管理员账号，增加站点地址参数、安装说明和备份升级说明。
+- 首次公开发布 Windows x64 与 Linux amd64 独立运行包。
+- 支持文章、页面、媒体上传、多语言译文管理、访问统计及逻辑备份导出/恢复。
 
-- First public release with standalone Windows x64 and Linux x64 packages.
-- Added an explicit virtual view count switch and a configurable daily display target. Turning it off uses recorded counts for site totals and popular articles.
-- Added a site statistics visibility switch. Fresh installations use real counts; existing settings keep their previous behavior.
-- Added first-run administrator setup, a site URL option, and installation, backup and upgrade instructions.
+- Initial public release with standalone Windows x64 and Linux amd64 packages.
+- Included posts, pages, media uploads, multilingual translation workflow, visitor analytics, and logical backup/restore commands.
